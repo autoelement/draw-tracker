@@ -36,7 +36,7 @@ def check_results(matches):
         return []
 
     model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash"
+    model_name="models/gemini-1.5-flash"
     )
 
     match_list = "\n".join([
