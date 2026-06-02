@@ -20,8 +20,7 @@ TODAY_DISPLAY = date.today().strftime("%d/%m/%Y")
 def find_top_draws():
     """Gemini-ს გამოყენებით მოძებნის დღევანდელ Top-5 ფრს"""
     model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        tools="google_search"
+    model_name="gemini-2.0-flash"
     )
 
     prompt = f"""
