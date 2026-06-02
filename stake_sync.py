@@ -22,10 +22,12 @@ query BetHistory {
 """
 
 r=requests.post(
-    "https://api.stake.com/graphql",
+    "https://stake.com/_api/graphql",
     headers={
         "x-access-token":TOKEN,
-        "Content-Type":"application/json"
+        "Content-Type":"application/json",
+        "User-Agent":"Mozilla/5.0",
+        "Accept":"application/json"
     },
     json={"query":query}
 )
