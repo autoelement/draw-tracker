@@ -1,7 +1,7 @@
 import os,json,requests
 from datetime import date
 
-KEY=os.environ["GEMINI_API_KEY"]
+AKEY=os.environ["ANTHROPIC_API_KEY"]
 SURL=os.environ["SUPABASE_URL"]
 SKEY=os.environ["SUPABASE_KEY"]
 TTOKEN=os.environ["TELEGRAM_BOT_TOKEN"]
@@ -9,14 +9,9 @@ TCHAT=os.environ["TELEGRAM_CHAT_ID"]
 TODAY=date.today().strftime("%Y-%m-%d")
 TODAYD=date.today().strftime("%d/%m/%Y")
 
-url=f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={KEY}"
-prompt=f"დღეს არის {TODAYD}. იპოვე დღევანდელი ფეხბურთის Top-5 მატჩი სადაც ფრის ალბათობა ყველაზე მაღალია Forebet-ზე. დააბრუნე მხოლოდ JSON ფორმატში: {{\"matches\":[{{\"home\":\"გუნდი1\",\"away\":\"გუნდი2\",\"league\":\"ლიგა\",\"draw_pct\":35,\"pred_score\":\"1-1\",\"kickoff\":\"21:00\"}}]}}"
-r=requests.post(url,json={"contents":[{"parts":[{"text":prompt}]}]})
+r=requests.post("https://api.anthropic.com/v1/messages",headers={"x-api-key":AKEY,"anthropic-version":"2023-06-01","content-type":"application/json"},json={"model":"claude-haiku-4-5-20251001","max_tokens":1000,"messages":[{"role":"user","content":f"დღეს არის {TODAYD}. იპოვე დღევანდელი ფეხბურთის Top-5 მატჩი სადაც ფრის ალბათობა ყველაზე მაღალია. გამოიყენე Forebet და სხვა საიტები. დააბრუნე მხოლოდ JSON: {{\"matches\":[{{\"home\":\"გუნდი1\",\"away\":\"გუნდი2\",\"league\":\"ლიგა\",\"draw_pct\":35,\"pred_score\":\"1-1\",\"kickoff\":\"21:00\"}}]}}"}]})
 print(r.json())
-data=r.json()
-if "candidates" not in data:
-    raise Exception(str(data))
-text=data["candidates"][0]["content"]["parts"][0]["text"].strip()
+text=r.json()["content"][0]["text"].strip()
 if "```json" in text:
     text=text.split("```json")[1].split("```")[0].strip()
 elif "```" in text:
