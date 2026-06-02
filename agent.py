@@ -1,4 +1,4 @@
-import os,json,requests
+import os,json,requests,re
 from datetime import date
 
 AKEY=os.environ["ANTHROPIC_API_KEY"]
@@ -9,15 +9,14 @@ TCHAT=os.environ["TELEGRAM_CHAT_ID"]
 TODAY=date.today().strftime("%Y-%m-%d")
 TODAYD=date.today().strftime("%d/%m/%Y")
 
-r=requests.post("https://api.anthropic.com/v1/messages",headers={"x-api-key":AKEY,"anthropic-version":"2023-06-01","content-type":"application/json"},json={"model":"claude-haiku-4-5-20251001","max_tokens":1000,"messages":[{"role":"user","content":f"დღეს არის {TODAYD}. იპოვე დღევანდელი ფეხბურთის Top-5 მატჩი სადაც ფრის ალბათობა ყველაზე მაღალია. გამოიყენე Forebet და სხვა საიტები. დააბრუნე მხოლოდ JSON: {{\"matches\":[{{\"home\":\"გუნდი1\",\"away\":\"გუნდი2\",\"league\":\"ლიგა\",\"draw_pct\":35,\"pred_score\":\"1-1\",\"kickoff\":\"21:00\"}}]}}"}]})
-print(r.json())
+r=requests.post("https://api.anthropic.com/v1/messages",headers={"x-api-key":AKEY,"anthropic-version":"2023-06-01","content-type":"application/json"},json={"model":"claude-haiku-4-5-20251001","max_tokens":1000,"messages":[{"role":"user","content":f"დღეს არის {TODAYD}. იპოვე დღევანდელი ფეხბურთის Top-5 მატჩი სადაც ფრის ალბათობა ყველაზე მაღალია Forebet-ზე და სხვა საიტებზე. დააბრუნე მხოლოდ JSON, სხვა ტექსტი არ დაამატო: {{\"matches\":[{{\"home\":\"გუნდი1\",\"away\":\"გუნდი2\",\"league\":\"ლიგა\",\"draw_pct\":35,\"pred_score\":\"1-1\",\"kickoff\":\"21:00\"}}]}}"}]})
 text=r.json()["content"][0]["text"].strip()
-if "```json" in text:
-    text=text.split("```json")[1].split("```")[0].strip()
-elif "```" in text:
-    text=text.split("```")[1].split("```")[0].strip()
+print("პასუხი:",text[:200])
+m=re.search(r'\{.*\}',text,re.DOTALL)
+if m:
+    text=m.group()
 matches=json.loads(text)["matches"]
-print(f"{len(matches)} მატჩი")
+print(f"{len(matches)} მატჩი ნაპოვნია")
 
 h={"apikey":SKEY,"Authorization":f"Bearer {SKEY}","Content-Type":"application/json"}
 rows=[{"date":TODAY,"home":m["home"],"away":m["away"],"league":m.get("league",""),"draw_pct":m.get("draw_pct",0),"pred_score":m.get("pred_score",""),"kickoff":m.get("kickoff",""),"outcome":"pending"} for m in matches]
