@@ -3,7 +3,7 @@ from datetime import date
 
 AKEY=os.environ["ANTHROPIC_API_KEY"]
 SURL=os.environ["SUPABASE_URL"]
-SKEY=os.environ["SUPABASE_API"]
+SKEY=os.environ["SUPABASE_KEY"]
 TTOKEN=os.environ["TELEGRAM_BOT_TOKEN"]
 TCHAT=os.environ["TELEGRAM_CHAT_ID"]
 TODAY=date.today().strftime("%Y-%m-%d")
