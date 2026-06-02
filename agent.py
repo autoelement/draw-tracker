@@ -12,13 +12,12 @@ HEADERS={"x-apisports-key":APIKEY}
 
 AFRICA={"Morocco","Algeria","Tunisia","Egypt","Nigeria","Ghana","Senegal","Cameroon","Ivory Coast","South Africa","Ethiopia","Kenya","Tanzania","Uganda","Rwanda","Mali","Burkina Faso","Niger","Chad","Sudan","Libya","Mauritania","Guinea","Sierra Leone","Liberia","Togo","Benin","Gambia","Guinea-Bissau","Equatorial Guinea","Gabon","Congo","DR Congo","Angola","Zambia","Zimbabwe","Mozambique","Madagascar","Malawi","Botswana","Namibia","Lesotho","Swaziland","Comoros","Cape Verde","Djibouti","Somalia","Eritrea","Burundi","Central African Republic","South Sudan"}
 
-def get_fixtures(day_offset):
-    d=(date.today()+timedelta(days=day_offset)).strftime("%Y-%m-%d")
+def get_fixtures(d):
     r=requests.get(f"https://v3.football.api-sports.io/fixtures?date={d}&status=NS",headers=HEADERS)
-    return r.json().get("response",[]),d
+    return r.json().get("response",[])
 
-def get_odds(fixture_id):
-    r=requests.get(f"https://v3.football.api-sports.io/odds?fixture={fixture_id}&bet=1",headers=HEADERS)
+def get_odds(fid):
+    r=requests.get(f"https://v3.football.api-sports.io/odds?fixture={fid}&bet=1",headers=HEADERS)
     try:
         values=r.json()["response"][0]["bookmakers"][0]["bets"][0]["values"]
         home=away=draw=0
@@ -28,58 +27,57 @@ def get_odds(fixture_id):
             elif v["value"]=="Away": away=float(v["odd"])
         if home and draw and away:
             total=1/home+1/draw+1/away
-            draw_pct=round((1/draw)/total*100)
-            return draw_pct,draw
-    except:
-        pass
+            return round((1/draw)/total*100),draw
+    except: pass
     return 0,0
 
+def get_h2h(home_id,away_id):
+    r=requests.get(f"https://v3.football.api-sports.io/fixtures/headtohead?h2h={home_id}-{away_id}&last=10",headers=HEADERS)
+    matches=r.json().get("response",[])
+    if not matches: return 0,0
+    draws=sum(1 for m in matches if m["score"]["fulltime"]["home"]==m["score"]["fulltime"]["away"])
+    avg_goals=sum((m["score"]["fulltime"]["home"] or 0)+(m["score"]["fulltime"]["away"] or 0) for m in matches)/len(matches)
+    return round(draws/len(matches)*100),round(avg_goals,1)
+
+def get_team_stats(team_id,league_id,season):
+    r=requests.get(f"https://v3.football.api-sports.io/teams/statistics?team={team_id}&league={league_id}&season={season}",headers=HEADERS)
+    try:
+        s=r.json()["response"]
+        total=s["fixtures"]["played"]["total"] or 1
+        draws=s["fixtures"]["draws"]["total"] or 0
+        goals_for=s["goals"]["for"]["average"]["total"] or "0"
+        goals_against=s["goals"]["against"]["average"]["total"] or "0"
+        return round(draws/total*100),float(goals_for),float(goals_against)
+    except: return 0,0,0
+
+def calc_edge(bk_pct,h2h_pct,home_dr,away_dr,avg_goals):
+    low_goals=max(0,min(100,(3.0-avg_goals)*20)) if avg_goals>0 else 50
+    form_avg=(home_dr+away_dr)/2
+    our_pct=(h2h_pct*0.30+form_avg*0.35+low_goals*0.20+bk_pct*0.15)
+    edge=our_pct-bk_pct
+    return round(our_pct),round(edge,1)
+
 all_messages=[]
+total_requests=0
 
 for day_offset in range(3):
-    fixtures,datestr=get_fixtures(day_offset)
-    display_date=datetime.strptime(datestr,"%Y-%m-%d").strftime("%d/%m/%Y")
+    d=(date.today()+timedelta(days=day_offset)).strftime("%Y-%m-%d")
+    display=datetime.strptime(d,"%Y-%m-%d").strftime("%d/%m/%Y")
     label=["Today","Tomorrow","Day after tomorrow"][day_offset]
-    print(f"\n{label} ({display_date}): {len(fixtures)} fixtures")
 
+    fixtures=get_fixtures(d)
+    total_requests+=1
+    print(f"\n{label}: {len(fixtures)} fixtures")
+
+    # Step 1: odds filter - top candidates
     candidates=[]
     count=0
     for f in fixtures:
-        if count>=30: break
-        country=f["league"]["country"]
-        if country in AFRICA: continue
+        if count>=20: break
+        if f["league"]["country"] in AFRICA: continue
         fid=f["fixture"]["id"]
-        home=f["teams"]["home"]["name"]
-        away=f["teams"]["away"]["name"]
-        league=f["league"]["name"]
-        try:
-            dt=datetime.fromisoformat(f["fixture"]["date"].replace("Z","+00:00"))
-            kickoff=dt.astimezone(TZ).strftime("%H:%M")
-        except:
-            kickoff=f["fixture"]["date"][11:16]
         draw_pct,draw_odd=get_odds(fid)
+        total_requests+=1
         count+=1
-        print(f"  {home} vs {away}: X={draw_pct}% odd={draw_odd}")
-        if draw_pct>=35 and draw_odd>=3.0:
-            candidates.append({"home":home,"away":away,"league":league,"country":country,"kickoff":kickoff,"draw_pct":draw_pct,"draw_odd":round(draw_odd,2),"date":display_date,"label":label})
-
-    candidates.sort(key=lambda x:x["draw_pct"],reverse=True)
-    top=candidates[:5]
-
-    if top:
-        section=f"📅 {label} · {display_date}\n"
-        for i,x in enumerate(top,1):
-            section+=f"{i}. {x['home']} vs {x['away']}\n   X: {x['draw_pct']}% | Odds: {x['draw_odd']} | ⏰ {x['kickoff']} | {x['league']}\n"
-        all_messages.append(section)
-
-        rows=[{"date":datestr,"home":x["home"],"away":x["away"],"league":x.get("league",""),"draw_pct":x.get("draw_pct",0),"pred_score":"","kickoff":x.get("kickoff",""),"outcome":"pending"} for x in top]
-        h={"apikey":SKEY,"Authorization":f"Bearer {SKEY}","Content-Type":"application/json"}
-        requests.post(f"{SURL}/rest/v1/matches",headers=h,json=rows)
-    else:
-        all_messages.append(f"📅 {label} · {display_date}\n❌ No matches with X≥35% and odds≥3.0\n")
-
-final="⚽ Draw Tracker · 3 Days\n📊 X≥35% | Odds≥3.0 | Tbilisi Time\n\n"
-final+="\n".join(all_messages)
-final+="Results update tonight 🔄"
-requests.post(f"https://api.telegram.org/bot{TTOKEN}/sendMessage",json={"chat_id":TCHAT,"text":final})
-print("Done!")
+        if draw_pct>=30 and draw_odd>=2.8:
+            candidates.appen
