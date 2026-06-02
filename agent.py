@@ -51,9 +51,12 @@ def get_team_stats(team_id,league_id,season):
     except: return 0,0,0
 
 def calc_edge(bk_pct,h2h_pct,home_dr,away_dr,avg_goals):
-    low_goals=max(0,min(100,(3.0-avg_goals)*20)) if avg_goals>0 else 50
-    form_avg=(home_dr+away_dr)/2
-    our_pct=(h2h_pct*0.30+form_avg*0.35+low_goals*0.20+bk_pct*0.15)
+    # თუ მონაცემი არ არის - bookmaker%-ს ვიყენებთ default-ად
+    h2h=h2h_pct if h2h_pct>0 else bk_pct
+    form_avg=(home_dr+away_dr)/2 if (home_dr+away_dr)>0 else bk_pct
+    low_goals=max(0,min(100,(3.0-avg_goals)*20)) if avg_goals>0 else bk_pct
+    # weighted formula
+    our_pct=(h2h*0.25+form_avg*0.30+low_goals*0.15+bk_pct*0.30)
     edge=our_pct-bk_pct
     return round(our_pct),round(edge,1)
 
@@ -117,21 +120,21 @@ for day_offset in range(3):
         scored.append({**m,"h2h_pct":h2h_pct,"avg_goals":avg_goals,"home_dr":home_dr,"away_dr":away_dr,"our_pct":our_pct,"edge":edge,"kickoff":kickoff})
         print(f"  {m['home']} vs {m['away']}: bk={m['draw_pct']}% our={our_pct}% edge={edge}%")
 
-    top5=sorted([x for x in scored if x["edge"]>=5],key=lambda x:x["edge"],reverse=True)[:5]
+    top5=sorted([x for x in scored if x["edge"]>=3],key=lambda x:x["edge"],reverse=True)[:5]
 
     if top5:
         section=f"📅 {label} · {display}\n"
         for i,x in enumerate(top5,1):
             section+=f"{i}. {x['home']} vs {x['away']}\n"
             section+=f"   📊 Bk: {x['draw_pct']}% → Our: {x['our_pct']}% | Edge: +{x['edge']}%\n"
-            section+=f"   🔢 Odds: {x['draw_odd']} | H2H draws: {x['h2h_pct']}% | Avg goals: {x['avg_goals']}\n"
+            section+=f"   🔢 Odds: {x['draw_odd']} | H2H: {x['h2h_pct']}% | Avg goals: {x['avg_goals']} | {x['home_dr']}%/{x['away_dr']}% draw rate\n"
             section+=f"   ⏰ {x['kickoff']} | {x['league']}\n"
         all_messages.append(section)
         rows=[{"date":d,"home":x["home"],"away":x["away"],"league":x["league"],"draw_pct":x["our_pct"],"pred_score":"","kickoff":x["kickoff"],"outcome":"pending"} for x in top5]
         h={"apikey":SKEY,"Authorization":f"Bearer {SKEY}","Content-Type":"application/json"}
         requests.post(f"{SURL}/rest/v1/matches",headers=h,json=rows)
     else:
-        all_messages.append(f"📅 {label} · {display}\n❌ No edge found (edge<5%)\n")
+        all_messages.append(f"📅 {label} · {display}\n❌ No edge found (edge<3%)\n")
 
 print(f"\nTotal API requests: {total_requests}/100")
 final="⚽ Draw Tracker · 3 Days\n📊 Edge Model | Tbilisi Time\n\n"
