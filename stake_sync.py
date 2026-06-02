@@ -1,4 +1,4 @@
-import os,requests,json
+import os,requests
 
 TOKEN=os.environ["STAKE_TOKEN"]
 
@@ -12,29 +12,8 @@ query BetHistory {
           amount
           currency
           status
-          cashoutMultiplier
           payout
           createdAt
-          outcomes {
-            odds
-            outcome {
-              name
-              market {
-                name
-                fixture {
-                  slug
-                  data {
-                    ... on SportFixtureDataMatch {
-                      competitors {
-                        name
-                      }
-                      startTime
-                    }
-                  }
-                }
-              }
-            }
-          }
         }
       }
     }
@@ -44,8 +23,11 @@ query BetHistory {
 
 r=requests.post(
     "https://api.stake.com/graphql",
-    headers={"Authorization":f"Bearer {TOKEN}","Content-Type":"application/json"},
+    headers={
+        "x-access-token":TOKEN,
+        "Content-Type":"application/json"
+    },
     json={"query":query}
 )
-print(r.status_code)
-print(json.dumps(r.json(),indent=2)[:2000])
+print(f"Status: {r.status_code}")
+print(f"Response: {r.text[:1000]}")
