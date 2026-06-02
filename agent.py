@@ -45,9 +45,9 @@ def get_team_stats(team_id,league_id,season):
         s=r.json()["response"]
         total=s["fixtures"]["played"]["total"] or 1
         draws=s["fixtures"]["draws"]["total"] or 0
-        goals_for=s["goals"]["for"]["average"]["total"] or "0"
-        goals_against=s["goals"]["against"]["average"]["total"] or "0"
-        return round(draws/total*100),float(goals_for),float(goals_against)
+        goals_for=float(s["goals"]["for"]["average"]["total"] or 0)
+        goals_against=float(s["goals"]["against"]["average"]["total"] or 0)
+        return round(draws/total*100),goals_for,goals_against
     except: return 0,0,0
 
 def calc_edge(bk_pct,h2h_pct,home_dr,away_dr,avg_goals):
@@ -69,15 +69,73 @@ for day_offset in range(3):
     total_requests+=1
     print(f"\n{label}: {len(fixtures)} fixtures")
 
-    # Step 1: odds filter - top candidates
     candidates=[]
     count=0
     for f in fixtures:
-        if count>=20: break
+        if count>=25: break
         if f["league"]["country"] in AFRICA: continue
         fid=f["fixture"]["id"]
         draw_pct,draw_odd=get_odds(fid)
         total_requests+=1
         count+=1
-        if draw_pct>=30 and draw_odd>=2.8:
-            candidates.appen
+        if draw_pct>=25:
+            candidates.append({
+                "fid":fid,
+                "home":f["teams"]["home"]["name"],
+                "away":f["teams"]["away"]["name"],
+                "home_id":f["teams"]["home"]["id"],
+                "away_id":f["teams"]["away"]["id"],
+                "league":f["league"]["name"],
+                "league_id":f["league"]["id"],
+                "season":f["league"]["season"],
+                "country":f["league"]["country"],
+                "date":f["fixture"]["date"],
+                "draw_pct":draw_pct,
+                "draw_odd":round(draw_odd,2)
+            })
+
+    candidates.sort(key=lambda x:x["draw_pct"],reverse=True)
+    top10=candidates[:10]
+    print(f"  Candidates: {len(top10)}")
+
+    scored=[]
+    for m in top10:
+        if total_requests>=88: break
+        h2h_pct,avg_goals=get_h2h(m["home_id"],m["away_id"])
+        total_requests+=1
+        home_dr,hgf,hga=get_team_stats(m["home_id"],m["league_id"],m["season"])
+        total_requests+=1
+        away_dr,agf,aga=get_team_stats(m["away_id"],m["league_id"],m["season"])
+        total_requests+=1
+        combined_avg=(hgf+agf)/2
+        our_pct,edge=calc_edge(m["draw_pct"],h2h_pct,home_dr,away_dr,combined_avg)
+        try:
+            dt=datetime.fromisoformat(m["date"].replace("Z","+00:00"))
+            kickoff=dt.astimezone(TZ).strftime("%H:%M")
+        except:
+            kickoff=m["date"][11:16]
+        scored.append({**m,"h2h_pct":h2h_pct,"avg_goals":avg_goals,"home_dr":home_dr,"away_dr":away_dr,"our_pct":our_pct,"edge":edge,"kickoff":kickoff})
+        print(f"  {m['home']} vs {m['away']}: bk={m['draw_pct']}% our={our_pct}% edge={edge}%")
+
+    top5=sorted([x for x in scored if x["edge"]>=5],key=lambda x:x["edge"],reverse=True)[:5]
+
+    if top5:
+        section=f"📅 {label} · {display}\n"
+        for i,x in enumerate(top5,1):
+            section+=f"{i}. {x['home']} vs {x['away']}\n"
+            section+=f"   📊 Bk: {x['draw_pct']}% → Our: {x['our_pct']}% | Edge: +{x['edge']}%\n"
+            section+=f"   🔢 Odds: {x['draw_odd']} | H2H draws: {x['h2h_pct']}% | Avg goals: {x['avg_goals']}\n"
+            section+=f"   ⏰ {x['kickoff']} | {x['league']}\n"
+        all_messages.append(section)
+        rows=[{"date":d,"home":x["home"],"away":x["away"],"league":x["league"],"draw_pct":x["our_pct"],"pred_score":"","kickoff":x["kickoff"],"outcome":"pending"} for x in top5]
+        h={"apikey":SKEY,"Authorization":f"Bearer {SKEY}","Content-Type":"application/json"}
+        requests.post(f"{SURL}/rest/v1/matches",headers=h,json=rows)
+    else:
+        all_messages.append(f"📅 {label} · {display}\n❌ No edge found (edge<5%)\n")
+
+print(f"\nTotal API requests: {total_requests}/100")
+final="⚽ Draw Tracker · 3 Days\n📊 Edge Model | Tbilisi Time\n\n"
+final+="\n".join(all_messages)
+final+=f"\n🔢 API calls: {total_requests}/100"
+requests.post(f"https://api.telegram.org/bot{TTOKEN}/sendMessage",json={"chat_id":TCHAT,"text":final})
+print("Done!")
