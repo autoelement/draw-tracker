@@ -18,7 +18,11 @@ def find_top_draws():
 {{"matches":[{{"home":"გუნდი1","away":"გუნდი2","league":"ლიგა","draw_pct":35,"pred_score":"1-1","kickoff":"21:00"}}]}}
 მხოლოდ JSON, სხვა ტექსტი არ დაამატო."""
     resp = requests.post(url, json={"contents":[{"parts":[{"text":prompt}]}]})
-    text = resp.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+    r = resp.json()
+print("Gemini response:", json.dumps(r, ensure_ascii=False)[:500])
+if "candidates" not in r:
+    raise Exception(f"Gemini error: {r}")
+text = r["candidates"][0]["content"]["parts"][0]["text"].strip()
     if "```json" in text:
         text = text.split("```json")[1].split("```")[0].strip()
     elif "```" in text:
