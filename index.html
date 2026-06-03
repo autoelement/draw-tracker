@@ -17,17 +17,17 @@
   --amber:#ffa040;--amber-dim:#ffa04015;
   --blue:#4090ff;--blue-dim:#4090ff15;
   --purple:#a060ff;--purple-dim:#a060ff15;
-  --nav-h:54px;--fab-size:56px;
+  --nav-h:60px;--fab-size:58px;
 }
 body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
 .mono{font-family:'Space Mono',monospace}
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(8,12,15,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:var(--nav-h);display:flex;align-items:center;padding:0 16px;gap:12px}
-.logo{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--green);letter-spacing:.08em;flex:1}
+.logo{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--green);letter-spacing:.08em;flex:1}
 .logo span{color:var(--text3)}
 .hamburger{background:none;border:none;color:var(--text2);cursor:pointer;padding:6px;border-radius:6px;display:flex;flex-direction:column;gap:4px}
-.hamburger span{display:block;width:20px;height:2px;background:currentColor;border-radius:2px;transition:all .3s}
+.hamburger span{display:block;width:22px;height:2.5px;background:currentColor;border-radius:2px;transition:all .3s}
 .hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
 .hamburger.open span:nth-child(2){opacity:0}
 .hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
@@ -69,11 +69,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(8,12,15,.97)
 .stat-sub{font-size:12px;color:var(--text3);margin-top:4px}
 
 /* FILTERS */
-.filters{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.filters{display:flex;gap:8px;margin-bottom:16px;padding-bottom:2px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
 .filters::-webkit-scrollbar{display:none}
-.filter-pill{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-weight:500;color:var(--text2);border:1px solid var(--border);background:var(--bg2);cursor:pointer;white-space:nowrap;transition:all .2s}
+.filter-pill{padding:9px 18px;border-radius:22px;font-size:13px;font-weight:600;font-weight:500;color:var(--text2);border:1px solid var(--border);background:var(--bg2);cursor:pointer;white-space:nowrap;transition:all .2s}
 .filter-pill.active{color:var(--green);border-color:var(--green);background:var(--green-dim)}
-.filter-sel{padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;white-space:nowrap}
+.filter-sel{padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:22px;color:var(--text2);font-size:13px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;white-space:nowrap}
 
 /* SECTION */
 .section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
@@ -392,6 +392,15 @@ canvas{width:100%!important}
     <div class="modal-handle"></div>
     <div class="modal-title"><span id="modal-bet-title">Add Bet</span><button class="modal-close" onclick="closeM('modal-bet')">x</button></div>
     <input type="hidden" id="bet-id"><input type="hidden" id="bet-stake-id"><input type="hidden" id="bet-is-mart">
+    <div style="display:flex;gap:0;background:var(--bg3);border-radius:10px;padding:3px;margin-bottom:14px">
+      <button id="mode-regular" onclick="setBetMode('regular')" style="flex:1;padding:8px;border-radius:8px;border:none;background:var(--green);color:#000;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s">Regular</button>
+      <button id="mode-mart" onclick="setBetMode('martingale')" style="flex:1;padding:8px;border-radius:8px;border:none;background:transparent;color:var(--text3);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s">Martingale</button>
+    </div>
+    <div id="mart-series-picker" style="display:none;margin-bottom:12px">
+      <div class="fg"><label class="fl">Select Series</label>
+        <select class="fs" id="bet-series-pick" onchange="onBetSeriesPick()"><option value="">-- Select series --</option></select>
+      </div>
+    </div>
     <div class="fr">
       <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="bet-date"></div>
       <div class="fg"><label class="fl">Bookmaker</label><select class="fs" id="bet-bk"></select></div>
@@ -489,6 +498,31 @@ canvas{width:100%!important}
     </div>
     <div class="fg"><label class="fl">Max Steps</label><input type="number" class="fi" id="m-new-steps" value="7"></div>
     <div class="mf"><button class="btn btn-ghost" onclick="closeM('modal-new-series')">Cancel</button><button class="btn btn-green" onclick="createSeries()">Create</button></div>
+  </div>
+</div>
+
+<!-- EDIT SERIES MODAL -->
+<div class="overlay" id="modal-edit-series">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span>Edit Series</span><button class="modal-close" onclick="closeM('modal-edit-series')">x</button></div>
+    <input type="hidden" id="edit-series-id">
+    <div class="fg"><label class="fl">Series Name</label><input type="text" class="fi" id="edit-series-name"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Base Stake ($)</label><input type="number" class="fi" id="edit-series-base" step="0.01"></div>
+      <div class="fg"><label class="fl">Multiplier</label><input type="number" class="fi" id="edit-series-mult" step="0.1"></div>
+    </div>
+    <div class="fg"><label class="fl">Max Steps</label><input type="number" class="fi" id="edit-series-steps"></div>
+    <div class="fg"><label class="fl">Status</label>
+      <select class="fs" id="edit-series-active">
+        <option value="true">Active</option>
+        <option value="false">Done</option>
+      </select>
+    </div>
+    <div class="mf">
+      <button class="btn btn-ghost" onclick="closeM('modal-edit-series')">Cancel</button>
+      <button class="btn btn-green" onclick="saveEditSeries()">Save</button>
+    </div>
   </div>
 </div>
 
@@ -1040,6 +1074,76 @@ document.querySelector(".hamburger").addEventListener("click",function(){
 });
 document.getElementById("modal-new-series").querySelector(".btn-green").onclick=createSeries;
 document.querySelectorAll('[onclick="openM(\'modal-new-series\')"]').forEach(function(el){el.onclick=function(){sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows){var n=(rows.length?parseInt(rows[0].id):0)+1;document.getElementById("m-new-name").value="Series "+n;openM("modal-new-series");});};});
+
+// BET MODE
+function setBetMode(mode) {
+  var isM = mode === 'martingale';
+  document.getElementById('mode-regular').style.background = isM ? 'transparent' : 'var(--green)';
+  document.getElementById('mode-regular').style.color = isM ? 'var(--text3)' : '#000';
+  document.getElementById('mode-mart').style.background = isM ? 'var(--purple)' : 'transparent';
+  document.getElementById('mode-mart').style.color = isM ? '#000' : 'var(--text3)';
+  document.getElementById('mart-series-picker').style.display = isM ? 'block' : 'none';
+  document.getElementById('mart-bet-info').style.display = 'none';
+  document.getElementById('mart-extra-fields').style.display = 'none';
+  if (isM) {
+    var sel = document.getElementById('bet-series-pick');
+    sel.innerHTML = '<option value="">-- Select series --</option>' +
+      martSeries.filter(function(s){return s.is_active;}).map(function(s){return '<option value="'+s.id+'">'+s.name+'</option>';}).join('');
+  } else {
+    document.getElementById('bet-is-mart').value = '';
+    document.getElementById('bet-mart').value = '';
+    document.getElementById('bet-mart-step').value = '';
+  }
+}
+
+function onBetSeriesPick() {
+  var seriesId = document.getElementById('bet-series-pick').value;
+  if (!seriesId) return;
+  var series = martSeries.find(function(s){return String(s.id)===String(seriesId);});
+  if (!series) return;
+  var base = series.base_stake||5, mult = series.multiplier||2;
+  sbGet('bets?martingale_series_id=eq.'+seriesId+'&select=martingale_step,status&order=martingale_step.desc&limit=1').then(function(d){
+    var lastLoss=0;if(d.length&&d[0].status==='loss')lastLoss=d[0].martingale_step||1;
+    var nextStep=lastLoss+1, nextAmt=parseFloat((base*Math.pow(mult,nextStep-1)).toFixed(2));
+    document.getElementById('bet-is-mart').value = seriesId;
+    document.getElementById('bet-mart').value = series.name;
+    document.getElementById('bet-mart-step').value = nextStep;
+    document.getElementById('bet-amount').value = nextAmt;
+    document.getElementById('mart-bet-info').style.display = 'block';
+    document.getElementById('mart-bet-info-text').innerHTML = 'Series: <strong>'+series.name+'</strong> | Step: <strong>'+nextStep+'</strong> | Amount: <strong>$'+nextAmt+'</strong>';
+    document.getElementById('mart-extra-fields').style.display = 'block';
+    calcBetFields();
+  });
+}
+
+// EDIT SERIES
+function openEditSeries(id) {
+  var s = martSeries.find(function(x){return x.id===id;});
+  if (!s) return;
+  document.getElementById('edit-series-id').value = id;
+  document.getElementById('edit-series-name').value = s.name || '';
+  document.getElementById('edit-series-base').value = s.base_stake || 5;
+  document.getElementById('edit-series-mult').value = s.multiplier || 2;
+  document.getElementById('edit-series-steps').value = s.max_steps || 7;
+  document.getElementById('edit-series-active').value = s.is_active ? 'true' : 'false';
+  openM('modal-edit-series');
+}
+
+function saveEditSeries() {
+  var id = document.getElementById('edit-series-id').value;
+  var row = {
+    name: document.getElementById('edit-series-name').value,
+    base_stake: parseFloat(document.getElementById('edit-series-base').value)||5,
+    multiplier: parseFloat(document.getElementById('edit-series-mult').value)||2,
+    max_steps: parseInt(document.getElementById('edit-series-steps').value)||7,
+    is_active: document.getElementById('edit-series-active').value === 'true'
+  };
+  sbPatch('martingale_series?id=eq.'+id, row).then(function(){
+    closeM('modal-edit-series');
+    showToast('Series updated!');
+    loadMartSeries().then(function(){loadMartingaleHistory();});
+  });
+}
 
 checkAuth();
 calcMartingale();
