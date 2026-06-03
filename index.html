@@ -778,19 +778,16 @@ async function saveBet(){
       notes:document.getElementById('bet-notes').value||null
     };
     if(stakeId){
-      // Stake bet extra data
       row.notes='stake:'+stakeId;
       row.bookmaker='Stake';
-      if(id){
+      console.log('Saving stake bet, stakeId:',stakeId,'extraId:',id);
+      if(id&&id!==''){
         await sbPatch('bets?id=eq.'+id,row);
+        console.log('Patched existing');
       } else {
-        await sbPost('bets',row);
+        const res=await sbPost('bets',row);
+        console.log('Posted new:',res);
       }
-    } else if(id){
-      await sbPatch('bets?id=eq.'+id,row);
-    } else {
-      await sbPost('bets',row);
-    }
     closeM('modal-bet');
     showToast('✓ Bet saved!');
     loadBets();
