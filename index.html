@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Draw Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080c0f;
+  --bg2:#0d1318;
+  --bg3:#121920;
+  --border:#1a2430;
+  --border2:#1f2d3d;
+  --text:#e8f0f7;
+  --text2:#7a9ab5;
+  --text3:#3a5570;
+  --green:#00d4a0;
+  --green2:#00ff94;
+  --green-dim:#00d4a015;
+  --green-mid:#00d4a025;
+  --red:#ff4560;
+  --red-dim:#ff456015;
+  --amber:#ffa040;
+  --amber-dim:#ffa04015;
+  --blue:#4090ff;
+  --blue-dim:#4090ff15;
+}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+.mono{font-family:'Space Mono',monospace}
+
+/* Nav */
+nav{position:sticky;top:0;z-index:100;background:rgba(8,12,15,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--green);letter-spacing:.1em}
+.logo span{color:var(--text3)}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;border:none;background:none}
+.nav-tab:hover{color:var(--text);background:var(--bg3)}
+.nav-tab.active{color:var(--green);background:var(--green-dim)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.sync-btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;color:var(--bg);background:var(--green);border:none;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif}
+.sync-btn:hover{background:var(--green2);transform:translateY(-1px)}
+
+/* Pages */
+.page{display:none;padding:24px}
+.page.active{display:block}
+
+/* Stats grid */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px}
+.stat-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.stat-val{font-family:'Space Mono',monospace;font-size:26px;font-weight:700;letter-spacing:-.02em}
+.stat-val.green{color:var(--green)}
+.stat-val.red{color:var(--red)}
+.stat-val.amber{color:var(--amber)}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* Table */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em}
+.table-actions{display:flex;gap:8px}
+.btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;border:none}
+.btn-primary{background:var(--green);color:var(--bg)}
+.btn-primary:hover{background:var(--green2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{color:var(--text);border-color:var(--text3)}
+.btn-red{background:var(--red-dim);color:var(--red);border:1px solid transparent}
+.btn-red:hover{border-color:var(--red)}
+
+table{width:100%;border-collapse:collapse}
+th{padding:10px 20px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:12px 20px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text2)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;font-family:'Space Mono',monospace;letter-spacing:.05em}
+.badge-win{background:var(--green-dim);color:var(--green)}
+.badge-loss{background:var(--red-dim);color:var(--red)}
+.badge-pending{background:var(--amber-dim);color:var(--amber)}
+.badge-stake{background:var(--blue-dim);color:var(--blue)}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:28px;width:480px;max-width:95vw}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:block}
+.form-input,.form-select{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;transition:border-color .2s}
+.form-input:focus,.form-select:focus{border-color:var(--green)}
+.form-select option{background:var(--bg2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* Chart */
+.chart-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px}
+.chart-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px}
+#pnlChart{width:100%;height:180px}
+
+/* Balance cards */
+.balance-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.balance-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.balance-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;background:var(--green-dim);filter:blur(20px)}
+.balance-bk{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.balance-amount{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--green);margin-bottom:4px}
+.balance-sub{font-size:11px;color:var(--text3)}
+.balance-actions{display:flex;gap:6px;margin-top:12px}
+.balance-btn{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'Outfit',sans-serif}
+.balance-btn-dep{background:var(--green-mid);color:var(--green)}
+.balance-btn-wit{background:var(--red-dim);color:var(--red)}
+
+/* Loading */
+.loading{text-align:center;padding:40px;color:var(--text3);font-size:13px}
+.spinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Empty */
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-icon{font-size:32px;margin-bottom:12px}
+.empty-text{font-size:14px}
+
+/* Filters */
+.filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.filter-select{padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:13px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer}
+.filter-select:focus{border-color:var(--green)}
+
+/* Odds badge */
+.odds{font-family:'Space Mono',monospace;font-size:12px;color:var(--amber);background:var(--amber-dim);padding:2px 6px;border-radius:4px}
+
+/* P&L colors */
+.profit-pos{color:var(--green)}
+.profit-neg{color:var(--red)}
+
+/* Scrollable table */
+.table-scroll{max-height:400px;overflow-y:auto}
+
+/* Section title */
+.section-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.section-sub{font-size:13px;color:var(--text3);margin-bottom:20px;margin-top:-10px}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--green);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--green);z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">DRAW<span>/</span>TRACKER</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('predictions')">Predictions</button>
+    <button class="nav-tab" onclick="showPage('bets')">My Bets</button>
+    <button class="nav-tab" onclick="showPage('balances')">Balances</button>
+  </div>
+  <div class="nav-right">
+    <button class="sync-btn" onclick="syncStake()">⟳ Sync Stake</button>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total P&L</div>
+      <div class="stat-val green" id="stat-pnl">+$0.00</div>
+      <div class="stat-sub" id="stat-pnl-sub">All time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-val" id="stat-wr">0%</div>
+      <div class="stat-sub" id="stat-wr-sub">0 / 0 bets</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ROI</div>
+      <div class="stat-val amber" id="stat-roi">0%</div>
+      <div class="stat-sub">Return on investment</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Active Bets</div>
+      <div class="stat-val" id="stat-active">0</div>
+      <div class="stat-sub">Pending settlement</div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">P&L Over Time</div>
+    <canvas id="pnlChart"></canvas>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Wagered</div>
+      <div class="stat-val mono" id="stat-wagered">$0</div>
+      <div class="stat-sub">All bookmakers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Best Bookmaker</div>
+      <div class="stat-val green" id="stat-best-bk">-</div>
+      <div class="stat-sub">By ROI</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Odds</div>
+      <div class="stat-val amber" id="stat-avg-odds">0.00</div>
+      <div class="stat-sub">Settled bets</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Draw Accuracy</div>
+      <div class="stat-val" id="stat-draw-acc">0%</div>
+      <div class="stat-sub">Draw tracker picks</div>
+    </div>
+  </div>
+</div>
+
+<!-- PREDICTIONS -->
+<div class="page" id="page-predictions">
+  <div class="section-title">Draw Tracker Predictions</div>
+  <div class="section-sub">Latest predictions from the agent</div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-title">Today's Matches</div>
+      <div class="table-actions">
+        <button class="btn btn-ghost" onclick="loadPredictions()">↻ Refresh</button>
+      </div>
+    </div>
+    <div id="predictions-body">
+      <div class="loading"><div class="spinner"></div>Loading predictions...</div>
+    </div>
+  </div>
+</div>
+
+<!-- MY BETS -->
+<div class="page" id="page-bets">
+  <div class="section-title">My Bets</div>
+  <div class="filters">
+    <select class="filter-select" id="filter-bk" onchange="loadBets()">
+      <option value="">All Bookmakers</option>
+      <option value="Stake">Stake</option>
+      <option value="BC Game">BC Game</option>
+      <option value="Other">Other</option>
+    </select>
+    <select class="filter-select" id="filter-status" onchange="loadBets()">
+      <option value="">All Status</option>
+      <option value="win">Win</option>
+      <option value="loss">Loss</option>
+      <option value="pending">Pending</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-title">Bet History</div>
+      <div class="table-actions">
+        <button class="btn btn-primary" onclick="openAddBet()">+ Add Bet</button>
+      </div>
+    </div>
+    <div id="bets-body">
+      <div class="loading"><div class="spinner"></div>Loading bets...</div>
+    </div>
+  </div>
+</div>
+
+<!-- BALANCES -->
+<div class="page" id="page-balances">
+  <div class="section-title">Bookmaker Balances</div>
+  <div class="section-sub">Track deposits, withdrawals and current balance</div>
+  <div class="balance-grid" id="balance-cards">
+    <div class="loading"><div class="spinner"></div>Loading...</div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-title">Transaction History</div>
+      <div class="table-actions">
+        <button class="btn btn-primary" onclick="openTransaction()">+ Transaction</button>
+      </div>
+    </div>
+    <div id="transactions-body">
+      <div class="loading"><div class="spinner"></div>Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BET MODAL -->
+<div class="modal-overlay" id="modal-bet">
+  <div class="modal">
+    <div class="modal-title">Add Bet</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="bet-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bookmaker</label>
+        <select class="form-select" id="bet-bk">
+          <option value="Stake">Stake</option>
+          <option value="BC Game">BC Game</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Match</label>
+      <input type="text" class="form-input" id="bet-match" placeholder="Team A vs Team B">
+    </div>
+    <div class="form-group">
+      <label class="form-label">League</label>
+      <input type="text" class="form-input" id="bet-league" placeholder="Liga name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Selection</label>
+      <input type="text" class="form-input" id="bet-selection" placeholder="Draw / Home / Away">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Odds</label>
+        <input type="number" class="form-input" id="bet-odds" placeholder="3.20" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount ($)</label>
+        <input type="number" class="form-input" id="bet-amount" placeholder="10.00" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="bet-status">
+          <option value="pending">Pending</option>
+          <option value="win">Win</option>
+          <option value="loss">Loss</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payout ($)</label>
+        <input type="number" class="form-input" id="bet-payout" placeholder="0.00" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input type="text" class="form-input" id="bet-notes" placeholder="Optional notes">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-bet')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBet()">Save Bet</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSACTION MODAL -->
+<div class="modal-overlay" id="modal-transaction">
+  <div class="modal">
+    <div class="modal-title">Add Transaction</div>
+    <div class="form-group">
+      <label class="form-label">Bookmaker</label>
+      <select class="form-select" id="tx-bk">
+        <option value="Stake">Stake</option>
+        <option value="BC Game">BC Game</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <select class="form-select" id="tx-type">
+        <option value="deposit">Deposit</option>
+        <option value="withdrawal">Withdrawal</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Amount ($)</label>
+      <input type="number" class="form-input" id="tx-amount" placeholder="100.00" step="0.01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note</label>
+      <input type="text" class="form-input" id="tx-note" placeholder="Optional note">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-transaction')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTransaction()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL="https://jczzctpbrbaavzetidov.supabase.co";
+const SUPABASE_KEY="";
+
+const headers={"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"};
+
+async function sb(path,method="GET",body=null){
+  const opts={method,headers};
+  if(body) opts.body=JSON.stringify(body);
+  const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,opts);
+  return r.json();
+}
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  event.target.classList.add('active');
+  if(name==='dashboard') loadDashboard();
+  if(name==='predictions') loadPredictions();
+  if(name==='bets') loadBets();
+  if(name==='balances') loadBalances();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function openAddBet(){
+  document.getElementById('bet-date').value=new Date().toISOString().slice(0,10);
+  openModal('modal-bet');
+}
+function openTransaction(){openModal('modal-transaction')}
+
+// DASHBOARD
+async function loadDashboard(){
+  const [bets,stakeBets]=await Promise.all([
+    sb("bets?select=*"),
+    sb("stake_bets?select=*")
+  ]);
+  const allBets=[
+    ...bets.map(b=>({...b,source:'manual'})),
+    ...stakeBets.map(b=>({
+      match:b.match,
+      amount:b.amount,
+      payout:b.payout,
+      status:b.status==='settled'?(b.payout>b.amount?'win':'loss'):'pending',
+      odds:b.odds,
+      bookmaker:'Stake',
+      source:'stake'
+    }))
+  ];
+  const settled=allBets.filter(b=>b.status==='win'||b.status==='loss');
+  const wins=allBets.filter(b=>b.status==='win');
+  const pending=allBets.filter(b=>b.status==='pending');
+  const totalWagered=settled.reduce((s,b)=>s+(b.amount||0),0);
+  const totalPayout=wins.reduce((s,b)=>s+(b.payout||0),0);
+  const pnl=totalPayout-totalWagered;
+  const wr=settled.length?((wins.length/settled.length)*100).toFixed(1):0;
+  const roi=totalWagered?((pnl/totalWagered)*100).toFixed(1):0;
+  const avgOdds=settled.length?(settled.reduce((s,b)=>s+(b.odds||0),0)/settled.length).toFixed(2):0;
+
+  document.getElementById('stat-pnl').textContent=(pnl>=0?'+':'')+' $'+pnl.toFixed(2);
+  document.getElementById('stat-pnl').className='stat-val '+(pnl>=0?'green':'red');
+  document.getElementById('stat-wr').textContent=wr+'%';
+  document.getElementById('stat-wr-sub').textContent=wins.length+' / '+settled.length+' bets';
+  document.getElementById('stat-roi').textContent=(roi>=0?'+':'')+roi+'%';
+  document.getElementById('stat-roi').className='stat-val '+(roi>=0?'amber':'red');
+  document.getElementById('stat-active').textContent=pending.length;
+  document.getElementById('stat-wagered').textContent='$'+totalWagered.toFixed(0);
+  document.getElementById('stat-avg-odds').textContent=avgOdds;
+
+  // Best bookmaker
+  const bkMap={};
+  settled.forEach(b=>{
+    const bk=b.bookmaker||'Unknown';
+    if(!bkMap[bk]) bkMap[bk]={wagered:0,pnl:0};
+    bkMap[bk].wagered+=b.amount||0;
+    bkMap[bk].pnl+=(b.payout||0)-(b.amount||0);
+  });
+  let bestBk='-',bestRoi=-999;
+  Object.entries(bkMap).forEach(([bk,v])=>{
+    const r=v.wagered?v.pnl/v.wagered*100:0;
+    if(r>bestRoi){bestRoi=r;bestBk=bk}
+  });
+  document.getElementById('stat-best-bk').textContent=bestBk;
+
+  // Draw accuracy
+  const drawBets=allBets.filter(b=>(b.selection||'').toLowerCase().includes('draw')||b.source==='stake');
+  const drawWins=drawBets.filter(b=>b.status==='win');
+  const drawAcc=drawBets.length?((drawWins.length/drawBets.length)*100).toFixed(0):0;
+  document.getElementById('stat-draw-acc').textContent=drawAcc+'%';
+
+  drawPnlChart(allBets);
+}
+
+function drawPnlChart(bets){
+  const canvas=document.getElementById('pnlChart');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth*2;
+  canvas.height=360;
+  ctx.scale(2,2);
+  const w=canvas.offsetWidth/2,h=180;
+
+  const settled=bets.filter(b=>b.status==='win'||b.status==='loss').sort((a,b)=>new Date(a.created_at||a.date)-new Date(b.created_at||b.date));
+  if(!settled.length){
+    ctx.fillStyle='#3a5570';
+    ctx.font='13px Outfit';
+    ctx.textAlign='center';
+    ctx.fillText('No settled bets yet',w/2,h/2);
+    return;
+  }
+
+  let cum=0;
+  const points=settled.map(b=>{
+    cum+=(b.payout||0)-(b.amount||0);
+    return cum;
+  });
+  const minV=Math.min(0,...points),maxV=Math.max(0,...points);
+  const range=maxV-minV||1;
+  const pad=20;
+
+  const xs=i=>pad+i*(w-pad*2)/(points.length-1||1);
+  const ys=v=>h-pad-(v-minV)/(range)*(h-pad*2);
+
+  // Grid
+  ctx.strokeStyle='#1a2430';
+  ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad+i*(h-pad*2)/4;
+    ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();
+  }
+
+  // Zero line
+  ctx.strokeStyle='#3a5570';
+  ctx.lineWidth=1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(pad,ys(0));ctx.lineTo(w-pad,ys(0));ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Area
+  const grad=ctx.createLinearGradient(0,pad,0,h-pad);
+  grad.addColorStop(0,'rgba(0,212,160,.3)');
+  grad.addColorStop(1,'rgba(0,212,160,0)');
+  ctx.fillStyle=grad;
+  ctx.beginPath();
+  ctx.moveTo(xs(0),ys(points[0]));
+  points.forEach((v,i)=>ctx.lineTo(xs(i),ys(v)));
+  ctx.lineTo(xs(points.length-1),h-pad);
+  ctx.lineTo(xs(0),h-pad);
+  ctx.closePath();
+  ctx.fill();
+
+  // Line
+  ctx.strokeStyle='#00d4a0';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  points.forEach((v,i)=>i===0?ctx.moveTo(xs(0),ys(v)):ctx.lineTo(xs(i),ys(v)));
+  ctx.stroke();
+}
+
+// PREDICTIONS
+async function loadPredictions(){
+  const body=document.getElementById('predictions-body');
+  body.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
+  const data=await sb("matches?select=*&order=date.desc&limit=50");
+  if(!data.length){
+    body.innerHTML='<div class="empty"><div class="empty-icon">⚽</div><div class="empty-text">No predictions yet</div></div>';
+    return;
+  }
+  let html='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>League</th><th>X%</th><th>Pred</th><th>Kickoff</th><th>Result</th><th>Outcome</th></tr></thead><tbody>';
+  data.forEach(m=>{
+    const outcome=m.outcome==='win'?'<span class="badge badge-win">WIN</span>':m.outcome==='loss'?'<span class="badge badge-loss">LOSS</span>':'<span class="badge badge-pending">PENDING</span>';
+    html+=`<tr>
+      <td class="mono">${m.date||''}</td>
+      <td style="color:var(--text);font-weight:500">${m.home||''} vs ${m.away||''}</td>
+      <td>${m.league||''}</td>
+      <td><span class="odds">${m.draw_pct||0}%</span></td>
+      <td class="mono">${m.pred_score||'-'}</td>
+      <td class="mono">${m.kickoff||''}</td>
+      <td class="mono">${m.result||'-'}</td>
+      <td>${outcome}</td>
+    </tr>`;
+  });
+  html+='</tbody></table></div>';
+  body.innerHTML=html;
+}
+
+// BETS
+async function loadBets(){
+  const body=document.getElementById('bets-body');
+  body.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
+  const bk=document.getElementById('filter-bk').value;
+  const st=document.getElementById('filter-status').value;
+  let q="bets?select=*&order=date.desc";
+  if(bk) q+="&bookmaker=eq."+bk;
+  if(st) q+="&status=eq."+st;
+  const [manual,stake]=await Promise.all([
+    sb(q),
+    sb("stake_bets?select=*&order=created_at.desc&limit=100")
+  ]);
+  const allBets=[
+    ...manual.map(b=>({...b,_source:'manual'})),
+    ...stake.filter(b=>!bk||bk==='Stake').filter(b=>{
+      const s=b.payout>b.amount?'win':b.payout===0&&b.status==='settled'?'loss':'pending';
+      return !st||s===st;
+    }).map(b=>({
+      id:b.id,match:b.match,league:'',selection:'Draw',
+      odds:b.odds,amount:b.amount,payout:b.payout,
+      status:b.status==='settled'?(b.payout>b.amount?'win':'loss'):'pending',
+      bookmaker:'Stake',date:b.created_at?b.created_at.slice(0,10):'',
+      _source:'stake'
+    }))
+  ];
+  if(!allBets.length){
+    body.innerHTML='<div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">No bets found</div></div>';
+    return;
+  }
+  let html='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Selection</th><th>Odds</th><th>Amount</th><th>Payout</th><th>P&L</th><th>Bookmaker</th><th>Status</th></tr></thead><tbody>';
+  allBets.forEach(b=>{
+    const pnl=(b.payout||0)-(b.amount||0);
+    const pnlStr=(pnl>=0?'+':'')+pnl.toFixed(2);
+    const pnlClass=pnl>=0?'profit-pos':'profit-neg';
+    const outcome=b.status==='win'?'<span class="badge badge-win">WIN</span>':b.status==='loss'?'<span class="badge badge-loss">LOSS</span>':'<span class="badge badge-pending">PENDING</span>';
+    const src=b._source==='stake'?'<span class="badge badge-stake">STAKE</span>':'';
+    html+=`<tr>
+      <td class="mono">${b.date||''}</td>
+      <td style="color:var(--text);font-weight:500">${b.match||''}</td>
+      <td>${b.selection||''}</td>
+      <td><span class="odds">${b.odds||0}</span></td>
+      <td class="mono">$${(b.amount||0).toFixed(2)}</td>
+      <td class="mono">$${(b.payout||0).toFixed(2)}</td>
+      <td class="mono ${pnlClass}">$${pnlStr}</td>
+      <td>${b.bookmaker||''} ${src}</td>
+      <td>${outcome}</td>
+    </tr>`;
+  });
+  html+='</tbody></table></div>';
+  body.innerHTML=html;
+}
+
+async function saveBet(){
+  const row={
+    date:document.getElementById('bet-date').value,
+    match:document.getElementById('bet-match').value,
+    league:document.getElementById('bet-league').value,
+    selection:document.getElementById('bet-selection').value,
+    odds:parseFloat(document.getElementById('bet-odds').value)||0,
+    amount:parseFloat(document.getElementById('bet-amount').value)||0,
+    payout:parseFloat(document.getElementById('bet-payout').value)||0,
+    bookmaker:document.getElementById('bet-bk').value,
+    status:document.getElementById('bet-status').value,
+    notes:document.getElementById('bet-notes').value
+  };
+  await sb("bets","POST",row);
+  closeModal('modal-bet');
+  showToast('✓ Bet saved!');
+  loadBets();
+}
+
+// BALANCES
+async function loadBalances(){
+  const [balances,txs]=await Promise.all([
+    sb("balances?select=*"),
+    sb("transactions?select=*&order=created_at.desc&limit=50")
+  ]);
+
+  const cards=document.getElementById('balance-cards');
+  const bks=['Stake','BC Game','Other'];
+  let html='';
+  bks.forEach(bk=>{
+    const bal=balances.find(b=>b.bookmaker===bk);
+    const amount=bal?bal.balance:0;
+    html+=`<div class="balance-card">
+      <div class="balance-bk">${bk}</div>
+      <div class="balance-amount">$${(amount||0).toFixed(2)}</div>
+      <div class="balance-sub">Current balance</div>
+      <div class="balance-actions">
+        <button class="balance-btn balance-btn-dep" onclick="quickTx('${bk}','deposit')">+ Deposit</button>
+        <button class="balance-btn balance-btn-wit" onclick="quickTx('${bk}','withdrawal')">- Withdraw</button>
+      </div>
+    </div>`;
+  });
+  cards.innerHTML=html;
+
+  const tbody=document.getElementById('transactions-body');
+  if(!txs.length){
+    tbody.innerHTML='<div class="empty"><div class="empty-icon">💳</div><div class="empty-text">No transactions yet</div></div>';
+    return;
+  }
+  let thtml='<table><thead><tr><th>Date</th><th>Bookmaker</th><th>Type</th><th>Amount</th><th>Note</th></tr></thead><tbody>';
+  txs.forEach(t=>{
+    const type=t.type==='deposit'?'<span class="badge badge-win">DEPOSIT</span>':'<span class="badge badge-loss">WITHDRAW</span>';
+    thtml+=`<tr>
+      <td class="mono">${(t.created_at||'').slice(0,10)}</td>
+      <td>${t.bookmaker}</td>
+      <td>${type}</td>
+      <td class="mono ${t.type==='deposit'?'profit-pos':'profit-neg'}">${t.type==='deposit'?'+':'-'}$${(t.amount||0).toFixed(2)}</td>
+      <td>${t.note||''}</td>
+    </tr>`;
+  });
+  thtml+='</tbody></table>';
+  tbody.innerHTML=thtml;
+}
+
+function quickTx(bk,type){
+  document.getElementById('tx-bk').value=bk;
+  document.getElementById('tx-type').value=type;
+  openModal('modal-transaction');
+}
+
+async function saveTransaction(){
+  const bk=document.getElementById('tx-bk').value;
+  const type=document.getElementById('tx-type').value;
+  const amount=parseFloat(document.getElementById('tx-amount').value)||0;
+  const note=document.getElementById('tx-note').value;
+  await sb("transactions","POST",{bookmaker:bk,type,amount,note});
+
+  // Update balance
+  const existing=await sb("balances?bookmaker=eq."+bk);
+  if(existing.length){
+    const newBal=existing[0].balance+(type==='deposit'?amount:-amount);
+    await fetch(SUPABASE_URL+"/rest/v1/balances?bookmaker=eq."+bk,{
+      method:'PATCH',
+      headers:{...headers,'Prefer':'return=minimal'},
+      body:JSON.stringify({balance:newBal,updated_at:new Date().toISOString()})
+    });
+  } else {
+    await sb("balances","POST",{bookmaker:bk,balance:type==='deposit'?amount:-amount});
+  }
+  closeModal('modal-transaction');
+  showToast('✓ Transaction saved!');
+  loadBalances();
+}
+
+async function syncStake(){
+  showToast('⟳ Stake sync runs via GitHub Actions daily at 9:00 AM');
+}
+
+// Init
+loadDashboard();
+</script>
+</body>
+</html>
