@@ -1116,6 +1116,27 @@ function onBetSeriesPick() {
   });
 }
 
+// DEACTIVATE / DELETE SERIES
+function deactivateSeries(id) {
+  confirmAction('Stop this series? It will become inactive.', function(){
+    sbPatch('martingale_series?id=eq.'+id, {is_active:false}).then(function(){
+      showToast('Series stopped!');
+      loadMartSeries().then(function(){loadMartingaleHistory();});
+    });
+  });
+}
+
+function deleteSeries(id) {
+  confirmAction('Delete this series permanently? All bets in this series will lose their series link.', function(){
+    sbPatch('bets?martingale_series_id=eq.'+id, {martingale_series_id:null}).then(function(){
+      return sbDelete('martingale_series?id=eq.'+id);
+    }).then(function(){
+      showToast('Series deleted!');
+      loadMartSeries().then(function(){loadMartingaleHistory();});
+    });
+  });
+}
+
 // EDIT SERIES
 function openEditSeries(id) {
   var s = martSeries.find(function(x){return x.id===id;});
