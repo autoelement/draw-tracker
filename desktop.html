@@ -370,6 +370,15 @@ tr:hover td{background:var(--bg3)}
     <input type="hidden" id="bet-id">
     <input type="hidden" id="bet-stake-id">
     <input type="hidden" id="bet-is-mart">
+    <div style="display:flex;gap:0;background:var(--bg3);border-radius:8px;padding:3px;margin-bottom:14px">
+      <button id="mode-regular" onclick="setBetMode('regular')" style="flex:1;padding:8px;border-radius:6px;border:none;background:var(--green);color:var(--bg);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s">Regular</button>
+      <button id="mode-mart" onclick="setBetMode('martingale')" style="flex:1;padding:8px;border-radius:6px;border:none;background:transparent;color:var(--text3);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s">Martingale</button>
+    </div>
+    <div id="mart-series-picker" style="display:none;margin-bottom:12px">
+      <div class="fg"><label class="fl">Select Series</label>
+        <select class="fs" id="bet-series-pick" onchange="onBetSeriesPick()"><option value="">-- Select series --</option></select>
+      </div>
+    </div>
     <div class="fr">
       <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="bet-date"></div>
       <div class="fg"><label class="fl">Bookmaker</label><select class="fs" id="bet-bk"></select></div>
@@ -461,6 +470,30 @@ tr:hover td{background:var(--bg3)}
     <div class="mf">
       <button class="btn btn-ghost" onclick="closeM('modal-add-bk')">Cancel</button>
       <button class="btn btn-green" onclick="saveBookmaker()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT SERIES MODAL -->
+<div class="overlay" id="modal-edit-series">
+  <div class="modal modal-sm">
+    <div class="modal-title"><span>Edit Series</span><button class="modal-close" onclick="closeM('modal-edit-series')">x</button></div>
+    <input type="hidden" id="edit-series-id">
+    <div class="fg"><label class="fl">Series Name</label><input type="text" class="fi" id="edit-series-name"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Base Stake ($)</label><input type="number" class="fi" id="edit-series-base" step="0.01"></div>
+      <div class="fg"><label class="fl">Multiplier</label><input type="number" class="fi" id="edit-series-mult" step="0.1"></div>
+    </div>
+    <div class="fg"><label class="fl">Max Steps</label><input type="number" class="fi" id="edit-series-steps"></div>
+    <div class="fg"><label class="fl">Status</label>
+      <select class="fs" id="edit-series-active">
+        <option value="true">Active</option>
+        <option value="false">Done</option>
+      </select>
+    </div>
+    <div class="mf">
+      <button class="btn btn-ghost" onclick="closeM('modal-edit-series')">Cancel</button>
+      <button class="btn btn-green" onclick="saveEditSeries()">Save</button>
     </div>
   </div>
 </div>
@@ -1201,17 +1234,20 @@ function loadMartingaleHistory(){
     var el=document.getElementById("mart-history");
     if(!series.length){el.innerHTML='<div class="empty">No martingale series yet</div>';return;}
     Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=martingale_step.asc");})).then(function(allBets){
-      var h='<table><thead><tr><th>Series</th><th>Config</th><th>Steps</th><th>Staked</th><th>Return</th><th>P&L</th><th>Status</th><th>Timeline</th></tr></thead><tbody>';
+      var h='<table><thead><tr><th>Series</th><th>Config</th><th>Steps</th><th>Staked</th><th>Return</th><th>P&L</th><th>Status</th><th>Timeline</th><th>Actions</th></tr></thead><tbody>';
       series.forEach(function(s,si){
         var bs=allBets[si];
         var tw=bs.reduce(function(t,b){return t+(b.amount||0);},0);
-        var tr=bs.reduce(function(t,b){return t+(b.payout||0);},0);
-        var pnl=tr-tw;
+        var tr2=bs.reduce(function(t,b){return t+(b.payout||0);},0);
+        var pnl=tr2-tw;
         var isWon=bs.some(function(b){return b.status==="win";});
         var st=isWon?'<span class="badge bw">WIN</span>':s.is_active?'<span class="badge bp">ACTIVE</span>':'<span class="badge bl">ENDED</span>';
         var tl=bs.map(function(b){var dc=b.status==="win"?"win":b.status==="loss"?"loss":"pending";var dt=b.status==="win"?"W":b.status==="loss"?"L":"P";return'<span class="series-dot '+dc+'">'+dt+"</span>";}).join(" ");
         var cfg="$"+(s.base_stake||5)+" x"+(s.multiplier||2)+" / "+(s.max_steps||7)+"st";
-        h+="<tr><td style='color:var(--text);font-weight:500'>"+s.name+"</td><td style='font-size:11px;color:var(--text3)'>"+cfg+"</td><td>"+bs.length+"</td><td class='mono'>$"+tw.toFixed(2)+"</td><td class='mono'>$"+tr.toFixed(2)+"</td><td class='"+(pnl>=0?"pnl-pos":"pnl-neg")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+st+"</td><td style='display:flex;gap:4px;flex-wrap:wrap;align-items:center'>"+tl+"</td></tr>";
+        var actBtns='<button class="btn btn-ghost btn-sm" onclick="openEditSeries('+s.id+')">Edit</button>';
+        if(s.is_active){actBtns+=' <button class="btn btn-sm" style="background:var(--amber-dim);color:var(--amber);border:none;cursor:pointer;font-family:Outfit,sans-serif;font-size:11px;padding:3px 8px;border-radius:5px" onclick="deactivateSeries('+s.id+')">Stop</button>';}
+        else{actBtns+=' <button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);border:none;cursor:pointer;font-family:Outfit,sans-serif;font-size:11px;padding:3px 8px;border-radius:5px" onclick="deleteSeries('+s.id+')">Delete</button>';}
+        h+="<tr><td style='color:var(--text);font-weight:500'>"+s.name+"</td><td style='font-size:11px;color:var(--text3)'>"+cfg+"</td><td>"+bs.length+"</td><td class='mono'>$"+tw.toFixed(2)+"</td><td class='mono'>$"+tr2.toFixed(2)+"</td><td class='"+(pnl>=0?"pnl-pos":"pnl-neg")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+st+"</td><td style='display:flex;gap:4px;flex-wrap:wrap;align-items:center'>"+tl+"</td><td style='white-space:nowrap'>"+actBtns+"</td></tr>";
       });
       h+="</tbody></table>";el.innerHTML=h;
     });
