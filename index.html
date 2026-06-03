@@ -1024,13 +1024,13 @@ function updateSeriesPreview(seriesId){
       bets.forEach(function(b){if((b.martingale_step||1)===step)betForStep=b;});
       var cls="mart-step";
       var stepAmt=+(base*Math.pow(mult,i)).toFixed(2);
-      var label="Step "+step+"\n$"+stepAmt;
+      var label="Step "+step+" | $"+stepAmt;
       if(betForStep){
-        if(betForStep.status==="win"){cls+=" win";label+="\nWIN";}
-        else if(betForStep.status==="loss"){cls+=" loss";label+="\nLOSS";}
-        else{cls+=" current";label+="\nPEND";}
+        if(betForStep.status==="win"){cls+=" win";label+=" WIN";}
+        else if(betForStep.status==="loss"){cls+=" loss";label+=" LOSS";}
+        else{cls+=" current";label+=" PEND";}
       } else if(step===nextStep){cls+=" current";}
-      sd+='<div class="'+cls+'" style="white-space:pre-line">'+label+"</div>";
+      sd+='<div class="'+cls+'" style="">'+label+"</div>";
     }
     document.getElementById("m-series-display").innerHTML=sd;
   });
