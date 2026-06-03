@@ -946,7 +946,7 @@ function deleteBookmaker(name){confirmAction("Delete "+name+"?",function(){sbDel
 function calcMartingale(){
   var base=parseFloat(document.getElementById("m-base").value)||5;var steps=parseInt(document.getElementById("m-steps").value)||7;
   var mult=parseFloat(document.getElementById("m-mult").value)||2;var bank=parseFloat(document.getElementById("m-bank").value)||500;
-  var seq=[],total=0;for(var i=0;i<steps;i++){var s=+(base*Math.pow(mult,i)).toFixed(2);seq.push(s);total+=s;}
+  var seq=[],total=0;for(var i=0;i<steps;i++){var s=parseFloat((base*Math.pow(mult,i)).toFixed(2));seq.push(s);total+=s;}
   var rp=(total/bank)*100;
   var h="";seq.forEach(function(s,i){h+='<div class="cal-row"><span>Step '+(i+1)+'</span><span class="mono">$'+s+"</span></div>";});
   h+='<div class="cal-row"><span>Max Loss</span><span class="mono" style="color:var(--red)">-$'+total.toFixed(2)+"</span></div>";
