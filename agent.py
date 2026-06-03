@@ -1,1048 +1,174 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Draw Tracker</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#080c0f;--bg2:#0d1318;--bg3:#121920;
-  --border:#1a2430;--border2:#1f2d3d;
-  --text:#e8f0f7;--text2:#7a9ab5;--text3:#3a5570;
-  --green:#00d4a0;--green2:#00ff94;--green-dim:#00d4a015;--green-mid:#00d4a025;
-  --red:#ff4560;--red-dim:#ff456015;
-  --amber:#ffa040;--amber-dim:#ffa04015;
-  --blue:#4090ff;--blue-dim:#4090ff15;
-  --purple:#a060ff;--purple-dim:#a060ff15;
-  --nav-h:52px;--fab-size:52px;
-}
-body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
-.mono{font-family:'Space Mono',monospace}
-
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(8,12,15,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:var(--nav-h);display:flex;align-items:center;padding:0 16px;gap:12px}
-.logo{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--green);letter-spacing:.08em;flex:1}
-.logo span{color:var(--text3)}
-.hamburger{background:none;border:none;color:var(--text2);cursor:pointer;padding:6px;border-radius:6px;display:flex;flex-direction:column;gap:4px}
-.hamburger span{display:block;width:20px;height:2px;background:currentColor;border-radius:2px;transition:all .3s}
-.hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
-.hamburger.open span:nth-child(2){opacity:0}
-.hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
-.nav-user{font-size:11px;color:var(--text3)}
-
-/* SIDEBAR */
-.sidebar{position:fixed;top:var(--nav-h);left:0;bottom:0;width:240px;background:var(--bg2);border-right:1px solid var(--border);z-index:150;transform:translateX(-100%);transition:transform .3s;overflow-y:auto;padding:12px}
-.sidebar.open{transform:translateX(0)}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:140}
-.sidebar-overlay.open{display:block}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;border:none;background:none;width:100%;text-align:left;margin-bottom:2px}
-.nav-item:hover{color:var(--text);background:var(--bg3)}
-.nav-item.active{color:var(--green);background:var(--green-dim)}
-.nav-item i{font-size:18px}
-.nav-divider{height:1px;background:var(--border);margin:8px 0}
-.nav-logout{color:var(--red)!important}
-.nav-logout:hover{background:var(--red-dim)!important}
-
-/* PAGES */
-.app{padding-top:var(--nav-h);min-height:100vh}
-.page{display:none;padding:16px 16px 80px}
-.page.active{display:block}
-
-/* FAB */
-.fab{position:fixed;bottom:24px;right:20px;z-index:100;width:var(--fab-size);height:var(--fab-size);border-radius:50%;background:var(--green);border:none;color:#000;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,212,160,.3);transition:all .2s}
-.fab:hover{background:var(--green2);transform:scale(1.05)}
-
-/* STATS */
-.stats-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.stats-1{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px}
-.stat-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-.stat-val{font-family:'Space Mono',monospace;font-size:20px;font-weight:700}
-.stat-val.green{color:var(--green)}
-.stat-val.red{color:var(--red)}
-.stat-val.amber{color:var(--amber)}
-.stat-val.blue{color:var(--blue)}
-.stat-val.purple{color:var(--purple)}
-.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
-
-/* FILTERS */
-.filters{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
-.filters::-webkit-scrollbar{display:none}
-.filter-pill{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;color:var(--text2);border:1px solid var(--border);background:var(--bg2);cursor:pointer;white-space:nowrap;transition:all .2s}
-.filter-pill.active{color:var(--green);border-color:var(--green);background:var(--green-dim)}
-.filter-sel{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;white-space:nowrap}
-
-/* SECTION */
-.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.section-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
-
-/* BET CARDS */
-.bet-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;position:relative}
-.bet-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
-.bet-match{font-size:14px;font-weight:600;color:var(--text);flex:1;margin-right:8px;line-height:1.3}
-.bet-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;font-family:'Space Mono',monospace;flex-shrink:0}
-.bw{background:var(--green-dim);color:var(--green)}
-.bl{background:var(--red-dim);color:var(--red)}
-.bp{background:var(--amber-dim);color:var(--amber)}
-.bs{background:var(--blue-dim);color:var(--blue)}
-.bm{background:var(--purple-dim);color:var(--purple)}
-.bet-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.bet-tag{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:3px}
-.bet-tag strong{color:var(--text2)}
-.bet-nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px}
-.bet-num-label{font-size:10px;color:var(--text3);margin-bottom:2px}
-.bet-num-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
-.pnl-pos{color:var(--green)}
-.pnl-neg{color:var(--red)}
-.bet-actions{display:flex;gap:6px}
-.bet-inline-wrap{display:flex;gap:6px;flex:1}
-.inline-input{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:'Outfit',sans-serif;padding:5px 8px;width:100%;outline:none}
-.inline-input:focus{border-color:var(--green)}
-.inline-sel{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:11px;font-family:'Outfit',sans-serif;padding:5px 6px;outline:none;cursor:pointer;flex:1}
-.btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;border:none;transition:all .2s}
-.btn-green{background:var(--green);color:#000}
-.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
-.btn-ghost:hover{color:var(--text);border-color:var(--text3)}
-.btn-red{background:var(--red-dim);color:var(--red);border:1px solid transparent}
-.btn-sm{padding:4px 10px;font-size:11px}
-.btn-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;padding:0}
-
-/* PREDICTION CARDS */
-.pred-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
-.pred-match{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
-.pred-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
-.pred-tag{font-size:11px;color:var(--text3)}
-.pred-tag strong{color:var(--amber)}
-.pred-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)}
-.odds-badge{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);background:var(--amber-dim);padding:3px 7px;border-radius:5px}
-.edge-pos{color:var(--green);font-size:11px;font-family:'Space Mono',monospace}
-.edge-neg{color:var(--red);font-size:11px;font-family:'Space Mono',monospace}
-
-/* CHART */
-.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
-.chart-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
-canvas{width:100%!important}
-
-/* BALANCE CARDS */
-.bankroll-card{background:var(--green-dim);border:1px solid var(--green);border-radius:12px;padding:16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
-.bankroll-label{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
-.bankroll-val{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green)}
-.bal-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
-.bal-info{flex:1}
-.bal-bk{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
-.bal-amount{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green)}
-.bal-btns{display:flex;gap:6px}
-.bal-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'Outfit',sans-serif}
-
-/* TX */
-.tx-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.tx-item:last-child{border-bottom:none}
-.tx-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.tx-info{flex:1}
-.tx-bk{font-size:13px;font-weight:500;color:var(--text)}
-.tx-date{font-size:11px;color:var(--text3)}
-.tx-amount{font-family:'Space Mono',monospace;font-size:14px;font-weight:700}
-
-/* MARTINGALE */
-.series-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
-.series-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
-.series-config{font-size:11px;color:var(--text3);margin-bottom:10px}
-.series-steps{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.mart-step{padding:4px 8px;border-radius:5px;font-family:'Space Mono',monospace;font-size:10px;background:var(--bg3);border:1px solid var(--border)}
-.mart-step.win{background:var(--green-dim);border-color:var(--green);color:var(--green)}
-.mart-step.loss{background:var(--red-dim);border-color:var(--red);color:var(--red)}
-.mart-step.current{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
-.next-bet-card{background:var(--amber-dim);border:1px solid var(--amber);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
-.next-bet-label{font-size:10px;color:var(--amber);text-transform:uppercase;margin-bottom:2px}
-.next-bet-amount{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--amber)}
-.risk-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:6px}
-.risk-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--amber),var(--red))}
-.cal-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
-.cal-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px}
-.cal-row:last-child{border-bottom:none;font-weight:600;color:var(--green)}
-
-/* SETTINGS */
-.settings-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
-.settings-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px}
-.settings-preview{background:var(--bg3);border-radius:8px;padding:10px;font-size:12px;color:var(--text2);margin:12px 0}
-
-/* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);z-index:1000;align-items:flex-end;justify-content:center;padding-bottom:0}
-.overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
-.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
-.modal-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-.modal-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer}
-.fg{margin-bottom:12px}
-.fl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;display:block}
-.fi,.fs{width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;outline:none;transition:border-color .2s}
-.fi:focus,.fs:focus{border-color:var(--green)}
-.fi[readonly]{opacity:.5}
-.fs option{background:var(--bg2)}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.mf{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-.series-info{background:var(--bg3);border:1px solid var(--amber);border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--amber)}
-.trix-leg{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
-.trix-leg-title{font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
-
-/* LOGIN */
-.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:20px}
-.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:32px;width:100%;max-width:360px}
-.login-logo{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green);text-align:center;margin-bottom:6px}
-.login-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:24px}
-
-/* EMPTY/LOADING */
-.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px}
-.loading{text-align:center;padding:24px;color:var(--text3);font-size:12px}
-.sp{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* TOAST */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg2);border:1px solid var(--green);border-radius:10px;padding:10px 18px;font-size:13px;color:var(--green);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.err{border-color:var(--red);color:var(--red)}
-</style>
-</head>
-<body>
-
-<!-- LOGIN -->
-<div class="login-page" id="login-page">
-  <div class="login-box">
-    <div class="login-logo">DRAW<span style="color:var(--text3)">/</span>TRACKER</div>
-    <div class="login-sub">Sign in to continue</div>
-    <div class="fg"><label class="fl">Email</label><input type="email" class="fi" id="login-email" placeholder="your@email.com"></div>
-    <div class="fg"><label class="fl">Password</label><input type="password" class="fi" id="login-pass" placeholder="••••••••"></div>
-    <div id="login-error" style="color:var(--red);font-size:12px;margin-bottom:12px;display:none"></div>
-    <button class="btn btn-green" style="width:100%;padding:12px;font-size:14px" id="login-btn" onclick="doLogin()">Sign In</button>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app" style="display:none">
-
-<nav>
-  <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="logo">DRAW<span>/</span>TRACKER</div>
-  <div class="nav-user" id="nav-user"></div>
-</nav>
-
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
-<div class="sidebar" id="sidebar">
-  <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</button>
-  <button class="nav-item" id="nav-predictions" onclick="showPage('predictions',this)"><i class="ti ti-target"></i>Predictions</button>
-  <button class="nav-item" id="nav-bets" onclick="showPage('bets',this)"><i class="ti ti-cards"></i>My Bets</button>
-  <button class="nav-item" id="nav-balances" onclick="showPage('balances',this)"><i class="ti ti-wallet"></i>Balances</button>
-  <button class="nav-item" id="nav-martingale" onclick="showPage('martingale',this)"><i class="ti ti-trending-up"></i>Martingale</button>
-  <button class="nav-item" id="nav-settings" onclick="showPage('settings',this)"><i class="ti ti-settings"></i>Settings</button>
-  <div class="nav-divider"></div>
-  <button class="nav-item nav-logout" onclick="doLogout()"><i class="ti ti-logout"></i>Logout</button>
-</div>
-
-<div class="app">
-
-<!-- DASHBOARD -->
-<div class="page active" id="page-dashboard">
-  <div class="filters" id="db-type-filters">
-    <button class="filter-pill active" onclick="setDbType('all',this)">All</button>
-    <button class="filter-pill" onclick="setDbType('single',this)">Singles</button>
-    <button class="filter-pill" onclick="setDbType('trixie',this)">Trixie</button>
-    <button class="filter-pill" onclick="setDbType('patent',this)">Patent</button>
-    <button class="filter-pill" onclick="setDbType('martingale',this)">Martingale</button>
-    <select class="filter-sel" id="db-range" onchange="loadDashboard()">
-      <option value="all">All Time</option>
-      <option value="month">This Month</option>
-      <option value="30">Last 30d</option>
-      <option value="7">Last 7d</option>
-    </select>
-    <select class="filter-sel" id="db-bk" onchange="loadDashboard()"><option value="">All BK</option></select>
-  </div>
-  <div class="stats-2">
-    <div class="stat-card"><div class="stat-label">Total P&L</div><div class="stat-val green" id="s-pnl">$0.00</div></div>
-    <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val" id="s-wr">0%</div><div class="stat-sub" id="s-wr2">0/0</div></div>
-    <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val amber" id="s-roi">0%</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div></div>
-    <div class="stat-card"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div></div>
-    <div class="stat-card"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
-  </div>
-  <div id="trixie-section" style="display:none">
-    <div class="stats-2" style="margin-bottom:14px">
-      <div class="stat-card"><div class="stat-label">Full Hit (3/3)</div><div class="trix-val green stat-val" id="t-full">0%</div></div>
-      <div class="stat-card"><div class="stat-label">Partial (2/3)</div><div class="trix-val amber stat-val" id="t-partial">0%</div></div>
-      <div class="stat-card"><div class="stat-label">Dead Loss</div><div class="trix-val red stat-val" id="t-dead">0%</div></div>
-    </div>
-  </div>
-  <div id="martingale-section" style="display:none">
-    <div class="stats-2" style="margin-bottom:14px">
-      <div class="stat-card"><div class="stat-label">Total Series</div><div class="stat-val purple" id="m-total">0</div></div>
-      <div class="stat-card"><div class="stat-label">Won Series</div><div class="stat-val green" id="m-won">0</div></div>
-      <div class="stat-card"><div class="stat-label">Avg Steps</div><div class="stat-val amber" id="m-avgsteps">0</div></div>
-      <div class="stat-card"><div class="stat-label">Series ROI</div><div class="stat-val" id="m-roi">0%</div></div>
-    </div>
-  </div>
-  <div class="chart-card"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="140"></canvas></div>
-  <div class="chart-card"><div class="chart-title" id="chart2-title">Edge Distribution</div><canvas id="edgeChart" height="120"></canvas></div>
-</div>
-
-<!-- PREDICTIONS -->
-<div class="page" id="page-predictions">
-  <div class="section-hd"><div class="section-title">Draw Predictions</div><button class="btn btn-ghost btn-sm" onclick="loadPredictions()">Refresh</button></div>
-  <div id="pred-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
-</div>
-
-<!-- MY BETS -->
-<div class="page" id="page-bets">
-  <div class="filters">
-    <select class="filter-sel" id="b-bk" onchange="loadBets()"><option value="">All BK</option></select>
-    <select class="filter-sel" id="b-status" onchange="loadBets()">
-      <option value="">All</option><option value="win">Win</option>
-      <option value="loss">Loss</option><option value="pending">Pending</option>
-    </select>
-    <select class="filter-sel" id="b-type" onchange="loadBets()">
-      <option value="">All Types</option><option value="single">Single</option>
-      <option value="trixie">Trixie</option><option value="patent">Patent</option>
-    </select>
-    <button class="btn btn-ghost btn-sm" onclick="loadBets()">Refresh</button>
-  </div>
-  <div id="bets-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
-</div>
-
-<!-- BALANCES -->
-<div class="page" id="page-balances">
-  <div id="bankroll-display" class="bankroll-card">
-    <div><div class="bankroll-label">Total Bankroll</div><div class="bankroll-val" id="bankroll-val">$0.00</div></div>
-    <div style="text-align:right;font-size:11px;color:var(--green)" id="bankroll-bk-count">0 bookmakers</div>
-  </div>
-  <div class="section-hd">
-    <div class="section-title">Bookmakers</div>
-    <button class="btn btn-ghost btn-sm" onclick="openM('modal-add-bk')">+ Add</button>
-  </div>
-  <div id="bal-cards"><div class="loading"><div class="sp"></div>Loading...</div></div>
-  <div class="section-hd" style="margin-top:16px">
-    <div class="section-title">Transactions</div>
-    <button class="btn btn-ghost btn-sm" onclick="openM('modal-tx')">+ New</button>
-  </div>
-  <div class="settings-card" style="padding:0 14px">
-    <div id="tx-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
-  </div>
-</div>
-
-<!-- MARTINGALE -->
-<div class="page" id="page-martingale">
-  <div class="section-hd">
-    <div class="section-title">Active Series</div>
-    <button class="btn btn-ghost btn-sm" onclick="openM('modal-new-series')">+ New Series</button>
-  </div>
-  <div class="fg"><select class="fs" id="m-series-sel" onchange="onSeriesChange()">
-    <option value="">-- Select series --</option>
-  </select></div>
-  <div id="next-bet-display"></div>
-  <div class="mart-seq" id="m-series-display" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px"></div>
-  <div id="m-add-bet-btn-wrap" style="display:none;margin-bottom:16px">
-    <button class="btn btn-green" style="width:100%" onclick="openAddBetMart()">+ Add Next Bet</button>
-  </div>
-  <div class="section-hd"><div class="section-title">Calculator</div></div>
-  <div class="cal-card">
-    <div class="fr" style="margin-bottom:10px">
-      <div class="fg"><label class="fl">Base Stake ($)</label><input type="number" class="fi" id="m-base" value="5" oninput="calcMartingale()"></div>
-      <div class="fg"><label class="fl">Steps</label><input type="number" class="fi" id="m-steps" value="7" oninput="calcMartingale()"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Multiplier</label><input type="number" class="fi" id="m-mult" value="2" step="0.1" oninput="calcMartingale()"></div>
-      <div class="fg"><label class="fl">Bankroll ($)</label><input type="number" class="fi" id="m-bank" value="500" oninput="calcMartingale()"></div>
-    </div>
-    <div id="mart-result"></div>
-  </div>
-  <div class="section-hd"><div class="section-title">Series History</div><button class="btn btn-ghost btn-sm" onclick="loadMartingaleHistory()">Refresh</button></div>
-  <div id="mart-history"><div class="loading"><div class="sp"></div>Loading...</div></div>
-</div>
-
-<!-- SETTINGS -->
-<div class="page" id="page-settings">
-  <div class="settings-card">
-    <div class="settings-title">Stake % of Bankroll</div>
-    <div class="fg"><label class="fl">Single Bet %</label><input type="number" class="fi" id="set-single" placeholder="2" step="0.1" oninput="updateSettingsPreview()"></div>
-    <div class="fg"><label class="fl">Trixie Unit %</label><input type="number" class="fi" id="set-trixie" placeholder="1" step="0.1" oninput="updateSettingsPreview()"></div>
-    <div class="fg"><label class="fl">Patent Unit %</label><input type="number" class="fi" id="set-patent" placeholder="0.5" step="0.1" oninput="updateSettingsPreview()"></div>
-    <div class="settings-preview" id="settings-preview"></div>
-    <button class="btn btn-green" style="width:100%" onclick="saveSettings()">Save Settings</button>
-  </div>
-  <div class="settings-card">
-    <div class="settings-title">Account</div>
-    <div class="fg"><label class="fl">Email</label><input type="text" class="fi" id="set-email" readonly></div>
-    <button class="btn btn-red" style="width:100%;margin-top:6px" onclick="doLogout()">Logout</button>
-  </div>
-</div>
-
-</div><!-- end app pages -->
-
-<!-- FAB -->
-<button class="fab" onclick="openAddBet()" title="Add Bet">+</button>
-
-</div><!-- end app -->
-
-<!-- ADD/EDIT BET MODAL -->
-<div class="overlay" id="modal-bet">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><span id="modal-bet-title">Add Bet</span><button class="modal-close" onclick="closeM('modal-bet')">x</button></div>
-    <input type="hidden" id="bet-id"><input type="hidden" id="bet-stake-id"><input type="hidden" id="bet-is-mart">
-    <div class="fr">
-      <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="bet-date"></div>
-      <div class="fg"><label class="fl">Bookmaker</label><select class="fs" id="bet-bk"></select></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Bet Type</label>
-        <select class="fs" id="bet-type" onchange="onBetTypeChange()">
-          <option value="single">Single</option>
-          <option value="trixie">Trixie (4 bets)</option>
-          <option value="patent">Patent (7 bets)</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">Status</label>
-        <select class="fs" id="bet-status" onchange="onStatusChange()">
-          <option value="pending">Pending</option><option value="win">Win</option><option value="loss">Loss</option>
-        </select>
-      </div>
-    </div>
-    <div id="single-fields">
-      <div class="fg"><label class="fl">Match</label><input type="text" class="fi" id="bet-match" placeholder="Team A vs Team B"></div>
-      <div class="fr">
-        <div class="fg"><label class="fl">League</label><input type="text" class="fi" id="bet-league" placeholder="League"></div>
-        <div class="fg"><label class="fl">Selection</label>
-          <select class="fs" id="bet-sel">
-            <option value="Draw (X)">Draw (X)</option>
-            <option value="Home Win (1)">Home Win (1)</option>
-            <option value="Away Win (2)">Away Win (2)</option>
-          </select>
-        </div>
-      </div>
-      <div class="fr3">
-        <div class="fg"><label class="fl">Odds</label><input type="number" class="fi" id="bet-odds" placeholder="3.20" step="0.01" oninput="calcBetFields()"></div>
-        <div class="fg"><label class="fl">Amount ($)</label><input type="number" class="fi" id="bet-amount" placeholder="auto" step="0.01" oninput="calcBetFields()"></div>
-        <div class="fg"><label class="fl">Payout ($)</label><input type="number" class="fi" id="bet-payout" placeholder="auto" step="0.01" oninput="payoutManual=true"></div>
-      </div>
-      <div class="fr3">
-        <div class="fg"><label class="fl">My Prob %</label><input type="number" class="fi" id="bet-myprob" placeholder="35" oninput="calcBetFields()"></div>
-        <div class="fg"><label class="fl">Implied %</label><input type="number" class="fi" id="bet-impl" readonly></div>
-        <div class="fg"><label class="fl">Edge %</label><input type="number" class="fi" id="bet-edge" readonly></div>
-      </div>
-    </div>
-    <div id="trixie-fields" style="display:none">
-      <div class="fg"><label class="fl">Unit Stake ($)</label><input type="number" class="fi" id="trix-unit" placeholder="auto" step="0.01" oninput="calcTrixie()"></div>
-      <div id="trix-legs"></div>
-      <div id="trix-summary" style="background:var(--bg3);border-radius:8px;padding:10px;font-size:12px;color:var(--text2);margin-bottom:10px"></div>
-    </div>
-    <div id="mart-bet-info" style="display:none"><div class="series-info" id="mart-bet-info-text"></div></div>
-    <div id="mart-extra-fields" style="display:none">
-      <div class="fr">
-        <div class="fg"><label class="fl">Series</label><input type="text" class="fi" id="bet-mart" readonly></div>
-        <div class="fg"><label class="fl">Step</label><input type="number" class="fi" id="bet-mart-step" readonly></div>
-      </div>
-    </div>
-    <div class="fg"><label class="fl">Notes</label><input type="text" class="fi" id="bet-notes" placeholder="Optional"></div>
-    <div class="mf">
-      <button class="btn btn-ghost" onclick="closeM('modal-bet')">Cancel</button>
-      <button class="btn btn-green" id="save-bet-btn" onclick="saveBet()">Save Bet</button>
-    </div>
-  </div>
-</div>
-
-<!-- TX MODAL -->
-<div class="overlay" id="modal-tx">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><span>Add Transaction</span><button class="modal-close" onclick="closeM('modal-tx')">x</button></div>
-    <div class="fg"><label class="fl">Bookmaker</label><select class="fs" id="tx-bk"></select></div>
-    <div class="fg"><label class="fl">Type</label><select class="fs" id="tx-type"><option value="deposit">Deposit</option><option value="withdrawal">Withdrawal</option></select></div>
-    <div class="fg"><label class="fl">Amount ($)</label><input type="number" class="fi" id="tx-amount" placeholder="100.00" step="0.01"></div>
-    <div class="fg"><label class="fl">Note</label><input type="text" class="fi" id="tx-note" placeholder="Optional"></div>
-    <div class="mf"><button class="btn btn-ghost" onclick="closeM('modal-tx')">Cancel</button><button class="btn btn-green" onclick="saveTx()">Save</button></div>
-  </div>
-</div>
-
-<!-- ADD BK MODAL -->
-<div class="overlay" id="modal-add-bk">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><span>Add Bookmaker</span><button class="modal-close" onclick="closeM('modal-add-bk')">x</button></div>
-    <div class="fg"><label class="fl">Name</label><input type="text" class="fi" id="bk-name" placeholder="e.g. Betway"></div>
-    <div class="fg"><label class="fl">Initial Balance ($)</label><input type="number" class="fi" id="bk-balance" placeholder="0.00" step="0.01"></div>
-    <div class="mf"><button class="btn btn-ghost" onclick="closeM('modal-add-bk')">Cancel</button><button class="btn btn-green" onclick="saveBookmaker()">Add</button></div>
-  </div>
-</div>
-
-<!-- NEW SERIES MODAL -->
-<div class="overlay" id="modal-new-series">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><span>New Martingale Series</span><button class="modal-close" onclick="closeM('modal-new-series')">x</button></div>
-    <div class="fg"><label class="fl">Series Name</label><input type="text" class="fi" id="m-new-name" readonly></div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Base Stake ($)</label><input type="number" class="fi" id="m-new-base" value="5" step="0.01"></div>
-      <div class="fg"><label class="fl">Multiplier</label><input type="number" class="fi" id="m-new-mult" value="2" step="0.1"></div>
-    </div>
-    <div class="fg"><label class="fl">Max Steps</label><input type="number" class="fi" id="m-new-steps" value="7"></div>
-    <div class="mf"><button class="btn btn-ghost" onclick="closeM('modal-new-series')">Cancel</button><button class="btn btn-green" onclick="createSeries()">Create</button></div>
-  </div>
-</div>
-
-<!-- CONFIRM -->
-<div class="overlay" id="modal-confirm">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><span>Confirm</span><button class="modal-close" onclick="closeM('modal-confirm')">x</button></div>
-    <p style="color:var(--text2);font-size:14px;margin-bottom:16px" id="confirm-msg">Are you sure?</p>
-    <div class="mf"><button class="btn btn-ghost" onclick="closeM('modal-confirm')">Cancel</button><button class="btn btn-red" id="confirm-btn">Delete</button></div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.js"></script>
-<script>
-var SB_URL="https://jczzctpbrbaavzetidov.supabase.co";
-var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjenpjdHBicmJhYXZ6ZXRpZG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MTAyNjQsImV4cCI6MjA5NTk4NjI2NH0.yV23Ohs0zAZqYJuW8NjlhRRqYaEJiOGPSXWfR64Ujts";
-var H={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
-var authH=H;
-var bookmakers=[];
-var dbType="all";
-var payoutManual=false;
-var martSeries=[];
-var settings={single_pct:2,trixie_pct:1,patent_pct:0.5};
-var bankroll=0;
-
-function sbGet(p){return fetch(SB_URL+"/rest/v1/"+p,{headers:authH}).then(function(r){return r.json();}).then(function(j){return Array.isArray(j)?j:(j&&!j.code?[j]:[]);});}
-function sbPost(p,b){return fetch(SB_URL+"/rest/v1/"+p,{method:"POST",headers:Object.assign({},authH,{"Prefer":"return=representation"}),body:JSON.stringify(b)}).then(function(r){return r.json();});}
-function sbPatch(p,b){return fetch(SB_URL+"/rest/v1/"+p,{method:"PATCH",headers:Object.assign({},authH,{"Prefer":"return=minimal"}),body:JSON.stringify(b)}).then(function(r){return r.status;});}
-function sbDelete(p){return fetch(SB_URL+"/rest/v1/"+p,{method:"DELETE",headers:authH}).then(function(r){return r.status;});}
-
-function showToast(msg,isErr){var t=document.getElementById("toast");t.textContent=msg;t.className="toast"+(isErr?" err":"");t.classList.add("show");setTimeout(function(){t.classList.remove("show");},3000);}
-function openM(id){document.getElementById(id).classList.add("open");}
-function closeM(id){document.getElementById(id).classList.remove("open");}
-function confirmAction(msg,fn){document.getElementById("confirm-msg").textContent=msg;document.getElementById("confirm-btn").onclick=function(){closeM("modal-confirm");fn();};openM("modal-confirm");}
-
-function toggleSidebar(){var s=document.getElementById("sidebar"),o=document.getElementById("sidebar-overlay"),h=document.getElementById("hamburger");s.classList.toggle("open");o.classList.toggle("open");h.classList.toggle("open");}
-function closeSidebar(){document.getElementById("sidebar").classList.remove("open");document.getElementById("sidebar-overlay").classList.remove("open");document.getElementById("hamburger").classList.remove("open");}
-
-function doLogin(){
-  var email=document.getElementById("login-email").value;
-  var pass=document.getElementById("login-pass").value;
-  var btn=document.getElementById("login-btn");
-  var err=document.getElementById("login-error");
-  btn.textContent="Signing in...";btn.disabled=true;err.style.display="none";
-  fetch(SB_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{"apikey":SB_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:email,password:pass})})
-    .then(function(r){return r.json();}).then(function(d){
-      if(d.access_token){
-        authH={"apikey":SB_KEY,"Authorization":"Bearer "+d.access_token,"Content-Type":"application/json"};
-        localStorage.setItem("dt_token",d.access_token);localStorage.setItem("dt_email",email);
-        showApp(email);
-      } else {err.textContent="Invalid email or password";err.style.display="block";}
-    }).finally(function(){btn.textContent="Sign In";btn.disabled=false;});
-}
-
-function doLogout(){localStorage.removeItem("dt_token");localStorage.removeItem("dt_email");authH=H;document.getElementById("app").style.display="none";document.getElementById("login-page").style.display="flex";}
-
-function showApp(email){
-  document.getElementById("login-page").style.display="none";
-  document.getElementById("app").style.display="block";
-  document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
-  document.getElementById("set-email").value=email||"";
-  loadBookmakers().then(function(){loadDashboard();loadSettings();});
-  loadMartSeries();
-}
-
-function checkAuth(){
-  var token=localStorage.getItem("dt_token");var email=localStorage.getItem("dt_email");
-  if(token){
-    authH={"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json"};
-    fetch(SB_URL+"/auth/v1/user",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token}})
-      .then(function(r){return r.json();}).then(function(d){if(d.id)showApp(email||d.email);else doLogout();}).catch(function(){doLogout();});
-  }
-}
-
-document.addEventListener("keydown",function(e){if(e.key==="Enter"&&document.getElementById("login-page").style.display!=="none")doLogin();});
-
-function loadBookmakers(){
-  return sbGet("balances?select=*&order=bookmaker.asc").then(function(bals){
-    var list=bals.map(function(b){return b.bookmaker;});
-    if(list.indexOf("Stake")===-1)list.unshift("Stake");
-    if(list.indexOf("BC Game")===-1)list.splice(1,0,"BC Game");
-    bookmakers=list;bankroll=bals.reduce(function(s,b){return s+(b.balance||0);},0);
-    ["db-bk","b-bk","bet-bk","tx-bk"].forEach(function(id){
-      var el=document.getElementById(id);if(!el)return;
-      var isF=id==="db-bk"||id==="b-bk";var cur=el.value;
-      el.innerHTML=(isF?'<option value="">All BK</option>':"")+bookmakers.map(function(bk){return'<option value="'+bk+'">'+bk+"</option>";}).join("");
-      if(cur)el.value=cur;
-    });
-  });
-}
-
-function loadMartSeries(){
-  return sbGet("martingale_series?select=*&order=created_at.desc").then(function(rows){
-    martSeries=rows;
-    var sel=document.getElementById("m-series-sel");if(!sel)return;
-    sel.innerHTML='<option value="">-- Select series --</option>'+rows.map(function(s){return'<option value="'+s.id+'">'+(s.is_active?"":"")+""+s.name+(s.is_active?"":" (done)")+"</option>";}).join("");
-  });
-}
-
-function loadSettings(){
-  sbGet("settings?select=*&limit=1").then(function(rows){
-    if(rows.length){settings=rows[0];document.getElementById("set-single").value=settings.single_pct||2;document.getElementById("set-trixie").value=settings.trixie_pct||1;document.getElementById("set-patent").value=settings.patent_pct||0.5;}
-    updateSettingsPreview();
-  }).catch(function(){});
-}
-
-function updateSettingsPreview(){
-  var sp=parseFloat(document.getElementById("set-single").value)||2;
-  var tp=parseFloat(document.getElementById("set-trixie").value)||1;
-  var pp=parseFloat(document.getElementById("set-patent").value)||0.5;
-  var br=bankroll||0;
-  document.getElementById("settings-preview").innerHTML='Bankroll: <strong>$'+br.toFixed(2)+'</strong><br>Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*tp/100).toFixed(2)+'</strong> ('+tp+'%) | Patent unit: <strong>$'+(br*pp/100).toFixed(2)+'</strong> ('+pp+'%)';
-}
-
-function saveSettings(){
-  var row={single_pct:parseFloat(document.getElementById("set-single").value)||2,trixie_pct:parseFloat(document.getElementById("set-trixie").value)||1,patent_pct:parseFloat(document.getElementById("set-patent").value)||0.5};
-  settings=row;
-  sbGet("settings?select=id&limit=1").then(function(rows){return rows.length?sbPatch("settings?id=eq."+rows[0].id,row):sbPost("settings",row);}).then(function(){showToast("Settings saved!");updateSettingsPreview();});
-}
-
-function showPage(name,el){
-  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");});
-  document.querySelectorAll(".nav-item").forEach(function(t){t.classList.remove("active");});
-  document.getElementById("page-"+name).classList.add("active");
-  if(el)el.classList.add("active");
-  closeSidebar();
-  if(name==="dashboard")loadDashboard();
-  if(name==="predictions")loadPredictions();
-  if(name==="bets")loadBets();
-  if(name==="balances")loadBalances();
-  if(name==="martingale"){calcMartingale();loadMartSeries().then(function(){loadMartingaleHistory();});}
-  if(name==="settings"){loadSettings();updateSettingsPreview();}
-}
-
-function setDbType(t,el){
-  dbType=t;
-  document.querySelectorAll("#db-type-filters .filter-pill").forEach(function(x){x.classList.remove("active");});
-  el.classList.add("active");
-  document.getElementById("trixie-section").style.display=(t==="trixie"||t==="patent")?"block":"none";
-  document.getElementById("martingale-section").style.display=t==="martingale"?"block":"none";
-  loadDashboard();
-}
-
-function loadDashboard(){
-  var bk=document.getElementById("db-bk").value;
-  var range=document.getElementById("db-range").value;
-  var now=new Date();var df="";
-  if(range==="month")df="&date=gte."+now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";
-  if(range==="30"){var d=new Date(now-30*864e5);df="&date=gte."+d.toISOString().slice(0,10);}
-  if(range==="7"){var d2=new Date(now-7*864e5);df="&date=gte."+d2.toISOString().slice(0,10);}
-  var q="bets?select=*"+df;
-  if(bk)q+="&bookmaker=eq."+encodeURIComponent(bk);
-  if(dbType==="martingale")q+="&martingale_series_id=not.is.null";
-  else if(dbType!=="all")q+="&bet_type=eq."+dbType;
-  Promise.all([sbGet(q),sbGet("stake_bets?select=*"),sbGet("balances?select=balance")]).then(function(res){
-    var manual=res[0],stake=res[1],bals=res[2];
-    bankroll=bals.reduce(function(s,b){return s+(b.balance||0);},0);
-    document.getElementById("s-bankroll").textContent="$"+bankroll.toFixed(0);
-    var all=manual.slice();
-    if(!bk||bk==="Stake"){stake.forEach(function(b){var s=b.status==="settled"?(b.payout>b.amount?"win":"loss"):"pending";all.push({match:b.match,amount:b.amount,payout:b.payout,status:s,odds:b.odds,bookmaker:"Stake",bet_type:"single",my_probability:null,edge:null,date:b.created_at?b.created_at.slice(0,10):""});});}
-    var settled=all.filter(function(b){return b.status==="win"||b.status==="loss";});
-    var wins=all.filter(function(b){return b.status==="win";});
-    var pending=all.filter(function(b){return b.status==="pending";});
-    var tw=settled.reduce(function(s,b){return s+(b.amount||0);},0);
-    var tp=wins.reduce(function(s,b){return s+(b.payout||0);},0);
-    var pnl=tp-tw;var wr=settled.length?((wins.length/settled.length)*100).toFixed(1):0;
-    var roi=tw?((pnl/tw)*100).toFixed(1):0;
-    var eb=settled.filter(function(b){return b.edge!=null;});
-    var avgE=eb.length?(eb.reduce(function(s,b){return s+b.edge;},0)/eb.length).toFixed(1):0;
-    document.getElementById("s-pnl").textContent=(pnl>=0?"+":"")+"$"+pnl.toFixed(2);
-    document.getElementById("s-pnl").className="stat-val "+(pnl>=0?"green":"red");
-    document.getElementById("s-wr").textContent=wr+"%";
-    document.getElementById("s-wr2").textContent=wins.length+"/"+settled.length;
-    document.getElementById("s-roi").textContent=(roi>=0?"+":"")+roi+"%";
-    document.getElementById("s-roi").className="stat-val "+(parseFloat(roi)>=0?"amber":"red");
-    document.getElementById("s-edge").textContent=(avgE>=0?"+":"")+avgE+"%";
-    document.getElementById("s-active").textContent=pending.length;
-    if(dbType==="trixie"||dbType==="patent"){var tx=settled.filter(function(b){return b.bet_type===dbType;});var full=tx.filter(function(b){return b.status==="win";}).length;var dead=tx.filter(function(b){return b.status==="loss";}).length;var part=tx.length-full-dead;var pct=function(n){return tx.length?(n/tx.length*100).toFixed(0)+"%":"0%";};document.getElementById("t-full").textContent=pct(full);document.getElementById("t-partial").textContent=pct(part);document.getElementById("t-dead").textContent=pct(dead);}
-    if(dbType==="martingale"){var sm={};manual.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]=[];sm[b.martingale_series_id].push(b);});var keys=Object.keys(sm);var wonS=keys.filter(function(k){return sm[k].some(function(b){return b.status==="win";});});var stepsArr=wonS.map(function(k){var wb=sm[k].filter(function(b){return b.status==="win";})[0];return wb?wb.martingale_step||1:0;});var avgS=stepsArr.length?(stepsArr.reduce(function(s,v){return s+v;},0)/stepsArr.length).toFixed(1):0;document.getElementById("m-total").textContent=keys.length;document.getElementById("m-won").textContent=wonS.length;document.getElementById("m-avgsteps").textContent=avgS;document.getElementById("m-roi").textContent=(roi>=0?"+":"")+roi+"%";document.getElementById("m-roi").className="stat-val "+(parseFloat(roi)>=0?"green":"red");}
-    drawPnlChart(all);
-    if(dbType==="martingale"){document.getElementById("chart2-title").textContent="Series P&L";drawSeriesChart(manual);}
-    else{document.getElementById("chart2-title").textContent="Edge Distribution";drawEdgeChart(settled);}
-  });
-}
-
-function drawPnlChart(bets){
-  var c=document.getElementById("pnlChart"),ctx=c.getContext("2d");
-  c.width=c.offsetWidth*2;c.height=280;ctx.scale(2,2);
-  var w=c.offsetWidth/2,h=140,p=12;ctx.clearRect(0,0,w,h);
-  var s=bets.filter(function(b){return b.status==="win"||b.status==="loss";}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
-  if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data yet",w/2,h/2);return;}
-  var cum=0,pts=s.map(function(b){cum+=(b.payout||0)-(b.amount||0);return cum;});
-  var mn=Math.min.apply(null,[0].concat(pts)),mx=Math.max.apply(null,[0].concat(pts)),rng=mx-mn||1;
-  var xs=function(i){return p+i*(w-p*2)/(pts.length-1||1);};
-  var ys=function(v){return h-p-(v-mn)/rng*(h-p*2);};
-  ctx.strokeStyle="#1a2430";ctx.lineWidth=1;for(var i=0;i<=3;i++){ctx.beginPath();ctx.moveTo(p,p+i*(h-p*2)/3);ctx.lineTo(w-p,p+i*(h-p*2)/3);ctx.stroke();}
-  ctx.strokeStyle="#3a5570";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(p,ys(0));ctx.lineTo(w-p,ys(0));ctx.stroke();ctx.setLineDash([]);
-  var g=ctx.createLinearGradient(0,p,0,h-p);g.addColorStop(0,"rgba(0,212,160,.25)");g.addColorStop(1,"rgba(0,212,160,0)");
-  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(xs(0),ys(pts[0]));pts.forEach(function(v,i){ctx.lineTo(xs(i),ys(v));});ctx.lineTo(xs(pts.length-1),h-p);ctx.lineTo(xs(0),h-p);ctx.closePath();ctx.fill();
-  ctx.strokeStyle="#00d4a0";ctx.lineWidth=2;ctx.beginPath();pts.forEach(function(v,i){if(i===0)ctx.moveTo(xs(0),ys(v));else ctx.lineTo(xs(i),ys(v));});ctx.stroke();
-}
-
-function drawEdgeChart(bets){
-  var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
-  c.width=c.offsetWidth*2;c.height=240;ctx.scale(2,2);
-  var w=c.offsetWidth/2,h=120,p=12;ctx.clearRect(0,0,w,h);
-  var eb=bets.filter(function(b){return b.edge!=null;});
-  if(!eb.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No edge data",w/2,h/2);return;}
-  var bins=8,emin=-20,emax=20,bw=(emax-emin)/bins;
-  var cnt=[0,0,0,0,0,0,0,0];
-  eb.forEach(function(b){var i=Math.min(bins-1,Math.max(0,Math.floor((b.edge-emin)/bw)));cnt[i]++;});
-  var mc=Math.max.apply(null,cnt)||1,bW=(w-p*2)/bins;
-  cnt.forEach(function(c2,i){var x=p+i*bW,bh=(c2/mc)*(h-p*2),ev=emin+i*bw;ctx.fillStyle=ev>=0?"rgba(0,212,160,.6)":"rgba(255,69,96,.6)";ctx.fillRect(x+1,h-p-bh,bW-2,bh);});
-  var zx=p+((0-emin)/bw)*bW;ctx.strokeStyle="#3a5570";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(zx,p);ctx.lineTo(zx,h-p);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle="#3a5570";ctx.font="9px Space Mono";ctx.textAlign="center";ctx.fillText("0%",zx,h-2);
-}
-
-function drawSeriesChart(bets){
-  var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
-  c.width=c.offsetWidth*2;c.height=240;ctx.scale(2,2);
-  var w=c.offsetWidth/2,h=120,p=12;ctx.clearRect(0,0,w,h);
-  var sm={};bets.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]={w:0,p:0};sm[b.martingale_series_id].p+=(b.payout||0)-(b.amount||0);});
-  var keys=Object.keys(sm);if(!keys.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data",w/2,h/2);return;}
-  var vals=keys.map(function(k){return sm[k].p;});var mx=Math.max.apply(null,vals.map(Math.abs))||1;var bW=(w-p*2)/keys.length;
-  keys.forEach(function(k,i){var x=p+i*bW,v=sm[k].p,bh=Math.abs(v)/mx*(h/2-p);ctx.fillStyle=v>=0?"rgba(0,212,160,.7)":"rgba(255,69,96,.7)";if(v>=0)ctx.fillRect(x+2,h/2-bh,bW-4,bh);else ctx.fillRect(x+2,h/2,bW-4,bh);});
-  ctx.strokeStyle="#3a5570";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(p,h/2);ctx.lineTo(w-p,h/2);ctx.stroke();ctx.setLineDash([]);
-}
-
-function loadPredictions(){
-  var el=document.getElementById("pred-body");
-  el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
-  sbGet("matches?select=*&order=date.desc&limit=100").then(function(d){
-    if(!d.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
-    var h="";
-    d.forEach(function(m){
-      var oc=m.outcome==="win"?'<span class="bet-badge bw">WIN</span>':m.outcome==="loss"?'<span class="bet-badge bl">LOSS</span>':'<span class="bet-badge bp">PEND</span>';
-      h+='<div class="pred-card"><div class="pred-match">'+(m.home||"")+" vs "+(m.away||"")+'</div><div class="pred-meta"><span class="pred-tag">'+(m.league||"")+'</span><span class="pred-tag"><strong>'+(m.kickoff||"")+'</strong></span><span class="pred-tag">'+(m.date||"")+'</span></div><div class="pred-bottom"><span class="odds-badge">X: '+(m.draw_pct||0)+'%</span><span class="odds-badge" style="color:var(--text2);background:var(--bg3)">'+(m.pred_score||"-")+'</span>'+oc+'</div></div>';
-    });
-    el.innerHTML=h;
-  });
-}
-
-function saveInline(id,src,field,val,extraId){
-  var patch={};patch[field]=val;
-  if(src==="manual"){sbPatch("bets?id=eq."+id,patch).then(function(){showToast("Saved!");loadBets();});}
-  else{if(extraId){sbPatch("bets?id=eq."+extraId,patch).then(function(){showToast("Saved!");loadBets();});}
-  else{sbPost("bets",Object.assign({bookmaker:"Stake",status:"pending",bet_type:"single",date:new Date().toISOString().slice(0,10),notes:"stake:"+id},patch)).then(function(){showToast("Saved!");loadBets();});}}
-}
-
-function loadBets(){
-  var el=document.getElementById("bets-body");
-  el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
-  var bk=document.getElementById("b-bk").value;var st=document.getElementById("b-status").value;var tp=document.getElementById("b-type").value;
-  var q="bets?select=*&order=date.desc,id.desc";
-  if(bk)q+="&bookmaker=eq."+encodeURIComponent(bk);if(st)q+="&status=eq."+st;if(tp)q+="&bet_type=eq."+tp;
-  Promise.all([sbGet(q),sbGet("stake_bets?select=*&order=created_at.desc&limit=200")]).then(function(res){
-    var manual=res[0],stake=res[1];
-    var stakeMap={};manual.forEach(function(b){if(b.notes&&b.notes.indexOf("stake:")===0)stakeMap[b.notes.slice(6)]=b;});
-    var all=manual.filter(function(b){return!b.notes||b.notes.indexOf("stake:")!==0;}).map(function(b){return Object.assign({},b,{_src:"manual"});});
-    if(!bk||bk==="Stake"){
-      stake.filter(function(b){if(!st)return true;var s=b.status==="settled"?(b.payout>b.amount?"win":"loss"):"pending";return s===st;})
-      .filter(function(){return!tp||tp==="single";})
-      .forEach(function(b){var extra=stakeMap[b.id]||{};all.push({id:b.id,match:b.match,selection:"Draw (X)",odds:b.odds,amount:b.amount,payout:b.payout,status:b.status==="settled"?(b.payout>b.amount?"win":"loss"):"pending",bookmaker:"Stake",bet_type:extra.bet_type||"single",my_probability:extra.my_probability||null,edge:extra.edge||null,martingale_series_id:extra.martingale_series_id||null,martingale_step:extra.martingale_step||null,date:b.created_at?b.created_at.slice(0,10):"",_src:"stake",_extra_id:extra.id||null,_stake_id:b.id});});
-    }
-    if(!all.length){el.innerHTML='<div class="empty">No bets found</div>';return;}
-    var bkOpts=bookmakers.map(function(bk2){return'<option value="'+bk2+'">'+bk2+"</option>";}).join("");
-    var h="";
-    all.forEach(function(b){
-      var pnl=(b.payout||0)-(b.amount||0);
-      var isPending=b.status==="pending";
-      var oc=b.status==="win"?'<span class="bet-badge bw">WIN</span>':b.status==="loss"?'<span class="bet-badge bl">LOSS</span>':'<span class="bet-badge bp">PEND</span>';
-      var tp2=b.bet_type==="trixie"?'<span class="bet-badge bm">TRIX</span>':b.bet_type==="patent"?'<span class="bet-badge bm">PAT</span>':"";
-      var src=b._src==="stake"?'<span class="bet-badge bs">S</span>':"";
-      var mart=b.martingale_series_id?'<span class="bet-badge" style="background:var(--purple-dim);color:var(--purple)">M'+( b.martingale_step||"")+"</span>":"";
-      var editId=b._src==="stake"?b._stake_id:b.id;var extraId=b._extra_id||"";
-      var eStr=b.edge!=null?'<span class="'+(b.edge>=0?"edge-pos":"edge-neg")+'">'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'';
-      var selS=(b.selection||"").replace(" Win","").replace("Draw (X)","X").replace("(1)","1").replace("(2)","2");
-      h+='<div class="bet-card"><div class="bet-card-top"><div class="bet-match">'+(b.match||"—")+'</div>'+oc+'</div>';
-      h+='<div class="bet-meta"><span class="bet-tag">'+(b.date||"")+'</span><span class="bet-tag"><strong>'+selS+'</strong></span><span class="bet-tag"><span class="odds-badge">'+(b.odds||0)+'</span></span>'+(b.league?'<span class="bet-tag">'+(b.league)+'</span>':"")+tp2+src+mart+'</div>';
-      h+='<div class="bet-nums"><div><div class="bet-num-label">Amount</div><div class="bet-num-val">$'+(b.amount||0).toFixed(2)+'</div></div><div><div class="bet-num-label">Payout</div><div class="bet-num-val">$'+(b.payout||0).toFixed(2)+'</div></div><div><div class="bet-num-label">P&L</div><div class="bet-num-val '+(pnl>=0?"pnl-pos":"pnl-neg")+'">'+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+'</div></div></div>';
-      if(isPending){
-        h+='<div class="bet-actions" style="flex-wrap:wrap;gap:6px">';
-        h+='<input class="inline-input" style="width:70px" type="number" value="'+(b.my_probability||"")+'" placeholder="My%" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'my_probability\',parseFloat(this.value)||null,\''+extraId+'\')">';
-        h+='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'bookmaker\',this.value,\''+extraId+'\')">'+bookmakers.map(function(bk2){return'<option value="'+bk2+'"'+(bk2===b.bookmaker?' selected':'')+'>'+bk2+"</option>";}).join("")+"</select>";
-        h+='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'status\',this.value,\''+extraId+'\')"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
-        h+='<button class="btn btn-ghost btn-sm btn-icon" onclick="openEditBet(\''+editId+'\',\''+b._src+'\',\''+extraId+'\','+(b.odds||0)+')">✎</button>';
-        if(b._src==="manual")h+='<button class="btn btn-red btn-sm btn-icon" onclick="deleteBet(\''+b.id+'\')">✕</button>';
-        h+='</div>';
-      } else {
-        h+='<div class="bet-actions" style="justify-content:space-between;align-items:center">';
-        h+='<div style="font-size:11px;color:var(--text3)">'+(b.my_probability!=null?'My: '+b.my_probability+'% '+eStr:'')+'</div>';
-        h+='<div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm btn-icon" onclick="openEditBet(\''+editId+'\',\''+b._src+'\',\''+extraId+'\','+(b.odds||0)+')">✎</button>'+(b._src==="manual"?'<button class="btn btn-red btn-sm btn-icon" onclick="deleteBet(\''+b.id+'\')">✕</button>':'')+'</div>';
-        h+='</div>';
-      }
-      h+='</div>';
-    });
-    el.innerHTML=h;
-  });
-}
-
-function onBetTypeChange(){
-  var t=document.getElementById("bet-type").value;var isTrix=t==="trixie"||t==="patent";
-  document.getElementById("single-fields").style.display=isTrix?"none":"block";
-  document.getElementById("trixie-fields").style.display=isTrix?"block":"none";
-  if(isTrix){buildTrixLegs(t);var pct=t==="trixie"?settings.trixie_pct:settings.patent_pct;document.getElementById("trix-unit").value=+(bankroll*pct/100).toFixed(2);}
-  else{document.getElementById("bet-amount").value=+(bankroll*(settings.single_pct||2)/100).toFixed(2);calcBetFields();}
-}
-
-function buildTrixLegs(type){
-  var h="";for(var i=0;i<3;i++){h+='<div class="trix-leg"><div class="trix-leg-title">Selection '+(i+1)+'</div><div class="fr"><div class="fg"><label class="fl">Match</label><input type="text" class="fi trix-match" placeholder="Team A vs B"></div><div class="fg"><label class="fl">Odds</label><input type="number" class="fi trix-odds" placeholder="2.50" step="0.01" oninput="calcTrixie()"></div></div><div class="fr"><div class="fg"><label class="fl">Selection</label><select class="fs trix-sel"><option value="Draw (X)">Draw (X)</option><option value="Home Win (1)">Home Win (1)</option><option value="Away Win (2)">Away Win (2)</option></select></div><div class="fg"><label class="fl">League</label><input type="text" class="fi trix-league" placeholder="League"></div></div></div>';}
-  document.getElementById("trix-legs").innerHTML=h;calcTrixie();
-}
-
-function calcTrixie(){
-  var unit=parseFloat(document.getElementById("trix-unit").value)||0;var type=document.getElementById("bet-type").value;
-  var oddsEls=document.querySelectorAll(".trix-odds");var odds=[];oddsEls.forEach(function(el){var v=parseFloat(el.value)||0;if(v>0)odds.push(v);});
-  if(!unit||odds.length<2){document.getElementById("trix-summary").innerHTML="Enter unit stake and odds";return;}
-  var totalStake=0,maxReturn=0,n=odds.length;
-  if(type==="patent"){odds.forEach(function(o){totalStake+=unit;maxReturn+=unit*o;});}
-  for(var i=0;i<n;i++)for(var j=i+1;j<n;j++){totalStake+=unit;maxReturn+=unit*odds[i]*odds[j];}
-  if(n>=3){totalStake+=unit;maxReturn+=unit*odds[0]*odds[1]*odds[2];}
-  document.getElementById("trix-summary").innerHTML=type.toUpperCase()+": "+(type==="patent"?7:4)+" bets | Total: <strong>$"+totalStake.toFixed(2)+"</strong> | Max: <strong>$"+maxReturn.toFixed(2)+"</strong>";
-}
-
-function calcBetFields(){
-  var odds=parseFloat(document.getElementById("bet-odds").value)||0;var amt=parseFloat(document.getElementById("bet-amount").value)||0;var myP=parseFloat(document.getElementById("bet-myprob").value)||0;
-  if(odds>0&&amt>0&&!payoutManual)document.getElementById("bet-payout").value=(amt*odds).toFixed(2);
-  if(odds>0){var impl=+(1/odds*100).toFixed(1);document.getElementById("bet-impl").value=impl;if(myP>0)document.getElementById("bet-edge").value=(myP-impl).toFixed(1);}
-}
-
-function onStatusChange(){if(document.getElementById("bet-status").value==="loss"){document.getElementById("bet-payout").value="0";payoutManual=true;}else{payoutManual=false;calcBetFields();}}
-
-function openAddBet(){
-  document.getElementById("bet-id").value="";document.getElementById("bet-stake-id").value="";document.getElementById("bet-is-mart").value="";
-  document.getElementById("modal-bet-title").textContent="Add Bet";
-  document.getElementById("bet-date").value=new Date().toISOString().slice(0,10);
-  document.getElementById("bet-status").value="pending";document.getElementById("bet-type").value="single";document.getElementById("bet-sel").value="Draw (X)";
-  ["bet-match","bet-league","bet-odds","bet-payout","bet-myprob","bet-impl","bet-edge","bet-notes"].forEach(function(id){document.getElementById(id).value="";});
-  document.getElementById("bet-amount").value=+(bankroll*(settings.single_pct||2)/100).toFixed(2);
-  document.getElementById("single-fields").style.display="block";document.getElementById("trixie-fields").style.display="none";
-  document.getElementById("mart-bet-info").style.display="none";document.getElementById("mart-extra-fields").style.display="none";
-  payoutManual=false;openM("modal-bet");
-}
-
-function openEditBet(id,src,extraId,odds){
-  payoutManual=false;
-  if(src==="stake"){
-    var p=extraId?sbGet("bets?id=eq."+extraId):Promise.resolve([]);
-    p.then(function(d){
-      var b=d[0]||{};
-      document.getElementById("bet-id").value=extraId||"";document.getElementById("bet-stake-id").value=id;document.getElementById("bet-is-mart").value="";
-      document.getElementById("modal-bet-title").textContent="Edit Stake Bet";
-      document.getElementById("bet-date").value=b.date||new Date().toISOString().slice(0,10);
-      document.getElementById("bet-bk").value="Stake";document.getElementById("bet-type").value=b.bet_type||"single";
-      document.getElementById("bet-status").value=b.status||"pending";document.getElementById("bet-match").value=b.match||"";
-      document.getElementById("bet-league").value=b.league||"";document.getElementById("bet-sel").value=b.selection||"Draw (X)";
-      document.getElementById("bet-odds").value=odds||b.odds||"";document.getElementById("bet-amount").value=b.amount||"";
-      document.getElementById("bet-payout").value=b.payout||"";payoutManual=true;
-      document.getElementById("bet-myprob").value=b.my_probability||"";document.getElementById("bet-notes").value="";
-      document.getElementById("single-fields").style.display="block";document.getElementById("trixie-fields").style.display="none";
-      document.getElementById("mart-bet-info").style.display="none";document.getElementById("mart-extra-fields").style.display="none";
-      calcBetFields();openM("modal-bet");
-    });return;
-  }
-  sbGet("bets?id=eq."+id).then(function(d){
-    if(!d.length)return;var b=d[0];
-    document.getElementById("bet-id").value=b.id;document.getElementById("bet-stake-id").value="";document.getElementById("bet-is-mart").value="";
-    document.getElementById("modal-bet-title").textContent="Edit Bet";
-    document.getElementById("bet-date").value=b.date||"";document.getElementById("bet-bk").value=b.bookmaker||"Other";
-    document.getElementById("bet-type").value=b.bet_type||"single";document.getElementById("bet-status").value=b.status||"pending";
-    document.getElementById("bet-match").value=b.match||"";document.getElementById("bet-league").value=b.league||"";
-    document.getElementById("bet-sel").value=b.selection||"Draw (X)";document.getElementById("bet-odds").value=b.odds||"";
-    document.getElementById("bet-amount").value=b.amount||"";document.getElementById("bet-payout").value=b.payout||"";payoutManual=true;
-    document.getElementById("bet-myprob").value=b.my_probability||"";document.getElementById("bet-notes").value=b.notes||"";
-    document.getElementById("single-fields").style.display="block";document.getElementById("trixie-fields").style.display="none";
-    document.getElementById("mart-bet-info").style.display="none";document.getElementById("mart-extra-fields").style.display="none";
-    calcBetFields();openM("modal-bet");
-  });
-}
-
-function saveBet(){
-  var btn=document.getElementById("save-bet-btn");btn.textContent="Saving...";btn.disabled=true;
-  var id=document.getElementById("bet-id").value;var stakeId=document.getElementById("bet-stake-id").value;var isMart=document.getElementById("bet-is-mart").value;
-  var type=document.getElementById("bet-type").value;var isTrix=type==="trixie"||type==="patent";
-  var bk=document.getElementById("bet-bk").value;var date=document.getElementById("bet-date").value;var status=document.getElementById("bet-status").value;var notes=document.getElementById("bet-notes").value||null;
-  if(isTrix&&!id){
-    var unit=parseFloat(document.getElementById("trix-unit").value)||0;
-    var matchEls=document.querySelectorAll(".trix-match");var oddsEls=document.querySelectorAll(".trix-odds");var selEls=document.querySelectorAll(".trix-sel");var legueEls=document.querySelectorAll(".trix-league");
-    var legs=[];matchEls.forEach(function(el,i){legs.push({match:el.value,odds:parseFloat(oddsEls[i].value)||0,sel:selEls[i].value,league:legueEls[i].value});});
-    var n=legs.length,rows=[];
-    if(type==="patent"){legs.forEach(function(l){rows.push({date:date,match:l.match,league:l.league,selection:l.sel,odds:l.odds,amount:unit,payout:+(unit*l.odds).toFixed(2),bookmaker:bk,status:status,bet_type:type,notes:"trix:single"});});}
-    for(var i=0;i<n;i++)for(var j=i+1;j<n;j++){var combo=[legs[i],legs[j]],co=+(combo[0].odds*combo[1].odds).toFixed(2);rows.push({date:date,match:combo[0].match+" + "+combo[1].match,league:combo[0].league+"/"+combo[1].league,selection:combo[0].sel+" + "+combo[1].sel,odds:co,amount:unit,payout:+(unit*co).toFixed(2),bookmaker:bk,status:status,bet_type:type,notes:"trix:double"});}
-    if(n>=3){var tco=+(legs[0].odds*legs[1].odds*legs[2].odds).toFixed(2);rows.push({date:date,match:legs.map(function(l){return l.match;}).join(" + "),league:legs.map(function(l){return l.league;}).join("/"),selection:legs.map(function(l){return l.sel;}).join(" + "),odds:tco,amount:unit,payout:+(unit*tco).toFixed(2),bookmaker:bk,status:status,bet_type:type,notes:"trix:treble"});}
-    Promise.all(rows.map(function(r){return sbPost("bets",r);})).then(function(){closeM("modal-bet");showToast(rows.length+" bets created!");loadBets();btn.textContent="Save Bet";btn.disabled=false;});return;
-  }
-  var odds=parseFloat(document.getElementById("bet-odds").value)||0;var myP=parseFloat(document.getElementById("bet-myprob").value)||null;
-  var impl=odds>0?+(1/odds*100).toFixed(1):null;var edge=(myP&&impl)?+(myP-impl).toFixed(1):null;
-  var amt=parseFloat(document.getElementById("bet-amount").value)||0;var payout=parseFloat(document.getElementById("bet-payout").value)||0;
-  if(!payoutManual&&odds>0&&amt>0)payout=+(amt*odds).toFixed(2);
-  var martStep=isMart?parseInt(document.getElementById("bet-mart-step").value)||1:1;
-  var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:isMart||null,martingale_step:martStep,notes:notes};
-  var p;
-  if(stakeId){row.notes="stake:"+stakeId;row.bookmaker="Stake";p=id?sbPatch("bets?id=eq."+id,row):sbPost("bets",row);}
-  else if(id){p=sbPatch("bets?id=eq."+id,row);}else{p=sbPost("bets",row);}
-  p.then(function(){if(isMart&&status==="win")return sbPatch("martingale_series?id=eq."+isMart,{is_active:false});})
-  .then(function(){closeM("modal-bet");showToast("Bet saved!");loadBets();if(isMart)loadMartSeries();})
-  .catch(function(e){showToast("Error: "+e.message,true);}).finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
-}
-
-function deleteBet(id){confirmAction("Delete this bet?",function(){sbDelete("bets?id=eq."+id).then(function(){showToast("Deleted!");loadBets();});});}
-
-function loadBalances(){
-  Promise.all([sbGet("balances?select=*&order=bookmaker.asc"),sbGet("transactions?select=*&order=created_at.desc&limit=50")]).then(function(res){
-    var bals=res[0],txs=res[1];
-    bankroll=bals.reduce(function(s,b){return s+(b.balance||0);},0);
-    document.getElementById("bankroll-val").textContent="$"+bankroll.toFixed(2);
-    document.getElementById("bankroll-bk-count").textContent=bals.length+" bookmakers";
-    var h="";
-    if(!bals.length){h='<div class="empty">No bookmakers yet</div>';}
-    else{bals.forEach(function(b){var amt=b.balance||0;h+='<div class="bal-card"><div class="bal-info"><div class="bal-bk">'+b.bookmaker+'</div><div class="bal-amount">$'+amt.toFixed(2)+'</div></div><div class="bal-btns"><button class="bal-btn" style="background:var(--green-mid);color:var(--green)" onclick="quickTx(\''+b.bookmaker+'\',\'deposit\')">+</button><button class="bal-btn" style="background:var(--red-dim);color:var(--red)" onclick="quickTx(\''+b.bookmaker+'\',\'withdrawal\')">-</button><button class="bal-btn" style="background:var(--border);color:var(--text3)" onclick="deleteBookmaker(\''+b.bookmaker+'\')">Del</button></div></div>';});}
-    document.getElementById("bal-cards").innerHTML=h;
-    var tb=document.getElementById("tx-body");
-    if(!txs.length){tb.innerHTML='<div class="empty">No transactions yet</div>';return;}
-    var th='<div style="padding:4px 0">';
-    txs.forEach(function(t){
-      var isD=t.type==="deposit";
-      th+='<div class="tx-item"><div class="tx-icon" style="background:'+(isD?"var(--green-dim)":"var(--red-dim)")+';color:'+(isD?"var(--green)":"var(--red)")+'">'+(isD?"+":"-")+'</div><div class="tx-info"><div class="tx-bk">'+t.bookmaker+(t.note?' · '+t.note:'')+'</div><div class="tx-date">'+(t.created_at||"").slice(0,10)+'</div></div><div class="tx-amount '+(isD?"pnl-pos":"pnl-neg")+'">'+(isD?"+":"-")+"$"+(t.amount||0).toFixed(2)+'</div></div>';
-    });
-    th+='</div>';tb.innerHTML=th;
-  });
-}
-
-function quickTx(bk,tp){document.getElementById("tx-bk").value=bk;document.getElementById("tx-type").value=tp;openM("modal-tx");}
-
-function saveTx(){
-  var bk=document.getElementById("tx-bk").value,tp=document.getElementById("tx-type").value;
-  var amt=parseFloat(document.getElementById("tx-amount").value)||0,note=document.getElementById("tx-note").value;
-  if(!amt){showToast("Enter amount",true);return;}
-  sbPost("transactions",{bookmaker:bk,type:tp,amount:amt,note:note}).then(function(){return sbGet("balances?bookmaker=eq."+encodeURIComponent(bk));})
-  .then(function(ex){var nb=ex.length?ex[0].balance+(tp==="deposit"?amt:-amt):(tp==="deposit"?amt:-amt);return ex.length?sbPatch("balances?bookmaker=eq."+encodeURIComponent(bk),{balance:nb,updated_at:new Date().toISOString()}):sbPost("balances",{bookmaker:bk,balance:nb});})
-  .then(function(){closeM("modal-tx");document.getElementById("tx-amount").value="";document.getElementById("tx-note").value="";showToast("Saved!");loadBalances();return loadBookmakers();});
-}
-
-function saveBookmaker(){
-  var name=document.getElementById("bk-name").value.trim(),bal=parseFloat(document.getElementById("bk-balance").value)||0;
-  if(!name){showToast("Enter name",true);return;}
-  sbPost("balances",{bookmaker:name,balance:bal}).then(function(){closeM("modal-add-bk");document.getElementById("bk-name").value="";document.getElementById("bk-balance").value="";showToast("Added!");return loadBookmakers();}).then(function(){loadBalances();});
-}
-
-function deleteBookmaker(name){confirmAction("Delete "+name+"?",function(){sbDelete("balances?bookmaker=eq."+encodeURIComponent(name)).then(function(){showToast("Deleted!");return loadBookmakers();}).then(function(){loadBalances();});});}
-
-function calcMartingale(){
-  var base=parseFloat(document.getElementById("m-base").value)||5;var steps=parseInt(document.getElementById("m-steps").value)||7;
-  var mult=parseFloat(document.getElementById("m-mult").value)||2;var bank=parseFloat(document.getElementById("m-bank").value)||500;
-  var seq=[],total=0;for(var i=0;i<steps;i++){var s=+(base*Math.pow(mult,i)).toFixed(2);seq.push(s);total+=s;}
-  var rp=(total/bank)*100;
-  var h="";seq.forEach(function(s,i){h+='<div class="cal-row"><span>Step '+(i+1)+'</span><span class="mono">$'+s+"</span></div>";});
-  h+='<div class="cal-row"><span>Max Loss</span><span class="mono" style="color:var(--red)">-$'+total.toFixed(2)+"</span></div>";
-  h+='<div class="cal-row"><span>Risk</span><span class="mono '+(rp>50?"pnl-neg":"")+'">'+(rp).toFixed(1)+"%</span></div>";
-  h+='<div class="risk-bar"><div class="risk-fill" style="width:'+Math.min(100,rp)+'%"></div></div>';
-  document.getElementById("mart-result").innerHTML=h;
-}
-
-function onSeriesChange(){
-  var v=document.getElementById("m-series-sel").value;var nextWrap=document.getElementById("m-add-bet-btn-wrap");
-  if(v){nextWrap.style.display="block";updateSeriesPreview(v);}
-  else{nextWrap.style.display="none";document.getElementById("next-bet-display").innerHTML="";document.getElementById("m-series-display").innerHTML="";}
-}
-
-function openNewSeries(){
-  sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows){var n=(rows.length?parseInt(rows[0].id):0)+1;document.getElementById("m-new-name").value="Series "+n;openM("modal-new-series");});
-}
-document.getElementById("m-add-bet-btn-wrap");
-
-function createSeries(){
-  var name=document.getElementById("m-new-name").value;var base=parseFloat(document.getElementById("m-new-base").value)||5;
-  var mult=parseFloat(document.getElementById("m-new-mult").value)||2;var steps=parseInt(document.getElementById("m-new-steps").value)||7;
-  sbPost("martingale_series",{name:name,base_stake:base,multiplier:mult,max_steps:steps,is_active:true}).then(function(){
-    showToast("Series created!");closeM("modal-new-series");return loadMartSeries();
-  }).then(function(){var sel=document.getElementById("m-series-sel"),opts=sel.options;for(var i=0;i<opts.length;i++){if(opts[i].text.indexOf(name)!==-1){sel.value=opts[i].value;break;}}onSeriesChange();loadMartingaleHistory();});
-}
-
-function updateSeriesPreview(seriesId){
-  var series=martSeries.find(function(s){return String(s.id)===String(seriesId);});if(!series)return;
-  var base=series.base_stake||5,mult=series.multiplier||2,steps=series.max_steps||7;
-  sbGet("bets?martingale_series_id=eq."+seriesId+"&select=*&order=martingale_step.asc").then(function(bets){
-    var lastLoss=0;bets.forEach(function(b){if(b.status==="loss")lastLoss=b.martingale_step||1;else if(b.status==="win")lastLoss=0;});
-    var nextStep=lastLoss+1,nextAmt=+(base*Math.pow(mult,nextStep-1)).toFixed(2);
-    var nbEl=document.getElementById("next-bet-display");
-    if(nextStep<=steps){nbEl.innerHTML='<div class="next-bet-card"><div><div class="next-bet-label">Next Bet - Step '+nextStep+" / "+steps+'</div><div class="next-bet-amount">$'+nextAmt+'</div></div><div style="font-size:11px;color:var(--amber)">x'+mult+'</div></div>';}
-    else{nbEl.innerHTML='<div class="next-bet-card" style="border-color:var(--red)"><div class="next-bet-label" style="color:var(--red)">Max steps reached!</div></div>';}
-    var sd="";
-    for(var i=0;i<steps;i++){
-      var step=i+1,betForStep=null;bets.forEach(function(b){if((b.martingale_step||1)===step)betForStep=b;});
-      var cls="mart-step",label="S"+step+" $"++(base*Math.pow(mult,i)).toFixed(2);
-      if(betForStep){if(betForStep.status==="win"){cls+=" win";label+=" W";}else if(betForStep.status==="loss"){cls+=" loss";label+=" L";}else{cls+=" current";label+=" P";}}
-      else if(step===nextStep){cls+=" current";}
-      sd+='<div class="'+cls+'">'+label+"</div>";
-    }
-    document.getElementById("m-series-display").innerHTML=sd;
-  });
-}
-
-function loadMartingaleHistory(){
-  sbGet("martingale_series?select=*&order=created_at.desc").then(function(series){
-    var el=document.getElementById("mart-history");
-    if(!series.length){el.innerHTML='<div class="empty">No series yet</div>';return;}
-    Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=martingale_step.asc");})).then(function(allBets){
-      var h="";
-      series.forEach(function(s,si){
-        var bs=allBets[si];var tw=bs.reduce(function(t,b){return t+(b.amount||0);},0);var tr=bs.reduce(function(t,b){return t+(b.payout||0);},0);var pnl=tr-tw;
-        var isWon=bs.some(function(b){return b.status==="win";});
-        var st=isWon?'<span class="bet-badge bw">WIN</span>':s.is_active?'<span class="bet-badge bp">ACTIVE</span>':'<span class="bet-badge bl">ENDED</span>';
-        var tl=bs.map(function(b){var dc=b.status==="win"?"win":b.status==="loss"?"loss":"pending";var dt=b.status==="win"?"W":b.status==="loss"?"L":"P";return'<span class="mart-step '+dc+'">'+dt+"</span>";}).join("");
-        h+='<div class="series-card"><div class="series-name">'+s.name+' '+st+'</div><div class="series-config">$'+(s.base_stake||5)+' x'+(s.multiplier||2)+' / '+(s.max_steps||7)+' steps</div><div class="series-steps">'+tl+'</div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2)"><span>Staked: $'+tw.toFixed(2)+'</span><span>Return: $'+tr.toFixed(2)+'</span><span class="'+(pnl>=0?"pnl-pos":"pnl-neg")+'">'+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+'</span></div></div>';
-      });
-      el.innerHTML=h;
-    });
-  });
-}
-
-function openAddBetMart(){
-  var seriesId=document.getElementById("m-series-sel").value;if(!seriesId){showToast("Select a series",true);return;}
-  var series=martSeries.find(function(s){return String(s.id)===String(seriesId);});if(!series)return;
-  var base=series.base_stake||5,mult=series.multiplier||2;
-  sbGet("bets?martingale_series_id=eq."+seriesId+"&select=martingale_step,status&order=martingale_step.desc&limit=1").then(function(d){
-    var lastLoss=0;if(d.length&&d[0].status==="loss")lastLoss=d[0].martingale_step||1;
-    var nextStep=lastLoss+1,nextAmt=+(base*Math.pow(mult,nextStep-1)).toFixed(2);
-    document.getElementById("bet-id").value="";document.getElementById("bet-stake-id").value="";document.getElementById("bet-is-mart").value=seriesId;
-    document.getElementById("modal-bet-title").textContent=series.name+" — Step "+nextStep;
-    document.getElementById("bet-date").value=new Date().toISOString().slice(0,10);
-    document.getElementById("bet-status").value="pending";document.getElementById("bet-type").value="single";document.getElementById("bet-sel").value="Draw (X)";
-    ["bet-match","bet-league","bet-odds","bet-myprob","bet-impl","bet-edge","bet-notes"].forEach(function(id){document.getElementById(id).value="";});
-    document.getElementById("bet-amount").value=nextAmt;document.getElementById("bet-payout").value="";
-    document.getElementById("bet-mart").value=series.name;document.getElementById("bet-mart-step").value=nextStep;
-    document.getElementById("single-fields").style.display="block";document.getElementById("trixie-fields").style.display="none";
-    document.getElementById("mart-bet-info").style.display="block";
-    document.getElementById("mart-bet-info-text").innerHTML="Series: <strong>"+series.name+"</strong> | Step: <strong>"+nextStep+"</strong> | Amount: <strong>$"+nextAmt+"</strong>";
-    document.getElementById("mart-extra-fields").style.display="block";
-    payoutManual=false;openM("modal-bet");
-  });
-}
-
-document.querySelector(".hamburger").addEventListener("click",function(){
-  sbGet("martingale_series?select=id&order=id.desc&limit=1");
-});
-document.getElementById("modal-new-series").querySelector(".btn-green").onclick=createSeries;
-document.querySelectorAll('[onclick="openM(\'modal-new-series\')"]').forEach(function(el){el.onclick=function(){sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows){var n=(rows.length?parseInt(rows[0].id):0)+1;document.getElementById("m-new-name").value="Series "+n;openM("modal-new-series");});};});
-
-checkAuth();
-calcMartingale();
-</script>
-</body>
-</html>
+import os,json,requests,re
+from datetime import date,datetime,timezone,timedelta
+
+AKEY=os.environ["ANTHROPIC_API_KEY"]
+SURL=os.environ["SUPABASE_URL"]
+SKEY=os.environ["SUPABASE_KEY"]
+TTOKEN=os.environ["TELEGRAM_BOT_TOKEN"]
+TCHAT=os.environ["TELEGRAM_CHAT_ID"]
+APIKEY=os.environ["APISPORTS_KEY"]
+TZ=timezone(timedelta(hours=4))
+HEADERS={"x-apisports-key":APIKEY}
+
+AFRICA={"Morocco","Algeria","Tunisia","Egypt","Nigeria","Ghana","Senegal","Cameroon","Ivory Coast","South Africa","Ethiopia","Kenya","Tanzania","Uganda","Rwanda","Mali","Burkina Faso","Niger","Chad","Sudan","Libya","Mauritania","Guinea","Sierra Leone","Liberia","Togo","Benin","Gambia","Guinea-Bissau","Equatorial Guinea","Gabon","Congo","DR Congo","Angola","Zambia","Zimbabwe","Mozambique","Madagascar","Malawi","Botswana","Namibia","Lesotho","Swaziland","Comoros","Cape Verde","Djibouti","Somalia","Eritrea","Burundi","Central African Republic","South Sudan"}
+
+def get_fixtures(d):
+    r=requests.get(f"https://v3.football.api-sports.io/fixtures?date={d}&status=NS",headers=HEADERS)
+    return r.json().get("response",[])
+
+def get_odds(fid):
+    r=requests.get(f"https://v3.football.api-sports.io/odds?fixture={fid}&bet=1",headers=HEADERS)
+    try:
+        values=r.json()["response"][0]["bookmakers"][0]["bets"][0]["values"]
+        home=away=draw=0
+        for v in values:
+            if v["value"]=="Home": home=float(v["odd"])
+            elif v["value"]=="Draw": draw=float(v["odd"])
+            elif v["value"]=="Away": away=float(v["odd"])
+        if home and draw and away:
+            total=1/home+1/draw+1/away
+            return round((1/draw)/total*100),draw
+    except: pass
+    return 0,0
+
+def get_h2h(home_id,away_id):
+    r=requests.get(f"https://v3.football.api-sports.io/fixtures/headtohead?h2h={home_id}-{away_id}&last=10",headers=HEADERS)
+    matches=r.json().get("response",[])
+    if not matches: return 0,0
+    draws=sum(1 for m in matches if m["score"]["fulltime"]["home"]==m["score"]["fulltime"]["away"])
+    avg_goals=sum((m["score"]["fulltime"]["home"] or 0)+(m["score"]["fulltime"]["away"] or 0) for m in matches)/len(matches)
+    return round(draws/len(matches)*100),round(avg_goals,1)
+
+def get_team_stats(team_id,league_id,season):
+    r=requests.get(f"https://v3.football.api-sports.io/teams/statistics?team={team_id}&league={league_id}&season={season}",headers=HEADERS)
+    try:
+        s=r.json()["response"]
+        total=s["fixtures"]["played"]["total"] or 1
+        draws=s["fixtures"]["draws"]["total"] or 0
+        goals_for=float(s["goals"]["for"]["average"]["total"] or 0)
+        goals_against=float(s["goals"]["against"]["average"]["total"] or 0)
+        return round(draws/total*100),goals_for,goals_against
+    except: return 0,0,0
+
+def calc_edge(bk_pct,h2h_pct,home_dr,away_dr,avg_goals):
+    h2h=h2h_pct if h2h_pct>0 else bk_pct
+    form_avg=(home_dr+away_dr)/2 if (home_dr+away_dr)>0 else bk_pct
+    low_goals=max(0,min(100,(3.0-avg_goals)*20)) if avg_goals>0 else bk_pct
+    our_pct=(h2h*0.25+form_avg*0.30+low_goals*0.15+bk_pct*0.30)
+    edge=our_pct-bk_pct
+    return round(our_pct),round(edge,1)
+
+all_messages=[]
+total_requests=0
+
+for day_offset in range(3):
+    d=(date.today()+timedelta(days=day_offset)).strftime("%Y-%m-%d")
+    display=datetime.strptime(d,"%Y-%m-%d").strftime("%d/%m/%Y")
+    label=["Today","Tomorrow","Day after tomorrow"][day_offset]
+
+    fixtures=get_fixtures(d)
+    total_requests+=1
+    print(f"\n{label}: {len(fixtures)} fixtures")
+
+    candidates=[]
+    count=0
+    for f in fixtures:
+        if count>=25: break
+        if f["league"]["country"] in AFRICA: continue
+        fid=f["fixture"]["id"]
+        draw_pct,draw_odd=get_odds(fid)
+        total_requests+=1
+        count+=1
+        if draw_pct>=25:
+            candidates.append({
+                "fid":fid,
+                "home":f["teams"]["home"]["name"],
+                "away":f["teams"]["away"]["name"],
+                "home_id":f["teams"]["home"]["id"],
+                "away_id":f["teams"]["away"]["id"],
+                "league":f["league"]["name"],
+                "league_id":f["league"]["id"],
+                "season":f["league"]["season"],
+                "country":f["league"]["country"],
+                "date":f["fixture"]["date"],
+                "draw_pct":draw_pct,
+                "draw_odd":round(draw_odd,2)
+            })
+
+    candidates.sort(key=lambda x:x["draw_pct"],reverse=True)
+    top10=candidates[:10]
+    print(f"  Candidates: {len(top10)}")
+
+    scored=[]
+    for m in top10:
+        if total_requests>=88: break
+        h2h_pct,avg_goals=get_h2h(m["home_id"],m["away_id"])
+        total_requests+=1
+        home_dr,hgf,hga=get_team_stats(m["home_id"],m["league_id"],m["season"])
+        total_requests+=1
+        away_dr,agf,aga=get_team_stats(m["away_id"],m["league_id"],m["season"])
+        total_requests+=1
+        combined_avg=(hgf+agf)/2
+        our_pct,edge=calc_edge(m["draw_pct"],h2h_pct,home_dr,away_dr,combined_avg)
+        try:
+            dt=datetime.fromisoformat(m["date"].replace("Z","+00:00"))
+            kickoff=dt.astimezone(TZ).strftime("%H:%M")
+        except:
+            kickoff=m["date"][11:16]
+        scored.append({**m,"h2h_pct":h2h_pct,"avg_goals":avg_goals,"home_dr":home_dr,"away_dr":away_dr,"our_pct":our_pct,"edge":edge,"kickoff":kickoff})
+        print(f"  {m['home']} vs {m['away']}: bk={m['draw_pct']}% our={our_pct}% edge={edge}%")
+
+    top5=sorted([x for x in scored if x["edge"]>=3],key=lambda x:x["edge"],reverse=True)[:5]
+
+    if top5:
+        # Claude analysis
+        prompt="You are an expert football betting analyst specializing in draw predictions.\n\n"
+        prompt+="Analyze these matches and provide a brief insight for each:\n\n"
+        for i,x in enumerate(top5,1):
+            prompt+=f"{i}. {x['home']} vs {x['away']} ({x['league']}, {x['country']})\n"
+            prompt+=f"   Kickoff: {x['kickoff']} Tbilisi | Bk draw: {x['draw_pct']}% | Our model: {x['our_pct']}% | Edge: +{x['edge']}%\n"
+            prompt+=f"   Draw odds: {x['draw_odd']} | H2H draw rate: {x['h2h_pct']}% | Avg goals H2H: {x['avg_goals']}\n"
+            prompt+=f"   Home draw rate: {x['home_dr']}% | Away draw rate: {x['away_dr']}%\n\n"
+        prompt+="For each match write ONE concise sentence: key reason + action (Bet/Skip/Watch).\n"
+        prompt+='Return ONLY JSON: {"matches":[{"home":"t1","away":"t2","analysis":"one sentence","action":"Bet","pred_score":"1-1"}]}'
+
+        try:
+            r=requests.post("https://api.anthropic.com/v1/messages",
+                headers={"x-api-key":AKEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
+                json={"model":"claude-haiku-4-5-20251001","max_tokens":1000,"messages":[{"role":"user","content":prompt}]})
+            txt=r.json()["content"][0]["text"].strip()
+            m=re.search(r'\{[\s\S]*"matches"[\s\S]*\}',txt)
+            if m: txt=m.group()
+            analyses={a["home"]+a["away"]:a for a in json.loads(txt)["matches"]}
+        except:
+            analyses={}
+
+        section=f"📅 {label} · {display}\n"
+        for i,x in enumerate(top5,1):
+            key=x["home"]+x["away"]
+            ana=analyses.get(key,{})
+            action=ana.get("action","")
+            action_emoji={"Bet":"✅","Skip":"❌","Watch":"👀"}.get(action,"")
+            pred=ana.get("pred_score","")
+            analysis=ana.get("analysis","")
+            section+=f"{i}. {x['home']} vs {x['away']}\n"
+            section+=f"   📊 Bk: {x['draw_pct']}% → Our: {x['our_pct']}% | Edge: +{x['edge']}%\n"
+            section+=f"   🔢 Odds: {x['draw_odd']} | H2H: {x['h2h_pct']}% | Goals: {x['avg_goals']}\n"
+            section+=f"   ⏰ {x['kickoff']} | {x['league']}\n"
+            if analysis: section+=f"   {action_emoji} {analysis}\n"
+            if pred: section+=f"   🎯 {pred}\n"
+            section+="\n"
+        all_messages.append(section)
+
+        rows=[{"date":d,"home":x["home"],"away":x["away"],"league":x["league"],"draw_pct":x["our_pct"],"pred_score":"","kickoff":x["kickoff"],"outcome":"pending"} for x in top5]
+        h={"apikey":SKEY,"Authorization":f"Bearer {SKEY}","Content-Type":"application/json"}
+        requests.post(f"{SURL}/rest/v1/matches",headers=h,json=rows)
+    else:
+        all_messages.append(f"📅 {label} · {display}\n❌ No edge found (edge<3%)\n")
+
+print(f"\nTotal API requests: {total_requests}/100")
+final="⚽ Draw Tracker · 3 Days\n📊 Edge Model | Tbilisi Time\n\n"
+final+="\n".join(all_messages)
+final+=f"\n🔢 API calls: {total_requests}/100"
+requests.post(f"https://api.telegram.org/bot{TTOKEN}/sendMessage",json={"chat_id":TCHAT,"text":final})
+print("Done!")
