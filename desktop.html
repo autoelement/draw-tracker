@@ -628,8 +628,6 @@ document.addEventListener("keydown", function(e) {
 function loadBookmakers() {
   return sbGet("balances?select=*&order=bookmaker.asc").then(function(bals) {
     var list = bals.map(function(b) { return b.bookmaker; });
-    if (list.indexOf("Stake") === -1) list.unshift("Stake");
-    if (list.indexOf("BC Game") === -1) list.splice(1, 0, "BC Game");
     bookmakers = list;
     bankroll = bals.reduce(function(s, b) { return s + (b.balance || 0); }, 0);
     ["db-bk","b-bk","bet-bk","tx-bk"].forEach(function(id) {
