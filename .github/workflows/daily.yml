@@ -31,7 +31,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_API: ${{ secrets.SUPABASE_API }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_API }}
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
 
   fetch_matches:
@@ -46,13 +46,11 @@ jobs:
       - run: python fetch_matches.py
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_API: ${{ secrets.SUPABASE_API }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_API }}
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
 
   results:
-    results:
     if: github.event.schedule == '0 3 * * *' || github.event.schedule == '0 15 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'results')
-    runs-on: ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -63,5 +61,5 @@ jobs:
       - run: python results.py
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_API: ${{ secrets.SUPABASE_API }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_API }}
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
