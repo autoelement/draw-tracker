@@ -2,9 +2,10 @@ name: Draw Tracker Daily
 
 on:
   schedule:
-    - cron: '0 5 * * *'   # 09:00 Tbilisi (UTC+4) - agent
-    - cron: '0 19 * * *'  # 23:00 Tbilisi (UTC+4) - results
-    - cron: '0 0 * * *'   # 04:00 Tbilisi (UTC+4) - fetch matches
+    - cron: '0 5 * * *'   # 09:00 Tbilisi - agent (predictions)
+    - cron: '0 0 * * *'   # 04:00 Tbilisi - fetch matches
+    - cron: '0 3 * * *'   # 07:00 Tbilisi - results morning
+    - cron: '0 15 * * *'  # 19:00 Tbilisi - results evening
   workflow_dispatch:
 
 jobs:
@@ -26,23 +27,6 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
-  results:
-    if: github.event.schedule == '0 19 * * *'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - run: pip install requests
-      - run: python results.py
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-
   fetch_matches:
     if: github.event.schedule == '0 0 * * *'
     runs-on: ubuntu-latest
@@ -57,3 +41,20 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+
+  results:
+    if: github.event.schedule == '0 3 * * *' || github.event.schedule == '0 15 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - run: python results.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
