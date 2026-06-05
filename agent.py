@@ -9,6 +9,7 @@ TCHAT=os.environ["TELEGRAM_CHAT_ID"]
 APIKEY=os.environ["APISPORTS_KEY"]
 TZ=timezone(timedelta(hours=4))
 HEADERS={"x-apisports-key":APIKEY}
+SH={"apikey":SKEY,"Authorization":f"Bearer {SKEY}","Content-Type":"application/json"}
 
 AFRICA={"Morocco","Algeria","Tunisia","Egypt","Nigeria","Ghana","Senegal","Cameroon","Ivory Coast","South Africa","Ethiopia","Kenya","Tanzania","Uganda","Rwanda","Mali","Burkina Faso","Niger","Chad","Sudan","Libya","Mauritania","Guinea","Sierra Leone","Liberia","Togo","Benin","Gambia","Guinea-Bissau","Equatorial Guinea","Gabon","Congo","DR Congo","Angola","Zambia","Zimbabwe","Mozambique","Madagascar","Malawi","Botswana","Namibia","Lesotho","Swaziland","Comoros","Cape Verde","Djibouti","Somalia","Eritrea","Burundi","Central African Republic","South Sudan"}
 
@@ -58,8 +59,47 @@ def calc_edge(bk_pct,h2h_pct,home_dr,away_dr,avg_goals):
     edge=our_pct-bk_pct
     return round(our_pct),round(edge,1)
 
+# ---- SAVE UPCOMING MATCHES TO SUPABASE ----
+def save_upcoming_matches():
+    print("\nSaving upcoming matches to Supabase...")
+    # Delete old upcoming matches (older than today)
+    today=date.today().strftime("%Y-%m-%d")
+    requests.delete(f"{SURL}/rest/v1/upcoming_matches?kickoff=lt.{today}",headers=SH)
+    
+    all_fixtures=[]
+    for day_offset in range(7):
+        d=(date.today()+timedelta(days=day_offset)).strftime("%Y-%m-%d")
+        fixtures=get_fixtures(d)
+        for f in fixtures:
+            if f["league"]["country"] in AFRICA: continue
+            try:
+                dt=datetime.fromisoformat(f["fixture"]["date"].replace("Z","+00:00"))
+                kickoff=dt.isoformat()
+            except:
+                kickoff=f["fixture"]["date"]
+            all_fixtures.append({
+                "fixture_id":f["fixture"]["id"],
+                "home":f["teams"]["home"]["name"],
+                "away":f["teams"]["away"]["name"],
+                "league":f["league"]["name"],
+                "country":f["league"]["country"],
+                "kickoff":kickoff,
+                "season":f["league"]["season"]
+            })
+    
+    if all_fixtures:
+        # Insert in batches of 100
+        for i in range(0,len(all_fixtures),100):
+            batch=all_fixtures[i:i+100]
+            requests.post(f"{SURL}/rest/v1/upcoming_matches",headers=SH,json=batch)
+        print(f"  Saved {len(all_fixtures)} upcoming matches")
+    return len(all_fixtures)
+
+# Save upcoming matches first
+saved=save_upcoming_matches()
+total_requests=3  # fixtures for 7 days
+
 all_messages=[]
-total_requests=0
 
 for day_offset in range(3):
     d=(date.today()+timedelta(days=day_offset)).strftime("%Y-%m-%d")
@@ -160,14 +200,13 @@ for day_offset in range(3):
             section+="\n"
         all_messages.append(section)
 
-        rows=[{"date":d,"home":x["home"],"away":x["away"],"league":x["league"],"draw_pct":x["our_pct"],"pred_score":"","kickoff":x["kickoff"],"outcome":"pending"} for x in top5]
-        h={"apikey":SKEY,"Authorization":f"Bearer {SKEY}","Content-Type":"application/json"}
-        requests.post(f"{SURL}/rest/v1/matches",headers=h,json=rows)
+        rows=[{"date":d,"home":x["home"],"away":x["away"],"league":x["league"],"draw_pct":x["our_pct"],"pred_score":"","kickoff":x["kickoff"],"outcome":"pending","fixture_id":x["fid"]} for x in top5]
+        requests.post(f"{SURL}/rest/v1/matches",headers=SH,json=rows)
     else:
         all_messages.append(f"📅 {label} · {display}\n❌ No edge found (edge<3%)\n")
 
 print(f"\nTotal API requests: {total_requests}/100")
-final="⚽ Draw Tracker · 3 Days\n📊 Edge Model | Tbilisi Time\n\n"
+final=f"⚽ Draw Tracker · 3 Days\n📊 Edge Model | Tbilisi Time\n📋 Saved {saved} upcoming matches\n\n"
 final+="\n".join(all_messages)
 final+=f"\n🔢 API calls: {total_requests}/100"
 requests.post(f"https://api.telegram.org/bot{TTOKEN}/sendMessage",json={"chat_id":TCHAT,"text":final})
