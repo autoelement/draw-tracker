@@ -7,10 +7,19 @@ on:
     - cron: '0 3 * * *'   # 07:00 Tbilisi - results morning
     - cron: '0 15 * * *'  # 19:00 Tbilisi - results evening
   workflow_dispatch:
+    inputs:
+      job:
+        description: 'Job to run'
+        required: true
+        default: 'results'
+        type: choice
+        options:
+          - results
+          - fetch_matches
 
 jobs:
   agent:
-    if: false
+    if: github.event.schedule == '0 5 * * *'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,7 +37,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
   fetch_matches:
-    if: github.event.schedule == '0 0 * * *'
+    if: github.event.schedule == '0 0 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'fetch_matches')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,7 +52,7 @@ jobs:
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
 
   results:
-    if: github.event.schedule == '0 3 * * *' || github.event.schedule == '0 15 * * *'
+    if: github.event.schedule == '0 3 * * *' || github.event.schedule == '0 15 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'results')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
