@@ -837,27 +837,21 @@ function loadBets(){
     all.forEach(function(b){
       var pnl=(b.payout||0)-(b.amount||0);
       var isPending=b.status==="pending";
-      var autoScore="";
-if(b.notes&&b.notes.indexOf("auto:FT:")===0){autoScore='<span style="font-size:11px;color:var(--text3);margin-left:6px;display:inline-block;vertical-align:middle">'+b.notes.split("auto:FT:")[1]+'</span>';}
-      var oc=b.status==="win"?'<span class="bet-badge bw">WIN</span>':b.status==="loss"?'<span class="bet-badge bl">LOSS</span>':'<span class="bet-badge bp">PEND</span>';
-      var tp2=b.bet_type==="trixie"?'<span class="bet-badge bm">TRIX</span>':b.bet_type==="patent"?'<span class="bet-badge bm">PAT</span>':"";
-      var src=b._src==="stake"?'<span class="bet-badge bs">S</span>':"";
-      var mart=b.martingale_series_id?'<span class="bet-badge" style="background:var(--purple-dim);color:var(--purple)">M'+( b.martingale_step||"")+"</span>":"";
-      var editId=b._src==="stake"?b._stake_id:b.id;var extraId=b._extra_id||"";
-      var eStr=b.edge!=null?'<span class="'+(b.edge>=0?"edge-pos":"edge-neg")+'">'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'';
-      var selS=(b.selection||"").replace(" Win","").replace("Draw (X)","X").replace("(1)","1").replace("(2)","2");
-      var matchDisplay=(b.match||"—")+(autoScore?' <span style="color:var(--text3);font-size:13px">'+b.notes.split("auto:FT:")[1]+'</span>':"");
-h+='<div class="bet-card-top"><div class="bet-match">'+matchDisplay+'</div>'+oc+'</div>';
-      h+='<div class="bet-meta"><span class="bet-tag">'+(b.date||"")+'</span><span class="bet-tag"><strong>'+selS+'</strong></span><span class="bet-tag"><span class="odds-badge">'+(b.odds||0)+'</span></span>'+(b.league?'<span class="bet-tag">'+(b.league)+'</span>':"")+tp2+src+mart+'</div>';
-      h+='<div class="bet-nums"><div><div class="bet-num-label">Amount</div><div class="bet-num-val">$'+((b.amount||0).toFixed(2))+'</div></div><div><div class="bet-num-label">Payout</div><div class="bet-num-val">$'+((b.payout||0).toFixed(2))+'</div></div><div><div class="bet-num-label">P&L</div><div class="bet-num-val '+(pnl>=0?"pnl-pos":"pnl-neg")+'">'+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+'</div></div></div>';
-      if(isPending){
-        h+='<div class="bet-actions" style="flex-wrap:wrap;gap:6px">';
-        h+='<input class="inline-input" style="width:70px" type="number" value="'+(b.my_probability||"")+'" placeholder="My%" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'my_probability\',parseFloat(this.value)||null,\''+extraId+'\')">';
-        h+='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'bookmaker\',this.value,\''+extraId+'\')">'+bookmakers.map(function(bk2){return'<option value="'+bk2+'"'+(bk2===b.bookmaker?' selected':'')+'>'+bk2+"</option>";}).join("")+"</select>";
-        h+='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'status\',this.value,\''+extraId+'\')"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
-        h+='<button class="btn btn-ghost btn-sm btn-icon" onclick="openEditBet(\''+editId+'\',\''+b._src+'\',\''+extraId+'\','+(b.odds||0)+')">✎</button>';
-        if(b._src==="manual")h+='<button class="btn btn-red btn-sm btn-icon" onclick="deleteBet(\''+b.id+'\')">✕</button>';
-        h+='</div>';
+      var autoScore = "";
+
+if (b.notes && b.notes.indexOf("auto:FT:") === 0) {
+  autoScore = '<span style="font-size:13px;color:var(--text3);margin-left:6px">' +
+              b.notes.split("auto:FT:")[1] +
+              '</span>';
+}
+
+var matchDisplay = (b.match || "—") + autoScore;
+
+h += '<div class="bet-card-top"><div class="bet-match">' +
+     matchDisplay +
+     '</div>' +
+     oc +
+     '</div>';
       } else {
         h+='<div class="bet-actions" style="justify-content:space-between;align-items:center">';
         h+='<div style="font-size:11px;color:var(--text3)">'+(b.my_probability!=null?'My: '+b.my_probability+'% '+eStr:'')+'</div>';
