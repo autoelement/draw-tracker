@@ -621,7 +621,7 @@ function syncResults(){
   fetch("https://api.github.com/repos/autoelement/draw-tracker/actions/workflows/daily.yml/dispatches",{
     method:"POST",
     headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},
-    body:JSON.stringify({ref:"main",inputs:{job:"results"}})
+    body:JSON.stringify({ref:"refs/heads/main",inputs:{job:"results"}})
   }).then(function(r){
     if(r.status===204){showToast("Sync started! (~1-2 min)");setTimeout(function(){loadBets();},90000);}
     else if(r.status===401){localStorage.removeItem("gh_token");showToast("Invalid token!",true);}
