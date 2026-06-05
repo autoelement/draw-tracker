@@ -617,8 +617,9 @@ function checkAuth() {
     fetch(SB_URL + "/auth/v1/user", {headers: {"apikey": SB_KEY, "Authorization": "Bearer " + authToken}})
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        if(d.id){showApp(email||d.email);setTimeout(function(){setInterval(refreshToken,50*60*1000);},1000);}else doLogout(); }
-      }).catch(function() { doLogout(); });
+        if(d.id){showApp(email||d.email);setTimeout(function(){setInterval(refreshToken,50*60*1000);},1000);}else doLogout();
+      }).catch
+(function() { doLogout(); });
   }
 }
 
