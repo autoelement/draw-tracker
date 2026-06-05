@@ -4,8 +4,6 @@ from datetime import date,timezone,timedelta
 SURL=os.environ["SUPABASE_URL"]
 SKEY=os.environ["SUPABASE_KEY"]
 APIKEY=os.environ["APISPORTS_KEY"]
-TTOKEN=os.environ["TELEGRAM_BOT_TOKEN"]
-TCHAT=os.environ["TELEGRAM_CHAT_ID"]
 
 HEADERS={"x-apisports-key":APIKEY}
 SH={"apikey":SKEY,"Authorization":f"Bearer {SKEY}","Content-Type":"application/json"}
@@ -91,23 +89,3 @@ for b in pending_bets:
         json={"status":outcome,"payout":payout,"notes":f"auto:FT:{res['result']}"})
     bets_updated+=1
     print(f"  Bet {b['id']}: {b.get('match','')} → {outcome}")
-
-# 6. Telegram message
-lines=[f"📊 Results · {TODAY_DISPLAY}\n"]
-for m in pred_matches:
-    fid=m.get("fixture_id")
-    if fid and fid in results and results[fid]["finished"]:
-        res=results[fid]
-        emoji="✅" if res["is_draw"] else "❌"
-        lines.append(f"{emoji} {m['home']} vs {m['away']}: {res['result']}")
-    else:
-        lines.append(f"⏳ {m['home']} vs {m['away']}: pending")
-
-lines.append(f"\n🏆 {wins}/{wins+losses} predictions correct")
-if bets_updated>0:
-    lines.append(f"💰 {bets_updated} bets updated automatically")
-
-text="\n".join(lines)
-requests.post(f"https://api.telegram.org/bot{TTOKEN}/sendMessage",
-    json={"chat_id":TCHAT,"text":text})
-print(f"Done! {wins}W/{losses}L, {bets_updated} bets updated")
