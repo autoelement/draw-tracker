@@ -50,7 +50,9 @@ jobs:
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
 
   results:
+    results:
     if: github.event.schedule == '0 3 * * *' || github.event.schedule == '0 15 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'results')
+    runs-on: ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
