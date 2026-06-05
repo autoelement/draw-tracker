@@ -583,7 +583,7 @@ function doLogin() {
       authToken = d.access_token;
       authH = {"apikey": SB_KEY, "Authorization": "Bearer " + authToken, "Content-Type": "application/json"};
       localStorage.setItem("dt_token", authToken);
-      localStorage.setItem("dt_email", email);
+      localStorage.setItem("dt_email", email);if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);
       showApp(email);
     } else {
       err.textContent = "Invalid email or password";
@@ -617,8 +617,7 @@ function checkAuth() {
     fetch(SB_URL + "/auth/v1/user", {headers: {"apikey": SB_KEY, "Authorization": "Bearer " + authToken}})
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        if (d.id) { showApp(email || d.email); }
-        else { doLogout(); }
+        if(d.id){showApp(email||d.email);setTimeout(function(){setInterval(refreshToken,50*60*1000);},1000);}else doLogout(); }
       }).catch(function() { doLogout(); });
   }
 }
@@ -1410,7 +1409,7 @@ function initSettings(){
     if(!rows.length)sbPost("settings",{single_pct:2,trixie_pct:1,patent_pct:0.5});
   }).catch(function(){});
 }
-
+function refreshToken(){var r=localStorage.getItem("dt_refresh");if(!r)return;fetch(SB_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":SB_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:r})}).then(function(x){return x.json();}).then(function(d){if(d.access_token){authH={"apikey":SB_KEY,"Authorization":"Bearer "+d.access_token,"Content-Type":"application/json"};localStorage.setItem("dt_token",d.access_token);if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);}});}
 checkAuth();
 initSettings();
 calcMartingale();
