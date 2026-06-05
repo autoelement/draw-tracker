@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<script>if(!/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)){window.location.replace('desktop.html');}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Draw Tracker</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -392,7 +391,7 @@ canvas{width:100%!important}
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title"><span id="modal-bet-title">Add Bet</span><button class="modal-close" onclick="closeM('modal-bet')">x</button></div>
-    <input type="hidden" id="bet-id"><input type="hidden" id="bet-stake-id"><input type="hidden" id="bet-is-mart">
+    <input type="hidden" id="bet-id"><input type="hidden" id="bet-stake-id"><input type="hidden" id="bet-is-mart"><input type="hidden" id="bet-fixture-id">
     <div style="display:flex;gap:0;background:var(--bg3);border-radius:10px;padding:3px;margin-bottom:14px">
       <button id="mode-regular" onclick="setBetMode('regular')" style="flex:1;padding:8px;border-radius:8px;border:none;background:var(--green);color:#000;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s">Regular</button>
       <button id="mode-mart" onclick="setBetMode('martingale')" style="flex:1;padding:8px;border-radius:8px;border:none;background:transparent;color:var(--text3);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s">Martingale</button>
@@ -421,7 +420,10 @@ canvas{width:100%!important}
       </div>
     </div>
     <div id="single-fields">
-      <div class="fg"><label class="fl">Match</label><input type="text" class="fi" id="bet-match" placeholder="Team A vs Team B"></div>
+      <div class="fg"><label class="fl">Match</label>
+      <input type="text" class="fi" id="bet-match" placeholder="Search team..." oninput="searchMatches(this.value)" autocomplete="off">
+      <div id="match-dropdown" style="display:none;position:relative;z-index:50;background:var(--bg3);border:1px solid var(--border2);border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;margin-top:-1px"></div>
+    </div>
       <div class="fr">
         <div class="fg"><label class="fl">League</label><input type="text" class="fi" id="bet-league" placeholder="League"></div>
         <div class="fg"><label class="fl">Selection</label>
@@ -606,6 +608,8 @@ document.addEventListener("keydown",function(e){if(e.key==="Enter"&&document.get
 function loadBookmakers(){
   return sbGet("balances?select=*&order=bookmaker.asc").then(function(bals){
     var list=bals.map(function(b){return b.bookmaker;});
+    if(list.indexOf("Stake")===-1)list.unshift("Stake");
+    if(list.indexOf("BC Game")===-1)list.splice(1,0,"BC Game");
     bookmakers=list;bankroll=bals.reduce(function(s,b){return s+(b.balance||0);},0);
     ["db-bk","b-bk","bet-bk","tx-bk"].forEach(function(id){
       var el=document.getElementById(id);if(!el)return;
@@ -925,7 +929,7 @@ function saveBet(){
   var amt=parseFloat(document.getElementById("bet-amount").value)||0;var payout=parseFloat(document.getElementById("bet-payout").value)||0;
   if(!payoutManual&&odds>0&&amt>0)payout=parseFloat((amt*odds).toFixed(2));
   var martStep=isMart?parseInt(document.getElementById("bet-mart-step").value)||1:1;
-  var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:isMart||null,martingale_step:martStep,notes:notes};
+  var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:isMart||null,martingale_step:martStep,notes:notes,fixture_id:fixtureId};
   var p;
   if(stakeId){row.notes="stake:"+stakeId;row.bookmaker="Stake";p=id?sbPatch("bets?id=eq."+id,row):sbPost("bets",row);}
   else if(id){p=sbPatch("bets?id=eq."+id,row);}else{p=sbPost("bets",row);}
@@ -1165,8 +1169,44 @@ function saveEditSeries() {
   });
 }
 
+// MATCH SEARCH
+var matchSearchTimeout=null;
+var upcomingMatches=[];
+
+function loadUpcomingMatches(){
+  sbGet("upcoming_matches?select=*&order=kickoff.asc&limit=500").then(function(rows){
+    upcomingMatches=rows;
+  });
+}
+
+function searchMatches(q){
+  var dd=document.getElementById("match-dropdown");
+  if(!q||q.length<2){dd.style.display="none";return;}
+  clearTimeout(matchSearchTimeout);
+  matchSearchTimeout=setTimeout(function(){
+    var ql=q.toLowerCase();
+    var results=upcomingMatches.filter(function(m){
+      return (m.home||"").toLowerCase().indexOf(ql)!==-1||(m.away||"").toLowerCase().indexOf(ql)!==-1;
+    }).slice(0,6);
+    if(!results.length){dd.style.display="none";return;}
+    dd.innerHTML=results.map(function(m){
+      var ko=m.kickoff?new Date(m.kickoff).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
+      return'<div onclick="selectMatch(this)" data-home="'+m.home+'" data-away="'+m.away+'" data-league="'+(m.league||"")+'" data-fixture="'+(m.fixture_id||"")+'" data-ko="'+ko+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px"><div style="font-weight:600;color:var(--text)">'+m.home+" vs "+m.away+"</div><div style='color:var(--text3);font-size:11px'>"+(m.league||"")+" · "+ko+"</div></div>";
+    }).join("");
+    dd.style.display="block";
+  },300);
+}
+
+function selectMatch(el){
+  document.getElementById("bet-match").value=el.getAttribute("data-home")+" vs "+el.getAttribute("data-away");
+  document.getElementById("bet-league").value=el.getAttribute("data-league");
+  document.getElementById("bet-fixture-id").value=el.getAttribute("data-fixture");
+  document.getElementById("match-dropdown").style.display="none";
+}
+
 checkAuth();
 calcMartingale();
+loadUpcomingMatches();
 </script>
 </body>
 </html>
