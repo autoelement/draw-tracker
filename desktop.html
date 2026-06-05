@@ -869,7 +869,7 @@ function loadPredictions() {
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
   sbGet("matches?select=*&order=date.desc&limit=100").then(function(d) {
     if(!d.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
-    var h='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Selection</th><th>Selection</th><th>League</th><th>X%</th><th>Pred</th><th>Kickoff</th><th>Result</th><th>Outcome</th></tr></thead><tbody>';
+    var h='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Selection</th><th>League</th><th>X%</th><th>Pred</th><th>Kickoff</th><th>Result</th><th>Outcome</th></tr></thead><tbody>';
     d.forEach(function(m){var oc=m.outcome==="win"?'<span class="badge bw">WIN</span>':m.outcome==="loss"?'<span class="badge bl">LOSS</span>':'<span class="badge bp">PEND</span>';h+="<tr><td class='mono'>"+(m.date||"")+"</td><td style='color:var(--text);font-weight:500'>"+(m.home||"")+" vs "+(m.away||"")+"</td><td>"+(m.league||"")+"</td><td><span class='odds-badge'>"+(m.draw_pct||0)+"%</span></td><td class='mono'>"+(m.pred_score||"-")+"</td><td class='mono'>"+(m.kickoff||"")+"</td><td class='mono'>"+(m.result||"-")+"</td><td>"+oc+"</td></tr>";});
     h+="</tbody></table></div>";el.innerHTML=h;
   });
