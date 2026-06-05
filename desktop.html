@@ -1006,7 +1006,9 @@ function openAddBet() {
   document.getElementById("bet-sel").value="Draw (X)";
   ["bet-match","bet-league","bet-odds","bet-payout","bet-myprob","bet-impl","bet-edge","bet-notes"].forEach(function(id){document.getElementById(id).value="";});
   var sp=settings.single_pct||2;
-  document.getElementById("bet-amount").value=+(bankroll*sp/100).toFixed(2);
+  var autoAmt=+(bankroll*sp/100).toFixed(2);
+document.getElementById("bet-amount").value=autoAmt>0?autoAmt:"";
+document.getElementById("bet-bk").value="";
   document.getElementById("single-fields").style.display="block";
   document.getElementById("trixie-fields").style.display="none";
   document.getElementById("mart-bet-info").style.display="none";
