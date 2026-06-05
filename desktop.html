@@ -925,7 +925,7 @@ function loadBets() {
     all.forEach(function(b){
       var pnl=(b.payout||0)-(b.amount||0);
       var isPending=b.status==="pending";
-      var oc=b.status==="win"?'<span class="badge bw">WIN</span>':b.status==="loss"?'<span class="badge bl">LOSS</span>':'<span class="badge bp">PEND</span>';
+      var autoScore=b.notes&&b.notes.indexOf("auto:FT:")===0?' <span style="color:var(--text3);font-size:11px">'+b.notes.split("auto:FT:")[1]+'</span>':""; var oc=b.status==="win"?'<span class="badge bw">WIN</span>':b.status==="loss"?'<span class="badge bl">LOSS</span>':'<span class="badge bp">PEND</span>';
       var src=b._src==="stake"?'<span class="badge bs" style="font-size:9px">S</span>':"";
       var tp2=b.bet_type==="trixie"?'<span class="badge bm">TRIX</span>':b.bet_type==="patent"?'<span class="badge bm">PAT</span>':'<span class="badge" style="background:var(--bg3);color:var(--text3)">SGL</span>';
       var mart=b.martingale_series_id?'<span style="color:var(--purple);font-size:10px"> M'+(b.martingale_step||"")+"</span>":"";
