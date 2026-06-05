@@ -269,7 +269,7 @@ canvas{width:100%!important}
     <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val amber" id="s-roi">0%</div></div>
     <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div></div>
     <div class="stat-card"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div></div>
-    <div class="stat-card" onclick="showPage('bets',document.getElementById('nav-bets'));document.getElementById('b-status').value='pending';loadBets();" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
+    <div class="stat-card"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
   </div>
   <div id="trixie-section" style="display:none">
     <div class="stats-2" style="margin-bottom:14px">
@@ -437,7 +437,7 @@ canvas{width:100%!important}
       </div>
       <div class="fr3">
         <div class="fg"><label class="fl">Odds</label><input type="number" class="fi" id="bet-odds" placeholder="3.20" step="0.01" oninput="calcBetFields()"></div>
-        <div class="fg"><label class="fl">Amount ($)</label><input type="number" class="fi" id="bet-amount" placeholder="auto" step="0.01" oninput="calcBetFields()"></div>
+        <div class="fg"><label class="fl">Amount ($)</label><input type="number" class="fi" id="bet-amount" placeholder="0" step="0.01" oninput="calcBetFields()"></div>
         <div class="fg"><label class="fl">Payout ($)</label><input type="number" class="fi" id="bet-payout" placeholder="auto" step="0.01" oninput="payoutManual=true"></div>
       </div>
       <div class="fr3">
@@ -545,7 +545,7 @@ canvas{width:100%!important}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script>
 var SB_URL="https://jczzctpbrbaavzetidov.supabase.co";
-var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjenpjdHBicmJhYXZ6ZXRpZG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MTAyNjQsImV4cCI6MjA5NTk4NjI2NH0.yV23Ohs0zAZqYJuW8NjlhRRqYaEJiOGPSXWfR64Ujts";
+var SB_KEY="YOUR_ANON_KEY_HERE";
 var H={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
 var authH=H;
 var bookmakers=[];
@@ -578,13 +578,15 @@ function doLogin(){
     .then(function(r){return r.json();}).then(function(d){
       if(d.access_token){
         authH={"apikey":SB_KEY,"Authorization":"Bearer "+d.access_token,"Content-Type":"application/json"};
-        localStorage.setItem("dt_token",d.access_token);localStorage.setItem("dt_email",email);if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);
+        localStorage.setItem("dt_token",d.access_token);localStorage.setItem("dt_email",email);
+        if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);
         showApp(email);
+        setInterval(refreshToken,50*60*1000);
       } else {err.textContent="Invalid email or password";err.style.display="block";}
     }).finally(function(){btn.textContent="Sign In";btn.disabled=false;});
 }
 
-function doLogout(){localStorage.removeItem("dt_token");localStorage.removeItem("dt_email");authH=H;document.getElementById("app").style.display="none";document.getElementById("login-page").style.display="flex";}
+function doLogout(){localStorage.removeItem("dt_token");localStorage.removeItem("dt_email");localStorage.removeItem("dt_refresh");authH=H;document.getElementById("app").style.display="none";document.getElementById("login-page").style.display="flex";}
 
 function showApp(email){
   document.getElementById("login-page").style.display="none";
@@ -595,12 +597,33 @@ function showApp(email){
   loadMartSeries();
 }
 
+function refreshToken(){
+  var refresh=localStorage.getItem("dt_refresh");
+  if(!refresh)return;
+  fetch(SB_URL+"/auth/v1/token?grant_type=refresh_token",{
+    method:"POST",
+    headers:{"apikey":SB_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({refresh_token:refresh})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.access_token){
+      authH={"apikey":SB_KEY,"Authorization":"Bearer "+d.access_token,"Content-Type":"application/json"};
+      localStorage.setItem("dt_token",d.access_token);
+      if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);
+    }
+  }).catch(function(){});
+}
+
 function checkAuth(){
   var token=localStorage.getItem("dt_token");var email=localStorage.getItem("dt_email");
   if(token){
     authH={"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json"};
     fetch(SB_URL+"/auth/v1/user",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token}})
-      .then(function(r){return r.json();}).then(function(d){if(d.id){showApp(email||d.email);setTimeout(function(){setInterval(refreshToken,50*60*1000);},1000);}else doLogout();}).catch(function(){doLogout();});
+      .then(function(r){return r.json();}).then(function(d){
+        if(d.id){
+          showApp(email||d.email);
+          setInterval(refreshToken,50*60*1000);
+        } else {doLogout();}
+      }).catch(function(){doLogout();});
   }
 }
 
@@ -615,7 +638,7 @@ function loadBookmakers(){
     ["db-bk","b-bk","bet-bk","tx-bk"].forEach(function(id){
       var el=document.getElementById(id);if(!el)return;
       var isF=id==="db-bk"||id==="b-bk";var cur=el.value;
-      el.innerHTML=(isF?'<option value="">All BK</option>':"")+bookmakers.map(function(bk){return'<option value="'+bk+'">'+bk+"</option>";}).join("");
+      el.innerHTML=(isF?'<option value="">All BK</option>':'<option value="">Select BK</option>')+bookmakers.map(function(bk){return'<option value="'+bk+'">'+bk+"</option>";}).join("");
       if(cur)el.value=cur;
     });
   });
@@ -870,9 +893,7 @@ function openAddBet(){
   document.getElementById("bet-date").value=new Date().toISOString().slice(0,10);
   document.getElementById("bet-status").value="pending";document.getElementById("bet-type").value="single";document.getElementById("bet-sel").value="Draw (X)";
   ["bet-match","bet-league","bet-odds","bet-payout","bet-myprob","bet-impl","bet-edge","bet-notes"].forEach(function(id){document.getElementById(id).value="";});
-  var autoAmt=+(bankroll*(settings.single_pct||2)/100).toFixed(2);
-document.getElementById("bet-amount").value=autoAmt>0?autoAmt:"";
-document.getElementById("bet-bk").value="";
+  document.getElementById("bet-amount").value=+(bankroll*(settings.single_pct||2)/100).toFixed(2);
   document.getElementById("single-fields").style.display="block";document.getElementById("trixie-fields").style.display="none";
   document.getElementById("mart-bet-info").style.display="none";document.getElementById("mart-extra-fields").style.display="none";
   payoutManual=false;openM("modal-bet");
@@ -1209,7 +1230,7 @@ function selectMatch(el){
   document.getElementById("bet-fixture-id").value=el.getAttribute("data-fixture");
   document.getElementById("match-dropdown").style.display="none";
 }
-function refreshToken(){var r=localStorage.getItem("dt_refresh");if(!r)return;fetch(SB_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":SB_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:r})}).then(function(x){return x.json();}).then(function(d){if(d.access_token){authH={"apikey":SB_KEY,"Authorization":"Bearer "+d.access_token,"Content-Type":"application/json"};localStorage.setItem("dt_token",d.access_token);if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);}});}
+
 checkAuth();
 calcMartingale();
 loadUpcomingMatches();
