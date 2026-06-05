@@ -309,6 +309,7 @@ canvas{width:100%!important}
       <option value="trixie">Trixie</option><option value="patent">Patent</option>
     </select>
     <button class="btn btn-ghost btn-sm" onclick="loadBets()">Refresh</button>
+<button class="btn btn-ghost btn-sm" onclick="syncResults()" id="sync-btn">⟳ Sync</button>
   </div>
   <div id="bets-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
 </div>
@@ -612,7 +613,22 @@ function refreshToken(){
     }
   }).catch(function(){});
 }
-
+function syncResults(){
+  var token=localStorage.getItem("gh_token");
+  if(!token){token=prompt("Enter GitHub Token:");if(token)localStorage.setItem("gh_token",token);else return;}
+  var btn=document.getElementById("sync-btn");
+  btn.textContent="Running...";btn.disabled=true;
+  fetch("https://api.github.com/repos/autoelement/draw-tracker/actions/workflows/daily.yml/dispatches",{
+    method:"POST",
+    headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},
+    body:JSON.stringify({ref:"main",inputs:{job:"results"}})
+  }).then(function(r){
+    if(r.status===204){showToast("Sync started! (~1-2 min)");setTimeout(function(){loadBets();},90000);}
+    else if(r.status===401){localStorage.removeItem("gh_token");showToast("Invalid token!",true);}
+    else{showToast("Error: "+r.status,true);}
+    btn.textContent="⟳ Sync Results";btn.disabled=false;
+  }).catch(function(){showToast("Error",true);btn.textContent="⟳ Sync Results";btn.disabled=false;});
+}
 function checkAuth(){
   var token=localStorage.getItem("dt_token");var email=localStorage.getItem("dt_email");
   if(token){
