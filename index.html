@@ -839,7 +839,7 @@ function loadBets(){
       var isPending=b.status==="pending";
       var autoScore="";
 if(b.notes&&b.notes.indexOf("auto:FT:")===0){autoScore=' <span style="font-size:10px;color:var(--text3);vertical-align:middle">'+b.notes.split("auto:FT:")[1]+'</span>';}
-      var oc=b.status==="win"?'<span class="bet-badge bw">WIN</span>'+autoScore:b.status==="loss"?'<span class="bet-badge bl">LOSS</span>'+autoScore:'<span class="bet-badge bp">PEND</span>';
+      var oc=b.status==="win"?'<span class="bet-badge bw">WIN</span> '+autoScore:b.status==="loss"?'<span class="bet-badge bl">LOSS</span> '+autoScore:'<span class="bet-badge bp">PEND</span>';
       var tp2=b.bet_type==="trixie"?'<span class="bet-badge bm">TRIX</span>':b.bet_type==="patent"?'<span class="bet-badge bm">PAT</span>':"";
       var src=b._src==="stake"?'<span class="bet-badge bs">S</span>':"";
       var mart=b.martingale_series_id?'<span class="bet-badge" style="background:var(--purple-dim);color:var(--purple)">M'+( b.martingale_step||"")+"</span>":"";
