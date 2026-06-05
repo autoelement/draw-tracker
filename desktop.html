@@ -921,7 +921,7 @@ function loadBets() {
     }
     if(!all.length){el.innerHTML='<div class="empty">No bets found</div>';return;}
     var bkOpts=bookmakers.map(function(bk){return'<option value="'+bk+'">'+bk+"</option>";}).join("");
-    var h='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Type</th><th>Odds</th><th>Amount</th><th>Payout</th><th>P&L</th><th>My%</th><th>Edge</th><th>Bookmaker</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+    var h='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Selection</th><th>Type</th><th>Odds</th><th>Amount</th><th>Payout</th><th>P&L</th><th>My%</th><th>Edge</th><th>Bookmaker</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
     all.forEach(function(b){
       var pnl=(b.payout||0)-(b.amount||0);
       var isPending=b.status==="pending";
