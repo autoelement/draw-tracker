@@ -206,7 +206,7 @@ tr:hover td{background:var(--bg3)}
     <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val" id="s-wr">0%</div><div class="stat-sub" id="s-wr2">0/0</div></div>
     <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val amber" id="s-roi">0%</div><div class="stat-sub">Return on investment</div></div>
     <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div><div class="stat-sub">vs bookmaker</div></div>
-    <div class="stat-card"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div><div class="stat-sub">Pending</div></div>
+    <div class="stat-card" onclick="showPage('bets',document.querySelectorAll('.nav-tab')[2]);document.getElementById('b-status').value='pending';loadBets();" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div><div class="stat-sub">Pending</div></div>
   </div>
   <div class="stats-grid-4">
     <div class="stat-card"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div><div class="stat-sub">Total balance</div></div>
