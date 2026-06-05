@@ -88,7 +88,7 @@ for b in pending_bets:
     outcome="win" if won else "loss"
     payout=round(b["amount"]*b["odds"],2) if won and b.get("odds") and b.get("amount") else 0
     requests.patch(f"{SURL}/rest/v1/bets?id=eq.{b['id']}",headers=SH,
-        json={"status":outcome,"payout":payout})
+        json={"status":outcome,"payout":payout,"notes":f"auto:FT:{res['result']}"})
     bets_updated+=1
     print(f"  Bet {b['id']}: {b.get('match','')} → {outcome}")
 
