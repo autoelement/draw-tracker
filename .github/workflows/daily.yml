@@ -2,53 +2,58 @@ name: Draw Tracker Daily
 
 on:
   schedule:
-    - cron: '0 5 * * *'
-    - cron: '0 19 * * *'
+    - cron: '0 5 * * *'   # 09:00 Tbilisi (UTC+4) - agent
+    - cron: '0 19 * * *'  # 23:00 Tbilisi (UTC+4) - results
+    - cron: '0 0 * * *'   # 04:00 Tbilisi (UTC+4) - fetch matches
   workflow_dispatch:
 
 jobs:
-  morning-agent:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 5 * * *'
+  agent:
+    if: github.event.schedule == '0 5 * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Python-ის მომზადება
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      - name: დამოკიდებულებების ინსტალაცია
-        run: pip install requests
-      - name: აგენტის გაშვება
+      - run: pip install requests
+      - run: python agent.py
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_API }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python agent.py
-      - name: Stake სინქრონიზაცია
-        env:
-          STAKE_TOKEN: ${{ secrets.STAKE_TOKEN }}
-        run: python stake_sync.py
 
-  evening-results:
+  results:
     if: github.event.schedule == '0 19 * * *'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Python-ის მომზადება
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      - name: დამოკიდებულებების ინსტალაცია
-        run: pip install requests
-      - name: შედეგების შემოწმება
+      - run: pip install requests
+      - run: python results.py
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_API }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python results.py
+
+  fetch_matches:
+    if: github.event.schedule == '0 0 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - run: python fetch_matches.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
