@@ -608,7 +608,19 @@ function showApp(email) {
   loadBookmakers().then(function() { loadDashboard(); loadSettings(); });
   loadMartSeries();
 }
-
+function syncResults(){
+  var btn=document.getElementById("sync-btn");
+  btn.textContent="Running...";btn.disabled=true;
+  fetch("https://api.github.com/repos/autoelement/draw-tracker/actions/workflows/daily.yml/dispatches",{
+    method:"POST",
+    headers:{"Authorization":"Bearer YOUR_GH_TOKEN","Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},
+    body:JSON.stringify({ref:"main",inputs:{job:"results"}})
+  }).then(function(r){
+    if(r.status===204){showToast("Sync started! (~1-2 min)");setTimeout(function(){loadBets();},90000);}
+    else{showToast("Error: "+r.status,true);}
+    btn.textContent="⟳ Sync Results";btn.disabled=false;
+  }).catch(function(){showToast("Error",true);btn.textContent="⟳ Sync Results";btn.disabled=false;});
+}
 function checkAuth() {
   var token = localStorage.getItem("dt_token");
   var email = localStorage.getItem("dt_email");
