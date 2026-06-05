@@ -269,7 +269,7 @@ canvas{width:100%!important}
     <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val amber" id="s-roi">0%</div></div>
     <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div></div>
     <div class="stat-card"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div></div>
-    <div class="stat-card"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
+    <div class="stat-card" onclick="showPage('bets',document.getElementById('nav-bets'));document.getElementById('b-status').value='pending';loadBets();" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
   </div>
   <div id="trixie-section" style="display:none">
     <div class="stats-2" style="margin-bottom:14px">
