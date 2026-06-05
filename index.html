@@ -929,6 +929,7 @@ function saveBet(){
   var amt=parseFloat(document.getElementById("bet-amount").value)||0;var payout=parseFloat(document.getElementById("bet-payout").value)||0;
   if(!payoutManual&&odds>0&&amt>0)payout=parseFloat((amt*odds).toFixed(2));
   var martStep=isMart?parseInt(document.getElementById("bet-mart-step").value)||1:1;
+  var fixtureId=parseInt(document.getElementById("bet-fixture-id").value)||null;
   var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:isMart||null,martingale_step:martStep,notes:notes,fixture_id:fixtureId};
   var p;
   if(stakeId){row.notes="stake:"+stakeId;row.bookmaker="Stake";p=id?sbPatch("bets?id=eq."+id,row):sbPost("bets",row);}
