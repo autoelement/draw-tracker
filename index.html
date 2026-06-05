@@ -578,7 +578,7 @@ function doLogin(){
     .then(function(r){return r.json();}).then(function(d){
       if(d.access_token){
         authH={"apikey":SB_KEY,"Authorization":"Bearer "+d.access_token,"Content-Type":"application/json"};
-        localStorage.setItem("dt_token",d.access_token);localStorage.setItem("dt_email",email);
+        localStorage.setItem("dt_token",d.access_token);localStorage.setItem("dt_email",email);if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);
         showApp(email);
       } else {err.textContent="Invalid email or password";err.style.display="block";}
     }).finally(function(){btn.textContent="Sign In";btn.disabled=false;});
@@ -600,7 +600,7 @@ function checkAuth(){
   if(token){
     authH={"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json"};
     fetch(SB_URL+"/auth/v1/user",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token}})
-      .then(function(r){return r.json();}).then(function(d){if(d.id)showApp(email||d.email);else doLogout();}).catch(function(){doLogout();});
+      .then(function(r){return r.json();}).then(function(d){if(d.id){showApp(email||d.email);setTimeout(function(){setInterval(refreshToken,50*60*1000);},1000);}else doLogout();}).catch(function(){doLogout();});
   }
 }
 
@@ -1207,7 +1207,7 @@ function selectMatch(el){
   document.getElementById("bet-fixture-id").value=el.getAttribute("data-fixture");
   document.getElementById("match-dropdown").style.display="none";
 }
-
+function refreshToken(){var r=localStorage.getItem("dt_refresh");if(!r)return;fetch(SB_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":SB_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:r})}).then(function(x){return x.json();}).then(function(d){if(d.access_token){authH={"apikey":SB_KEY,"Authorization":"Bearer "+d.access_token,"Content-Type":"application/json"};localStorage.setItem("dt_token",d.access_token);if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);}});}
 checkAuth();
 calcMartingale();
 loadUpcomingMatches();
