@@ -1008,7 +1008,7 @@ function openAddBet() {
   var sp=settings.single_pct||2;
   var autoAmt=+(bankroll*sp/100).toFixed(2);
 document.getElementById("bet-amount").value=autoAmt>0?autoAmt:"";
-document.getElementById("bet-bk").value="";
+var bkEl=document.getElementById("bet-bk");if(bkEl)bkEl.value="";
   document.getElementById("single-fields").style.display="block";
   document.getElementById("trixie-fields").style.display="none";
   document.getElementById("mart-bet-info").style.display="none";
