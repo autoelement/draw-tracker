@@ -31,7 +31,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_API: ${{ secrets.SUPABASE_API }}
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
 
   fetch_matches:
@@ -46,7 +46,7 @@ jobs:
       - run: python fetch_matches.py
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_API: ${{ secrets.SUPABASE_API }}
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
 
   results:
@@ -61,5 +61,5 @@ jobs:
       - run: python results.py
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_API: ${{ secrets.SUPABASE_API }}
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
