@@ -812,7 +812,31 @@ function loadPredictions(){
 
 function saveInline(id,src,field,val,extraId){
   var patch={};patch[field]=val;
-  if(src==="manual"){sbPatch("bets?id=eq."+id,patch).then(function(){showToast("Saved!");loadBets();});}
+  if(src==="manual"){
+    if(field==="my_probability"){
+      var oddsEl=document.querySelector("[data-id='"+id+"'] .odds-badge");
+      var odds=oddsEl?parseFloat(oddsEl.textContent):0;
+      if(odds>0){patch.implied_probability=+(1/odds*100).toFixed(1);patch.edge=+(val-patch.implied_probability).toFixed(1);}
+    }
+    if(field==="status"||field==="bookmaker"){
+      sbGet("bets?id=eq."+id+"&select=*").then(function(old){
+        var ob=old[0]||{};
+        var oldEff=ob.balance_applied?settledEffect(ob.status,ob.amount,ob.payout):0;
+        var newStatus=field==="status"?val:ob.status;
+        var newBk=field==="bookmaker"?val:ob.bookmaker;
+        var newApplied=(newStatus==="win"||newStatus==="loss");
+        patch.balance_applied=newApplied;
+        var newEff=newApplied?settledEffect(newStatus,ob.amount,ob.payout):0;
+        return adjustBalance(ob.bookmaker,-oldEff).then(function(){
+          return sbPatch("bets?id=eq."+id,patch);
+        }).then(function(){
+          return adjustBalance(newBk,newEff);
+        }).then(function(){showToast("Saved!");loadBets();loadBookmakers();});
+      });
+      return;
+    }
+    sbPatch("bets?id=eq."+id,patch).then(function(){showToast("Saved!");loadBets();});
+  }
   else{if(extraId){sbPatch("bets?id=eq."+extraId,patch).then(function(){showToast("Saved!");loadBets();});}
   else{sbPost("bets",Object.assign({bookmaker:"Stake",status:"pending",bet_type:"single",date:new Date().toISOString().slice(0,10),notes:"stake:"+id},patch)).then(function(){showToast("Saved!");loadBets();});}}
 }
