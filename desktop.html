@@ -600,12 +600,14 @@ function doLogout() {
   document.getElementById("login-page").style.display = "flex";
 }
 
-function showApp(email) {
-  document.getElementById("login-page").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  document.getElementById("set-email").value = email || "";
-  loadBookmakers().then(function() { loadDashboard(); loadSettings(); });
+function showApp(email){
+  document.getElementById("login-page").style.display="none";
+  document.getElementById("app").style.display="block";
+  document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
+  document.getElementById("set-email").value=email||"";
+  loadBookmakers().then(function(){loadDashboard();loadSettings();});
   loadMartSeries();
+  loadUpcomingMatches();
 }
 function syncResults(){
   var token=localStorage.getItem("gh_token");
