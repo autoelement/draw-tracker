@@ -1123,7 +1123,7 @@ function loadMartingaleHistory(){
     Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=martingale_step.asc");})).then(function(allBets){
       var h="";
       series.forEach(function(s,si){
-        var bs=allBets[si];var settledBs=bs.filter(function(b){return b.status==="win"||b.status==="loss";});var tw=settledBs.reduce(function(t,b){return t+(b.amount||0);},0);var tr=settledBs.reduce(function(t,b){return t+(b.payout||0);},0);var pnl=tr-tw;
+        var bs=allBets[si];var settledBs=bs.filter(function(b){return b.status==="win"||b.status==="loss";});var tw=bs.reduce(function(t,b){return t+(b.amount||0);},0);var tr=settledBs.reduce(function(t,b){return t+(b.payout||0);},0);var pnl=tr-settledBs.reduce(function(t,b){return t+(b.amount||0);},0);
         var isWon=bs.some(function(b){return b.status==="win";});
         var st=isWon?'<span class="bet-badge bw">WIN</span>':s.is_active?'<span class="bet-badge bp">ACTIVE</span>':'<span class="bet-badge bl">ENDED</span>';
         var tl=bs.map(function(b){var dc=b.status==="win"?"win":b.status==="loss"?"loss":"pending";var dt=b.status==="win"?"W":b.status==="loss"?"L":"P";return'<span class="mart-step '+dc+'">'+dt+"</span>";}).join("");
