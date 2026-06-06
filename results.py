@@ -84,15 +84,19 @@ for b in pending_bets:
     else:
         outcome="win" if won else "loss"
     payout=round(b["amount"]*b["odds"],2) if won and b.get("odds") and b.get("amount") else 0
+    # skip if balance already applied (idempotent)
+    already=b.get("balance_applied")
     requests.patch(f"{SURL}/rest/v1/bets?id=eq.{b['id']}",headers=SH,
-        json={"status":outcome,"payout":payout,"notes":f"auto:FT:{res['result']}"})
-    # AUTO BALANCE: bet was pending (stake already deducted at placement),
-    # so on WIN add payout; on LOSS nothing (stake already gone)
+        json={"status":outcome,"payout":payout,"notes":f"auto:FT:{res['result']}","balance_applied":True})
     bk=b.get("bookmaker")
-    if won and bk and bk!="Stake" and payout:
-        bal=requests.get(f"{SURL}/rest/v1/balances?bookmaker=eq.{bk}&select=balance",headers=SH).json()
-        if bal:
-            nb=(bal[0].get("balance") or 0)+payout
-            requests.patch(f"{SURL}/rest/v1/balances?bookmaker={bk}",headers=SH,json={"balance":nb})
+    amt=b.get("amount") or 0
+    if not already and bk and bk!="Stake":
+        # settled effect: win=+profit, loss=-stake
+        eff=(payout-amt) if won else (-amt)
+        if eff:
+            bal=requests.get(f"{SURL}/rest/v1/balances?bookmaker=eq.{bk}&select=balance",headers=SH).json()
+            if bal:
+                nb=(bal[0].get("balance") or 0)+eff
+                requests.patch(f"{SURL}/rest/v1/balances?bookmaker=eq.{bk}",headers=SH,json={"balance":nb})
     bets_updated+=1
     print(f"  Bet {b['id']}: {b.get('match','')} → {outcome}")
