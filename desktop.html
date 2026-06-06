@@ -1181,12 +1181,12 @@ function adjustBalance(bk, delta){
   });
 }
 // net effect of a bet on balance: stake removed when placed, payout added when won
-function betBalanceEffect(status, amount, payout){
+function settledEffect(status, amount, payout){
   var amt=amount||0, pay=payout||0;
-  if(status==="pending") return -amt;       // stake leaves balance
-  if(status==="win") return -amt+pay;        // stake out, payout in
-  if(status==="loss") return -amt;           // stake lost
+  if(status==="win") return pay-amt;
+  if(status==="loss") return -amt;
   return 0;
+}
 }
 function deleteBet(id){confirmAction("Delete this bet?",function(){   sbGet("bets?id=eq."+id+"&select=*").then(function(old){     var ob=old[0]||{};     var eff=betBalanceEffect(ob.status,ob.amount,ob.payout);     return adjustBalance(ob.bookmaker,-eff).then(function(){       return sbDelete("bets?id=eq."+id);     });   }).then(function(){showToast("Deleted!");loadBets();loadBookmakers();}); });}
 
