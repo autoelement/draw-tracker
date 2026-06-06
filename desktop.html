@@ -1169,12 +1169,6 @@ function saveBet() {
       return adjustBalance(bk,row.balance_applied?newEff:0);
     });
   }
-  else{
-    // NEW manual bet: apply effect
-    p=sbPost("bets",row).then(function(){
-      return adjustBalance(bk,betBalanceEffect(status,amt,payout));
-    });
-  }
   p.then(function(){
     if(isMart&&martId&&status==="win"){return sbPatch("martingale_series?id=eq."+martId,{is_active:false});}
   }).then(function(){closeM("modal-bet");showToast("Bet saved!");loadBets();loadBookmakers();if(isMart)loadMartSeries();})
