@@ -945,7 +945,9 @@ function loadBets() {
         statusCell=oc;
       }
 
-      var eStr2=b.edge!=null?'<span class="'+(b.edge>=0?"edge-pos":"edge-neg")+'">'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'<span style="color:var(--text3)">-</span>';
+      var edgeColor=b.status==="win"?"edge-pos":b.status==="loss"?"edge-neg":"";
+var edgeStyle=isPending?'style="color:var(--text3)"':'';
+var eStr2=b.edge!=null?'<span class="'+edgeColor+'" '+edgeStyle+'>'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'<span style="color:var(--text3)">-</span>';
 
       h+="<tr data-id='"+b.id+"'><td class='mono' style='white-space:nowrap'>"+(b.date||"")+"</td><td style='color:var(--text);font-weight:500;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+(b.match||"")+autoScore+"</td><td style='font-size:11px;color:var(--text3)'>"+(b.selection||"")+"</td><td>"+tp2+mart+"</td><td><span class='odds-badge bet-odds-val'>"+(b.odds||0)+"</span></td><td class='mono'>$"+(b.amount||0).toFixed(2)+"</td><td class='mono'>$"+(b.payout||0).toFixed(2)+"</td><td class='"+(pnl>=0?"pnl-pos":"pnl-neg")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+myPctCell+"</td><td>"+eStr2+"</td><td>"+bkCell+" "+src+"</td><td>"+statusCell+"</td><td style='white-space:nowrap'><button class='btn btn-ghost btn-sm' onclick=\"openEditBet('"+editId+"','"+b._src+"','"+extraId+"',"+(b.odds||0)+")\">Edit</button>"+(b._src==="manual"?"<button class='btn btn-red btn-sm' onclick=\"deleteBet('"+b.id+"')\">x</button>":"")+"</td></tr>";
     });
