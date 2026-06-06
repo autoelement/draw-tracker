@@ -675,9 +675,9 @@ function loadSettings(){
 }
 
 function updateSettingsPreview(){
-  var sp=parseFloat(document.getElementById("set-single").value)||2;
-  var tp=parseFloat(document.getElementById("set-trixie").value)||1;
-  var pp=parseFloat(document.getElementById("set-patent").value)||0.5;
+  var sp=parseFloat(document.getElementById("set-single").value)||0;
+  var tp=parseFloat(document.getElementById("set-trixie").value)||0;
+  var pp=parseFloat(document.getElementById("set-patent").value)||0;
   var br=bankroll||0;
   document.getElementById('settings-preview').innerHTML='Bankroll: <strong>$'+br.toFixed(2)+'</strong><br>Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*tp/100).toFixed(2)+'</strong> ('+tp+'%) | Patent unit: <strong>$'+(br*pp/100).toFixed(2)+'</strong> ('+pp+'%)';
 }
