@@ -1139,7 +1139,23 @@ function saveBet() {
   .catch(function(e){showToast("Error: "+e.message,true);})
   .finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
 }
-
+// AUTO BALANCE: manual bets only. pending=-amount, win=+payout, loss=0
+function adjustBalance(bk, delta){
+  if(!bk || bk==="Stake" || !delta) return Promise.resolve();
+  return sbGet("balances?bookmaker=eq."+encodeURIComponent(bk)+"&select=balance").then(function(ex){
+    if(!ex.length) return;
+    var nb=(ex[0].balance||0)+delta;
+    return sbPatch("balances?bookmaker=eq."+encodeURIComponent(bk),{balance:nb,updated_at:new Date().toISOString()});
+  });
+}
+// net effect of a bet on balance: stake removed when placed, payout added when won
+function betBalanceEffect(status, amount, payout){
+  var amt=amount||0, pay=payout||0;
+  if(status==="pending") return -amt;       // stake leaves balance
+  if(status==="win") return -amt+pay;        // stake out, payout in
+  if(status==="loss") return -amt;           // stake lost
+  return 0;
+}
 function deleteBet(id){confirmAction("Delete this bet?",function(){sbDelete("bets?id=eq."+id).then(function(){showToast("Deleted!");loadBets();});});}
 
 function loadBalances(){
