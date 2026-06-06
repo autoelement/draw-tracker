@@ -603,7 +603,7 @@ function doLogout() {
 function showApp(email){
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
-  document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
+  var nu=document.getElementById("nav-user");if(nu)nu.textContent=email?email.split("@")[0]:"";
   document.getElementById("set-email").value=email||"";
   loadBookmakers().then(function(){loadDashboard();loadSettings();});
   loadMartSeries();
