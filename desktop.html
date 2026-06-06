@@ -1191,7 +1191,6 @@ function settledEffect(status, amount, payout){
   if(status==="loss") return -amt;
   return 0;
 }
-}
 function deleteBet(id){confirmAction("Delete this bet?",function(){
   sbGet("bets?id=eq."+id+"&select=*").then(function(old){
     var ob=old[0]||{};
