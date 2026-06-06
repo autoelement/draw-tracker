@@ -1188,7 +1188,7 @@ function betBalanceEffect(status, amount, payout){
   if(status==="loss") return -amt;           // stake lost
   return 0;
 }
-function deleteBet(id){confirmAction("Delete this bet?",function(){sbDelete("bets?id=eq."+id).then(function(){showToast("Deleted!");loadBets();});});}
+function deleteBet(id){confirmAction("Delete this bet?",function(){   sbGet("bets?id=eq."+id+"&select=*").then(function(old){     var ob=old[0]||{};     var eff=betBalanceEffect(ob.status,ob.amount,ob.payout);     return adjustBalance(ob.bookmaker,-eff).then(function(){       return sbDelete("bets?id=eq."+id);     });   }).then(function(){showToast("Deleted!");loadBets();loadBookmakers();}); });}
 
 function loadBalances(){
   Promise.all([sbGet("balances?select=*&order=bookmaker.asc"),sbGet("transactions?select=*&order=created_at.desc&limit=100")]).then(function(res){
