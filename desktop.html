@@ -937,11 +937,12 @@ function exportCSV(rows,cols,filename){
   URL.revokeObjectURL(url);
 }
 function exportBets(){
+  betsAll.forEach(function(b){b._mode=b.martingale_series_id?"Martingale":"Regular";});
   exportCSV(betsAll,[
     {key:"date",label:"Date"},{key:"match",label:"Match"},{key:"selection",label:"Selection"},
     {key:"bet_type",label:"Type"},{key:"odds",label:"Odds"},{key:"amount",label:"Amount"},
     {key:"payout",label:"Payout"},{key:"my_probability",label:"My%"},{key:"edge",label:"Edge"},
-    {key:"bookmaker",label:"Bookmaker"},{key:"status",label:"Status"}
+    {key:"bookmaker",label:"Bookmaker"},{key:"status",label:"Status"},{key:"_mode",label:"Mode"}
   ],"bets_"+new Date().toISOString().slice(0,10)+".csv");
 }
 function exportTx(){
