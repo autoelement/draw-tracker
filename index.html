@@ -257,10 +257,13 @@ canvas{width:100%!important}
     <button class="filter-pill" onclick="setDbType('martingale',this)">Martingale</button>
     <select class="filter-sel" id="db-range" onchange="loadDashboard()">
       <option value="all">All Time</option>
+      <option value="year">This Year</option>
       <option value="month">This Month</option>
+      <option value="90">Last 90d</option>
       <option value="30">Last 30d</option>
       <option value="7">Last 7d</option>
     </select>
+    <select class="filter-sel" id="db-series" onchange="loadDashboard()" style="display:none"><option value="all">All Series</option></select>
     <select class="filter-sel" id="db-bk" onchange="loadDashboard()"><option value="">All BK</option></select>
   </div>
   <div class="stats-2">
