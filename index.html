@@ -981,7 +981,7 @@ function saveBet(){
   .catch(function(e){showToast("Error: "+e.message,true);}).finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
 }
 
-function deleteBet(id){confirmAction("Delete this bet?",function(){sbDelete("bets?id=eq."+id).then(function(){showToast("Deleted!");loadBets();});});}
+function adjustBalance(bk,delta){   if(!bk||bk==="Stake"||!delta)return Promise.resolve();   return sbGet("balances?bookmaker=eq."+encodeURIComponent(bk)+"&select=balance").then(function(ex){     if(!ex.length)return;     var nb=(ex[0].balance||0)+delta;     return sbPatch("balances?bookmaker=eq."+encodeURIComponent(bk),{balance:nb,updated_at:new Date().toISOString()});   }); } function settledEffect(status,amount,payout){   var amt=amount||0,pay=payout||0;   if(status==="win")return pay-amt;   if(status==="loss")return -amt;   return 0; } function deleteBet(id){confirmAction("Delete this bet?",function(){   sbGet("bets?id=eq."+id+"&select=*").then(function(old){     var ob=old[0]||{};     var eff=ob.balance_applied?settledEffect(ob.status,ob.amount,ob.payout):0;     return adjustBalance(ob.bookmaker,-eff).then(function(){return sbDelete("bets?id=eq."+id);});   }).then(function(){showToast("Deleted!");loadBets();loadBookmakers();}); });}
 
 function loadBalances(){
   Promise.all([sbGet("balances?select=*&order=bookmaker.asc"),sbGet("transactions?select=*&order=created_at.desc&limit=50")]).then(function(res){
