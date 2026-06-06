@@ -1318,7 +1318,6 @@ function loadMartingaleHistory(){
       var h='<table><thead><tr><th>Series</th><th>Config</th><th>Steps</th><th>Staked</th><th>Return</th><th>P&L</th><th>Status</th><th>Timeline</th><th>Actions</th></tr></thead><tbody>';
       series.forEach(function(s,si){
         var bs=allBets[si];
-        var bs=allBets[si];
         var settledBs=bs.filter(function(b){return b.status==="win"||b.status==="loss";});
         var tw=bs.reduce(function(t,b){return t+(b.amount||0);},0);
         var tr2=settledBs.reduce(function(t,b){return t+(b.payout||0);},0);
