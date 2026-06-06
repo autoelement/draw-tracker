@@ -818,8 +818,6 @@ function loadDashboard() {
       var wonS=keys.filter(function(k){return sm[k].some(function(b){return b.status==="win";});});
       var stepsArr=wonS.map(function(k){var wb=sm[k].filter(function(b){return b.status==="win";})[0];return wb?wb.martingale_step||1:0;});
       var avgS=stepsArr.length?(stepsArr.reduce(function(s,v){return s+v;},0)/stepsArr.length).toFixed(1):0;
-      document.getElementById("m-total").textContent=keys.length;
-      document.getElementById("m-won").textContent=wonS.length;
       document.getElementById("m-avgsteps").textContent=avgS;
       document.getElementById("m-roi").textContent=(roi>=0?"+":"")+roi+"%";
       document.getElementById("m-roi").className="stat-val "+(parseFloat(roi)>=0?"green":"red");
