@@ -584,6 +584,7 @@ function doLogin() {
       authH = {"apikey": SB_KEY, "Authorization": "Bearer " + authToken, "Content-Type": "application/json"};
       localStorage.setItem("dt_token", authToken);
       localStorage.setItem("dt_email", email);
+      if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);
       showApp(email);
     } else {
       err.textContent = "Invalid email or password";
@@ -605,9 +606,7 @@ function showApp(email){
   document.getElementById("app").style.display="block";
   var nu=document.getElementById("nav-user");if(nu)nu.textContent=email?email.split("@")[0]:"";
   document.getElementById("set-email").value=email||"";
-  loadBookmakers().then(function(){loadDashboard();loadSettings();});
-  loadMartSeries();
-  loadUpcomingMatches();
+loadBookmakers().then(function(){loadDashboard();loadSettings();loadUpcomingMatches();loadMartSeries();});
 }
 function syncResults(){
   var token=localStorage.getItem("gh_token");
