@@ -1017,7 +1017,10 @@ function saveBet(){
   }
   var odds=parseFloat(document.getElementById("bet-odds").value)||0;var myP=parseFloat(document.getElementById("bet-myprob").value)||null;
   var impl=odds>0?parseFloat((1/odds*100).toFixed(1)):null;var edge=(myP&&impl)?parseFloat((myP-impl).toFixed(1)):null;
-  var amt=parseFloat(document.getElementById("bet-amount").value)||0;var payout=parseFloat(document.getElementById("bet-payout").value)||0;
+  var amt=parseFloat(document.getElementById("bet-amount").value)||0;
+  var payout=parseFloat(document.getElementById("bet-payout").value)||0;
+  if(!payoutManual&&odds>0&&amt>0)payout=+(amt*odds).toFixed(2);
+  if(status==="loss"||status==="pending")payout=0;
   if(!payoutManual&&odds>0&&amt>0)payout=parseFloat((amt*odds).toFixed(2));
   var martStep=isMart?parseInt(document.getElementById("bet-mart-step").value)||1:1;
   var fixtureId=parseInt(document.getElementById("bet-fixture-id").value)||null;
