@@ -669,7 +669,7 @@ function loadMartSeries(){
 
 function loadSettings(){
   sbGet("settings?select=*&limit=1").then(function(rows){
-    if(rows.length){settings=rows[0];document.getElementById("set-single").value=settings.single_pct||2;document.getElementById("set-trixie").value=settings.trixie_pct||1;document.getElementById("set-patent").value=settings.patent_pct||0.5;}
+    if(rows.length){settings=rows[0];document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;}
     updateSettingsPreview();
   }).catch(function(){});
 }
