@@ -711,6 +711,13 @@ function setDbType(t,el){
   el.classList.add("active");
   document.getElementById("trixie-section").style.display=(t==="trixie"||t==="patent")?"block":"none";
   document.getElementById("martingale-section").style.display=t==="martingale"?"block":"none";
+  var seriesSel=document.getElementById("db-series");
+  if(t==="martingale"){
+    seriesSel.style.display="";
+    seriesSel.innerHTML='<option value="all">All Series</option>'+martSeries.map(function(s){return'<option value="'+s.id+'">'+s.name+(s.is_active?"":" (done)")+'</option>';}).join("");
+  } else {
+    seriesSel.style.display="none";seriesSel.value="all";
+  }
   loadDashboard();
 }
 
