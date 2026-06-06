@@ -1131,11 +1131,27 @@ function saveBet() {
   var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:martId,martingale_step:martStep,notes:notes};
   var p;
   if(stakeId){row.notes="stake:"+stakeId;row.bookmaker="Stake";p=id?sbPatch("bets?id=eq."+id,row):sbPost("bets",row);}
-  else if(id){p=sbPatch("bets?id=eq."+id,row);}
-  else{p=sbPost("bets",row);}
+  else if(id){
+    // EDIT: reverse old effect first, then apply new
+    p=sbGet("bets?id=eq."+id+"&select=*").then(function(old){
+      var ob=old[0]||{};
+      var oldEff=betBalanceEffect(ob.status,ob.amount,ob.payout);
+      return adjustBalance(ob.bookmaker,-oldEff).then(function(){
+        return sbPatch("bets?id=eq."+id,row);
+      }).then(function(){
+        return adjustBalance(bk,betBalanceEffect(status,amt,payout));
+      });
+    });
+  }
+  else{
+    // NEW manual bet: apply effect
+    p=sbPost("bets",row).then(function(){
+      return adjustBalance(bk,betBalanceEffect(status,amt,payout));
+    });
+  }
   p.then(function(){
     if(isMart&&martId&&status==="win"){return sbPatch("martingale_series?id=eq."+martId,{is_active:false});}
-  }).then(function(){closeM("modal-bet");showToast("Bet saved!");loadBets();if(isMart)loadMartSeries();})
+  }).then(function(){closeM("modal-bet");showToast("Bet saved!");loadBets();loadBookmakers();if(isMart)loadMartSeries();})
   .catch(function(e){showToast("Error: "+e.message,true);})
   .finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
 }
