@@ -82,10 +82,17 @@ for b in pending_bets:
         parts=res["result"].split("-")
         won=int(parts[1])>int(parts[0]) if len(parts)==2 else False
     else:
-        won=res["is_draw"]
-    outcome="win" if won else "loss"
+        outcome="win" if won else "loss"
     payout=round(b["amount"]*b["odds"],2) if won and b.get("odds") and b.get("amount") else 0
     requests.patch(f"{SURL}/rest/v1/bets?id=eq.{b['id']}",headers=SH,
         json={"status":outcome,"payout":payout,"notes":f"auto:FT:{res['result']}"})
+    # AUTO BALANCE: bet was pending (stake already deducted at placement),
+    # so on WIN add payout; on LOSS nothing (stake already gone)
+    bk=b.get("bookmaker")
+    if won and bk and bk!="Stake" and payout:
+        bal=requests.get(f"{SURL}/rest/v1/balances?bookmaker=eq.{bk}&select=balance",headers=SH).json()
+        if bal:
+            nb=(bal[0].get("balance") or 0)+payout
+            requests.patch(f"{SURL}/rest/v1/balances?bookmaker={bk}",headers=SH,json={"balance":nb})
     bets_updated+=1
     print(f"  Bet {b['id']}: {b.get('match','')} → {outcome}")
