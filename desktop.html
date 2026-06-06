@@ -1210,9 +1210,23 @@ function deleteBet(id){confirmAction("Delete this bet?",function(){
     });
   }).then(function(){showToast("Deleted!");loadBets();loadBookmakers();});
 });}
-
+var txPage=1;var txPerPage=20;var txAll=[];
+function renderTxPage(){
+  var tb=document.getElementById("tx-body");
+  if(!txAll.length){tb.innerHTML='<div class="empty">No transactions yet</div>';return;}
+  var totalPages=Math.ceil(txAll.length/txPerPage);
+  if(txPage>totalPages)txPage=totalPages;
+  var start=(txPage-1)*txPerPage;
+  var items=txAll.slice(start,start+txPerPage);
+  var th='<table><thead><tr><th>Date</th><th>Bookmaker</th><th>Type</th><th>Amount</th><th>Note</th></tr></thead><tbody>';
+  items.forEach(function(t){var tp=t.type==="deposit"?'<span class="badge bw">DEP</span>':'<span class="badge bl">WIT</span>';th+="<tr><td class='mono'>"+(t.created_at||"").slice(0,10)+"</td><td>"+t.bookmaker+"</td><td>"+tp+"</td><td class='"+(t.type==="deposit"?"pnl-pos":"pnl-neg")+"'>"+(t.type==="deposit"?"+":"-")+"$"+(t.amount||0).toFixed(2)+"</td><td>"+(t.note||"")+"</td></tr>";});
+  th+="</tbody></table>";
+  th+=pagControls(txPage,totalPages,"gotoTxPage");
+  tb.innerHTML=th;
+}
+function gotoTxPage(p){txPage=p;renderTxPage();}
 function loadBalances(){
-  Promise.all([sbGet("balances?select=*&order=bookmaker.asc"),sbGet("transactions?select=*&order=created_at.desc&limit=100")]).then(function(res){
+  Promise.all([sbGet("balances?select=*&order=bookmaker.asc"),sbGet("transactions?select=*&order=created_at.desc&limit=2000")]).then(function(res){
     var bals=res[0],txs=res[1];
     bankroll=bals.reduce(function(s,b){return s+(b.balance||0);},0);
     document.getElementById("bankroll-val").textContent="$"+bankroll.toFixed(2);
@@ -1221,11 +1235,7 @@ function loadBalances(){
     if(!bals.length){h='<div class="empty">No bookmakers yet</div>';}
     else{bals.forEach(function(b){var amt=b.balance||0;h+='<div class="bal-card"><div class="bal-bk">'+b.bookmaker+'</div><div class="bal-amount">$'+amt.toFixed(2)+'</div><div class="bal-sub">Current balance</div><div class="bal-actions"><button class="bal-btn" style="background:var(--green-mid);color:var(--green)" onclick="quickTx(\''+b.bookmaker+'\',\'deposit\')">+ Dep</button><button class="bal-btn" style="background:var(--red-dim);color:var(--red)" onclick="quickTx(\''+b.bookmaker+'\',\'withdrawal\')">- Wit</button><button class="bal-btn" style="background:var(--border);color:var(--text3)" onclick="deleteBookmaker(\''+b.bookmaker+'\')">Del</button></div></div>';});}
     document.getElementById("bal-cards").innerHTML=h;
-    var tb=document.getElementById("tx-body");
-    if(!txs.length){tb.innerHTML='<div class="empty">No transactions yet</div>';return;}
-    var th='<table><thead><tr><th>Date</th><th>Bookmaker</th><th>Type</th><th>Amount</th><th>Note</th></tr></thead><tbody>';
-    txs.forEach(function(t){var tp=t.type==="deposit"?'<span class="badge bw">DEP</span>':'<span class="badge bl">WIT</span>';th+="<tr><td class='mono'>"+(t.created_at||"").slice(0,10)+"</td><td>"+t.bookmaker+"</td><td>"+tp+"</td><td class='"+(t.type==="deposit"?"pnl-pos":"pnl-neg")+"'>"+(t.type==="deposit"?"+":"-")+"$"+(t.amount||0).toFixed(2)+"</td><td>"+(t.note||"")+"</td></tr>";});
-    th+="</tbody></table>";tb.innerHTML=th;
+    txAll=txs;txPage=1;renderTxPage();
   });
 }
 
