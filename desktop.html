@@ -918,7 +918,8 @@ function saveInline(id, src, field, val, extraId) {
   }
 }
 
-function loadBets() {
+var betsPage=1;var betsPerPage=20;var betsAll=[];
+function loadBets(){
   var el=document.getElementById("bets-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
   var bk=document.getElementById("b-bk").value;
@@ -928,49 +929,58 @@ function loadBets() {
   if(bk)q+="&bookmaker=eq."+encodeURIComponent(bk);
   if(st)q+="&status=eq."+st;
   if(tp)q+="&bet_type=eq."+tp;
-  Promise.all([sbGet(q),sbGet("stake_bets?select=*&order=created_at.desc&limit=200")]).then(function(res){
-    var manual=res[0],stake=res[1];
-    var stakeMap={};
-    manual.forEach(function(b){if(b.notes&&b.notes.indexOf("stake:")===0)stakeMap[b.notes.slice(6)]=b;});
-    var all=manual.filter(function(b){return!b.notes||b.notes.indexOf("stake:")!==0;}).map(function(b){return Object.assign({},b,{_src:"manual"});});
-    if(!bk||bk==="Stake"){
-      stake.filter(function(b){if(!st)return true;var s=b.status==="settled"?(b.payout>b.amount?"win":"loss"):"pending";return s===st;})
-      .filter(function(){return!tp||tp==="single";})
-      .forEach(function(b){var extra=stakeMap[b.id]||{};all.push({id:b.id,match:b.match,selection:"Draw (X)",odds:b.odds,amount:b.amount,payout:b.payout,status:b.status==="settled"?(b.payout>b.amount?"win":"loss"):"pending",bookmaker:"Stake",bet_type:extra.bet_type||"single",my_probability:extra.my_probability||null,edge:extra.edge||null,martingale_series_id:extra.martingale_series_id||null,martingale_step:extra.martingale_step||null,date:b.created_at?b.created_at.slice(0,10):"",_src:"stake",_extra_id:extra.id||null,_stake_id:b.id});});
-    }
-    if(!all.length){el.innerHTML='<div class="empty">No bets found</div>';return;}
-    var bkOpts=bookmakers.map(function(bk){return'<option value="'+bk+'">'+bk+"</option>";}).join("");
-    var h='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Selection</th><th>Type</th><th>Odds</th><th>Amount</th><th>Payout</th><th>P&L</th><th>My%</th><th>Edge</th><th>Bookmaker</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
-    all.forEach(function(b){
-      var pnl=(b.payout||0)-(b.amount||0);
-      var isPending=b.status==="pending";
-      var autoScore=b.notes&&b.notes.indexOf("auto:FT:")===0?' <span style="color:var(--text3);font-size:11px">'+b.notes.split("auto:FT:")[1]+'</span>':""; var oc=b.status==="win"?'<span class="badge bw">WIN</span>':b.status==="loss"?'<span class="badge bl">LOSS</span>':'<span class="badge bp">PEND</span>';
-      var src=b._src==="stake"?'<span class="badge bs" style="font-size:9px">S</span>':"";
-      var tp2=b.bet_type==="trixie"?'<span class="badge bm">TRIX</span>':b.bet_type==="patent"?'<span class="badge bm">PAT</span>':'<span class="badge" style="background:var(--bg3);color:var(--text3)">SGL</span>';
-      var mart=b.martingale_series_id?'<span style="color:var(--purple);font-size:10px"> M'+(b.martingale_step||"")+"</span>":"";
-      var editId=b._src==="stake"?b._stake_id:b.id;
-      var extraId=b._extra_id||"";
-
-      var myPctCell, bkCell, statusCell;
-      if(isPending){
-        myPctCell='<input class="inline-input" style="width:60px" type="number" value="'+(b.my_probability||"")+'" placeholder="%" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'my_probability\',parseFloat(this.value)||null,\''+extraId+'\')">';
-        bkCell='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'bookmaker\',this.value,\''+extraId+'\')">'+bookmakers.map(function(bk2){return'<option value="'+bk2+'"'+(bk2===b.bookmaker?' selected':'')+'>'+bk2+"</option>";}).join("")+"</select>";
-        statusCell='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'status\',this.value,\''+extraId+'\')"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
-      } else {
-        var eStr=b.edge!=null?'<span class="'+(b.edge>=0?"edge-pos":"edge-neg")+'">'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'<span style="color:var(--text3)">-</span>';
-        myPctCell=(b.my_probability!=null?b.my_probability+"%":'<span style="color:var(--text3)">-</span>');
-        bkCell=b.bookmaker||"";
-        statusCell=oc;
-      }
-
-      var edgeColor=b.status==="win"?"edge-pos":b.status==="loss"?"edge-neg":"";
-var edgeStyle=isPending?'style="color:var(--text3)"':'';
-var eStr2=b.edge!=null?'<span class="'+edgeColor+'" '+edgeStyle+'>'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'<span style="color:var(--text3)">-</span>';
-
-      h+="<tr data-id='"+b.id+"'><td class='mono' style='white-space:nowrap'>"+(b.date||"")+"</td><td style='color:var(--text);font-weight:500;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+(b.match||"")+autoScore+"</td><td style='font-size:11px;color:var(--text3)'>"+(b.selection||"")+"</td><td>"+tp2+mart+"</td><td><span class='odds-badge bet-odds-val'>"+(b.odds||0)+"</span></td><td class='mono'>$"+(b.amount||0).toFixed(2)+"</td><td class='mono'>$"+(b.payout||0).toFixed(2)+"</td><td class='"+(pnl>=0?"pnl-pos":"pnl-neg")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+myPctCell+"</td><td>"+eStr2+"</td><td>"+bkCell+" "+src+"</td><td>"+statusCell+"</td><td style='white-space:nowrap'><button class='btn btn-ghost btn-sm' onclick=\"openEditBet('"+editId+"','"+b._src+"','"+extraId+"',"+(b.odds||0)+")\">Edit</button>"+(b._src==="manual"?"<button class='btn btn-red btn-sm' onclick=\"deleteBet('"+b.id+"')\">x</button>":"")+"</td></tr>";
-    });
-    h+="</tbody></table></div>";el.innerHTML=h;
+  sbGet(q).then(function(manual){
+    betsAll=manual.filter(function(b){return!b.notes||b.notes.indexOf("stake:")!==0;});
+    betsPage=1;
+    renderBetsPage();
   });
+}
+function renderBetsPage(){
+  var el=document.getElementById("bets-body");
+  var all=betsAll;
+  if(!all.length){el.innerHTML='<div class="empty">No bets found</div>';return;}
+  var totalPages=Math.ceil(all.length/betsPerPage);
+  if(betsPage>totalPages)betsPage=totalPages;
+  var start=(betsPage-1)*betsPerPage;
+  var pageItems=all.slice(start,start+betsPerPage);
+  var h='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Selection</th><th>Type</th><th>Odds</th><th>Amount</th><th>Payout</th><th>P&L</th><th>My%</th><th>Edge</th><th>Bookmaker</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  pageItems.forEach(function(b){
+    b._src="manual";
+    var pnl=(b.payout||0)-(b.amount||0);
+    var isPending=b.status==="pending";
+    var autoScore=b.notes&&b.notes.indexOf("auto:FT:")===0?' <span style="color:var(--text3);font-size:11px">'+b.notes.split("auto:FT:")[1]+'</span>':"";
+    var oc=b.status==="win"?'<span class="badge bw">WIN</span>':b.status==="loss"?'<span class="badge bl">LOSS</span>':'<span class="badge bp">PEND</span>';
+    var tp2=b.bet_type==="trixie"?'<span class="badge bm">TRIX</span>':b.bet_type==="patent"?'<span class="badge bm">PAT</span>':'<span class="badge" style="background:var(--bg3);color:var(--text3)">SGL</span>';
+    var mart=b.martingale_series_id?'<span style="color:var(--purple);font-size:10px"> M'+(b.martingale_step||"")+"</span>":"";
+    var editId=b.id;var extraId="";
+    var myPctCell,bkCell,statusCell;
+    if(isPending){
+      myPctCell='<input class="inline-input" style="width:60px" type="number" value="'+(b.my_probability||"")+'" placeholder="%" onchange="saveInline(\''+editId+'\',\'manual\',\'my_probability\',parseFloat(this.value)||null,\'\')">';
+      bkCell='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\'manual\',\'bookmaker\',this.value,\'\')">'+bookmakers.map(function(bk2){return'<option value="'+bk2+'"'+(bk2===b.bookmaker?' selected':'')+'>'+bk2+"</option>";}).join("")+"</select>";
+      statusCell='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\'manual\',\'status\',this.value,\'\')"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
+    } else {
+      myPctCell=(b.my_probability!=null?b.my_probability+"%":'<span style="color:var(--text3)">-</span>');
+      bkCell=b.bookmaker||"";
+      statusCell=oc;
+    }
+    var edgeColor=b.status==="win"?"edge-pos":b.status==="loss"?"edge-neg":"";
+    var edgeStyle=isPending?'style="color:var(--text3)"':'';
+    var eStr2=b.edge!=null?'<span class="'+edgeColor+'" '+edgeStyle+'>'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'<span style="color:var(--text3)">-</span>';
+    h+="<tr data-id='"+b.id+"'><td class='mono' style='white-space:nowrap'>"+(b.date||"")+"</td><td style='color:var(--text);font-weight:500;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+(b.match||"")+autoScore+"</td><td style='font-size:11px;color:var(--text3)'>"+(b.selection||"")+"</td><td>"+tp2+mart+"</td><td><span class='odds-badge bet-odds-val'>"+(b.odds||0)+"</span></td><td class='mono'>$"+(b.amount||0).toFixed(2)+"</td><td class='mono'>$"+(b.payout||0).toFixed(2)+"</td><td class='"+(pnl>=0?"pnl-pos":"pnl-neg")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+myPctCell+"</td><td>"+eStr2+"</td><td>"+bkCell+"</td><td>"+statusCell+"</td><td style='white-space:nowrap'><button class='btn btn-ghost btn-sm' onclick=\"openEditBet('"+editId+"','manual','',"+(b.odds||0)+")\">Edit</button><button class='btn btn-red btn-sm' onclick=\"deleteBet('"+b.id+"')\">x</button></td></tr>";
+  });
+  h+="</tbody></table></div>";
+  h+=pagControls(betsPage,totalPages,"gotoBetsPage");
+  el.innerHTML=h;
+}
+function gotoBetsPage(p){betsPage=p;renderBetsPage();}
+function pagControls(page,totalPages,fn){
+  if(totalPages<=1)return"";
+  var h='<div style="display:flex;justify-content:center;align-items:center;gap:8px;padding:12px">';
+  h+='<button class="btn btn-ghost btn-sm" '+(page<=1?'disabled style="opacity:.4"':'onclick="'+fn+'('+(page-1)+')"')+'>‹ Prev</button>';
+  h+='<span style="font-size:12px;color:var(--text2)">Page '+page+' / '+totalPages+'</span>';
+  h+='<button class="btn btn-ghost btn-sm" '+(page>=totalPages?'disabled style="opacity:.4"':'onclick="'+fn+'('+(page+1)+')"')+'>Next ›</button>';
+  h+='</div>';
+  return h;
 }
 
 function onBetTypeChange() {
