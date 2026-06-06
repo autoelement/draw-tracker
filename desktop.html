@@ -919,6 +919,36 @@ function saveInline(id, src, field, val, extraId) {
 }
 
 var betsPage=1;var betsPerPage=20;var betsAll=[];
+function exportCSV(rows,cols,filename){
+  if(!rows.length){showToast("No data to export",true);return;}
+  var header=cols.map(function(c){return'"'+c.label+'"';}).join(",");
+  var lines=rows.map(function(r){
+    return cols.map(function(c){
+      var v=r[c.key];if(v==null)v="";
+      return'"'+String(v).replace(/"/g,'""')+'"';
+    }).join(",");
+  });
+  var csv=header+"\n"+lines.join("\n");
+  var blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download=filename;a.click();
+  URL.revokeObjectURL(url);
+}
+function exportBets(){
+  exportCSV(betsAll,[
+    {key:"date",label:"Date"},{key:"match",label:"Match"},{key:"selection",label:"Selection"},
+    {key:"bet_type",label:"Type"},{key:"odds",label:"Odds"},{key:"amount",label:"Amount"},
+    {key:"payout",label:"Payout"},{key:"my_probability",label:"My%"},{key:"edge",label:"Edge"},
+    {key:"bookmaker",label:"Bookmaker"},{key:"status",label:"Status"}
+  ],"bets_"+new Date().toISOString().slice(0,10)+".csv");
+}
+function exportTx(){
+  exportCSV(txAll,[
+    {key:"created_at",label:"Date"},{key:"bookmaker",label:"Bookmaker"},
+    {key:"type",label:"Type"},{key:"amount",label:"Amount"},{key:"note",label:"Note"}
+  ],"transactions_"+new Date().toISOString().slice(0,10)+".csv");
+}
 function loadBets(){
   var el=document.getElementById("bets-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
