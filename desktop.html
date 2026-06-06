@@ -189,9 +189,10 @@ tr:hover td{background:var(--bg3)}
   <div class="filters-bar">
     <select class="filter-sel" id="db-bk" onchange="loadDashboard()"><option value="">All Bookmakers</option></select>
     <select class="filter-sel" id="db-range" onchange="loadDashboard()">
-      <option value="all">All Time</option><option value="month">This Month</option>
-      <option value="30">Last 30 Days</option><option value="7">Last 7 Days</option>
+      <option value="all">All Time</option><option value="year">This Year</option><option value="month">This Month</option>
+      <option value="90">Last 90 Days</option><option value="30">Last 30 Days</option><option value="7">Last 7 Days</option>
     </select>
+    <select class="filter-sel" id="db-series" onchange="loadDashboard()" style="display:none"><option value="all">All Series</option></select>
     <div class="type-tabs">
       <button class="type-tab active" onclick="setDbType('all',this)">All</button>
       <button class="type-tab" onclick="setDbType('single',this)">Singles</button>
