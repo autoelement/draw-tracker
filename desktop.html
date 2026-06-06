@@ -940,7 +940,7 @@ function loadBets() {
         statusCell='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\''+b._src+'\',\'status\',this.value,\''+extraId+'\')"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
       } else {
         var eStr=b.edge!=null?'<span class="'+(b.edge>=0?"edge-pos":"edge-neg")+'">'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'<span style="color:var(--text3)">-</span>';
-        myPctCell=(b.my_probability!=null?b.my_probability+"%":'<span style="color:var(--text3)">-</span>')+' '+eStr;
+        myPctCell=(b.my_probability!=null?b.my_probability+"%":'<span style="color:var(--text3)">-</span>');
         bkCell=b.bookmaker||"";
         statusCell=oc;
       }
