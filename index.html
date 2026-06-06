@@ -596,6 +596,7 @@ function showApp(email){
   document.getElementById("set-email").value=email||"";
   loadBookmakers().then(function(){loadDashboard();loadSettings();});
   loadMartSeries();
+  loadUpcomingMatches();
 }
 
 function refreshToken(){
