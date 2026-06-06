@@ -82,7 +82,8 @@ for b in pending_bets:
         parts=res["result"].split("-")
         won=int(parts[1])>int(parts[0]) if len(parts)==2 else False
     else:
-        outcome="win" if won else "loss"
+        won=res["is_draw"]
+    outcome="win" if won else "loss"
     payout=round(b["amount"]*b["odds"],2) if won and b.get("odds") and b.get("amount") else 0
     # skip if balance already applied (idempotent)
     already=b.get("balance_applied")
