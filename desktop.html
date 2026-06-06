@@ -888,6 +888,22 @@ function saveInline(id, src, field, val, extraId) {
         patch.edge = +(val - patch.implied_probability).toFixed(1);
       }
     }
+    // status/bookmaker change affects balance
+    if (field === "status" || field === "bookmaker") {
+      sbGet("bets?id=eq."+id+"&select=*").then(function(old){
+        var ob=old[0]||{};
+        var oldEff=betBalanceEffect(ob.status,ob.amount,ob.payout);
+        var newStatus=field==="status"?val:ob.status;
+        var newBk=field==="bookmaker"?val:ob.bookmaker;
+        var newEff=betBalanceEffect(newStatus,ob.amount,ob.payout);
+        return adjustBalance(ob.bookmaker,-oldEff).then(function(){
+          return sbPatch("bets?id=eq."+id,patch);
+        }).then(function(){
+          return adjustBalance(newBk,newEff);
+        }).then(function(){showToast("Saved!");loadBets();loadBookmakers();});
+      });
+      return;
+    }
     sbPatch("bets?id=eq." + id, patch).then(function() { showToast("Saved!"); loadBets(); });
   } else {
     var patch2 = {};
