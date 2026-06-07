@@ -797,7 +797,7 @@ function loadDashboard() {
     var best="-",br2=-999;
     Object.keys(bkMap).forEach(function(k){var r=bkMap[k].w?bkMap[k].p/bkMap[k].w*100:0;if(r>br2){br2=r;best=k;}});
     document.getElementById("s-bk").textContent=best;
-    var db=all.filter(function(b){return(b.selection||"").indexOf("Draw")!==-1;});
+    var db=all.filter(function(b){return(b.selection||"").indexOf("Draw")!==-1&&(b.status==="win"||b.status==="loss");});
     var dw=db.filter(function(b){return b.status==="win";});
     document.getElementById("s-draw").textContent=db.length?((dw.length/db.length)*100).toFixed(0)+"%":"0%";
     if (dbType==="trixie"||dbType==="patent") {
