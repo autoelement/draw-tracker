@@ -1436,7 +1436,10 @@ function loadMartingaleHistory(){
         var stepsAfterWin=0;bs.forEach(function(b){if(b.status==="win")stepsAfterWin=0;else stepsAfterWin++;});
         var isWon=bs.some(function(b){return b.status==="win";});
         var st=isWon?'<span class="badge bw">WIN</span>':s.is_active?'<span class="badge bp">ACTIVE</span>':'<span class="badge bl">ENDED</span>';
-        var tl=bs.map(function(b){var dc=b.status==="win"?"win":b.status==="loss"?"loss":"pending";var dt=b.status==="win"?"W":b.status==="loss"?"L":"P";return'<span class="series-dot '+dc+'">'+dt+"</span>";}).join(" ");
+        var maxShow=s.max_steps||7;
+        var hidden=bs.length>maxShow?bs.length-maxShow:0;
+        var shown=bs.slice(-maxShow);
+        var tl=(hidden?'<span style="color:var(--text3);font-size:11px;margin-right:4px">+'+hidden+'</span>':'')+shown.map(function(b){var dc=b.status==="win"?"win":b.status==="loss"?"loss":"pending";return'<span class="series-dot '+dc+'" style="width:14px;height:14px;padding:0"></span>';}).join("");
         var cfg="$"+(s.base_stake||5)+" x"+(s.multiplier||2)+" / "+(s.max_steps||7)+"st";
         var actBtns='<button class="btn btn-ghost btn-sm" onclick="openEditSeries('+s.id+')">Edit</button>';
         if(s.is_active){actBtns+=' <button class="btn btn-sm" style="background:var(--amber-dim);color:var(--amber);border:none;cursor:pointer;font-family:Outfit,sans-serif;font-size:11px;padding:3px 8px;border-radius:5px" onclick="deactivateSeries('+s.id+')">Stop</button>';}
