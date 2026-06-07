@@ -1166,7 +1166,6 @@ function onSeriesChange(){
 function openNewSeries(){
   sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows){var n=(rows.length?parseInt(rows[0].id):0)+1;document.getElementById("m-new-name").value="Series "+n;openM("modal-new-series");});
 }
-document.getElementById("m-add-bet-btn-wrap");
 
 function createSeries(){
   var name=document.getElementById("m-new-name").value;var base=parseFloat(document.getElementById("m-new-base").value)||5;
