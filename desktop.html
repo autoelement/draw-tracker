@@ -848,6 +848,7 @@ function loadDashboard() {
 }
 
 var pnlChartData=null;
+function drawPnlChart(bets){requestAnimationFrame(function(){_drawPnlChart(bets);});}
 function _drawPnlChart(bets) {
   var c=document.getElementById("pnlChart"),ctx=c.getContext("2d");
   var cw=c.parentNode.clientWidth-32;
@@ -902,6 +903,7 @@ function drawEdgeChart(bets) {
   ctx.textAlign="left";ctx.fillText("max "+mc,2,p+6);
 }
 
+function drawSeriesChart(bets){requestAnimationFrame(function(){_drawSeriesChart(bets);});}
 function _drawSeriesChart(bets) {
   var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
   var cw=c.parentNode.clientWidth-32;
