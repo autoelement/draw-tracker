@@ -1483,6 +1483,7 @@ function openAddBetMart(){
     document.getElementById("bet-id").value="";
     setBetMode("martingale");
 document.getElementById("bet-series-pick").value=seriesId;
+document.getElementById("bet-is-mart").value=seriesId;
     document.getElementById("bet-stake-id").value="";
     document.getElementById("bet-is-mart").value=seriesId;
     document.getElementById("modal-bet-title").textContent="Add Bet - "+series.name+" (Step "+nextStep+")";
@@ -1526,6 +1527,7 @@ function setBetMode(mode){
 }
 
 function onBetSeriesPick(){
+  if(document.getElementById("bet-is-mart").value)return;
   var seriesId=document.getElementById('bet-series-pick').value;
   if(!seriesId)return;
   var series=martSeries.find(function(s){return String(s.id)===String(seriesId);});
