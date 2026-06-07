@@ -865,7 +865,6 @@ function drawPnlChart(bets) {
   ctx.fillStyle="#7a9ab5";ctx.font="9px Space Mono";ctx.textAlign="left";
   for(var gi=0;gi<=4;gi++){var gv=mn+(rng*gi/4);ctx.fillText("$"+gv.toFixed(0),2,ys(gv)-2);}
 }
-}
 
 function drawEdgeChart(bets) {
   var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
