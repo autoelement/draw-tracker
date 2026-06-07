@@ -759,8 +759,10 @@ function loadDashboard() {
   if (range === "7") { var d2 = new Date(now-7*864e5); df = "&date=gte." + d2.toISOString().slice(0,10); }
   var q = "bets?select=*" + df;
   if (bk) q += "&bookmaker=eq." + encodeURIComponent(bk);
-  if (dbType === "martingale") q += "&martingale_series_id=not.is.null";
-  else if (dbType !== "all") q += "&bet_type=eq." + dbType;
+  if(dbType==="martingale")q+="&martingale_series_id=not.is.null";
+else if(dbType==="single")q+="&bet_type=eq.single&martingale_series_id=is.null";
+else if(dbType==="trixie")q+="&bet_type=eq.trixie&martingale_series_id=is.null";
+else if(dbType==="patent")q+="&bet_type=eq.patent&martingale_series_id=is.null";
   Promise.all([sbGet(q), sbGet("stake_bets?select=*"), sbGet("balances?select=balance")]).then(function(res) {
     var manual = res[0], stake = res[1], bals = res[2];
     bankroll = bals.reduce(function(s, b) { return s + (b.balance || 0); }, 0);
