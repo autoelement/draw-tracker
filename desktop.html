@@ -229,10 +229,8 @@ tr:hover td{background:var(--bg3)}
       <div class="stat-card"><div class="stat-label">Max Loss Run</div><div class="stat-val red" id="m-lstreak">0</div><div class="stat-sub">Consecutive losses</div></div>
     </div>
   </div>
-  <div class="chart-row">
-    <div class="chart-card"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="160"></canvas></div>
-    <div class="chart-card"><div class="chart-title" id="chart2-title">Edge Distribution</div><canvas id="edgeChart" height="160"></canvas></div>
-  </div>
+  <div class="chart-card" style="margin-bottom:20px"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="160" style="cursor:crosshair"></canvas></div>
+  <div class="chart-card" id="series-chart-card" style="margin-bottom:20px;display:none"><div class="chart-title">Series P&L</div><canvas id="edgeChart" height="160"></canvas></div>
 </div>
 
 <!-- PREDICTIONS -->
@@ -841,18 +839,21 @@ function loadDashboard() {
       document.getElementById("m-lstreak").textContent=lStreak;
     }
     drawPnlChart(all);
-    if (dbType==="martingale") { document.getElementById("chart2-title").textContent="Series P&L"; drawSeriesChart(manual); }
-    else { document.getElementById("chart2-title").textContent="Edge Distribution"; drawEdgeChart(settled); }
+    var scc=document.getElementById("series-chart-card");
+    if (dbType==="martingale") { scc.style.display=""; drawSeriesChart(manual); }
+    else { scc.style.display="none"; }
   });
 }
 
+var pnlChartData=null;
 function drawPnlChart(bets) {
   var c=document.getElementById("pnlChart"),ctx=c.getContext("2d");
   c.width=c.offsetWidth*2;c.height=320;ctx.scale(2,2);
   var w=c.offsetWidth/2,h=160,p=16;ctx.clearRect(0,0,w,h);
   var s=bets.filter(function(b){return b.status==="win"||b.status==="loss";}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
-  if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data yet",w/2,h/2);return;}
+  if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data yet",w/2,h/2);pnlChartData=null;return;}
   var cum=0,pts=s.map(function(b){cum+=(b.payout||0)-(b.amount||0);return cum;});
+  var dates=s.map(function(b){return b.date||"";});
   var mn=Math.min.apply(null,[0].concat(pts)),mx=Math.max.apply(null,[0].concat(pts)),rng=mx-mn||1;
   var xs=function(i){return p+i*(w-p*2)/(pts.length-1||1);};
   var ys=function(v){return h-p-(v-mn)/rng*(h-p*2);};
@@ -864,7 +865,22 @@ function drawPnlChart(bets) {
   ctx.strokeStyle="#00d4a0";ctx.lineWidth=2;ctx.beginPath();pts.forEach(function(v,i){if(i===0)ctx.moveTo(xs(0),ys(v));else ctx.lineTo(xs(i),ys(v));});ctx.stroke();
   ctx.fillStyle="#7a9ab5";ctx.font="9px Space Mono";ctx.textAlign="left";
   for(var gi=0;gi<=4;gi++){var gv=mn+(rng*gi/4);ctx.fillText("$"+gv.toFixed(0),2,ys(gv)-2);}
+  pnlChartData={pts:pts,dates:dates,xs:xs,ys:ys,w:w,h:h,p:p};
 }
+function pnlHover(ev){
+  if(!pnlChartData)return;
+  var c=document.getElementById("pnlChart");
+  var rect=c.getBoundingClientRect();
+  var mx=(ev.clientX-rect.left);
+  var d=pnlChartData;
+  var idx=Math.round((mx-d.p)/((d.w-d.p*2)/(d.pts.length-1||1)));
+  if(idx<0)idx=0;if(idx>=d.pts.length)idx=d.pts.length-1;
+  var tip=document.getElementById("pnl-tip");
+  if(!tip){tip=document.createElement("div");tip.id="pnl-tip";tip.style.cssText="position:fixed;background:var(--bg2);border:1px solid var(--green);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text);pointer-events:none;z-index:9999;font-family:'Space Mono',monospace";document.body.appendChild(tip);}
+  tip.innerHTML=d.dates[idx]+"<br><span style='color:var(--green)'>$"+d.pts[idx].toFixed(2)+"</span>";
+  tip.style.left=(ev.clientX+12)+"px";tip.style.top=(ev.clientY-10)+"px";tip.style.display="block";
+}
+function pnlLeave(){var tip=document.getElementById("pnl-tip");if(tip)tip.style.display="none";}
 
 function drawEdgeChart(bets) {
   var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
@@ -1570,7 +1586,7 @@ function initSettings(){
     if(!rows.length)sbPost("settings",{single_pct:2,trixie_pct:1,patent_pct:0.5});
   }).catch(function(){});
 }
-
+(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}})();
 checkAuth();
 initSettings();
 calcMartingale();
