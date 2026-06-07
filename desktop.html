@@ -951,7 +951,10 @@ function saveInline(id, src, field, val, extraId) {
         var newStatus=field==="status"?val:ob.status;
         var newBk=field==="bookmaker"?val:ob.bookmaker;
         var newApplied=true;
-        var newEff=newApplied?settledEffect(newStatus,ob.amount,ob.payout):0;
+        var effPayout=ob.payout;
+        if(newStatus==="win"&&(!ob.payout||ob.payout===0)&&ob.odds&&ob.amount){effPayout=+(ob.amount*ob.odds).toFixed(2);patch.payout=effPayout;}
+        if(newStatus==="loss"||newStatus==="pending"){effPayout=0;patch.payout=0;}
+        var newEff=settledEffect(newStatus,ob.amount,effPayout);
         patch.balance_applied=newApplied;
         return adjustBalance(ob.bookmaker,-oldEff).then(function(){
           return sbPatch("bets?id=eq."+id,patch);
