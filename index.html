@@ -914,7 +914,7 @@ function renderBetsPage(){
   pageItems.forEach(function(b){
     b._src="manual";
     var isPending=b.status==="pending";
-    var pnl=(b.payout||0)-(b.amount||0);
+    var pnl=isPending?-(b.amount||0):(b.payout||0)-(b.amount||0);
     var autoScore="";
     if(b.notes&&b.notes.indexOf("auto:FT:")===0){autoScore='<span style="font-size:11px;color:var(--text3);margin-left:6px;display:inline-block;vertical-align:middle">'+b.notes.split("auto:FT:")[1]+'</span>';}
     var oc=b.status==="win"?'<span class="bet-badge bw">WIN</span>':b.status==="loss"?'<span class="bet-badge bl">LOSS</span>':'<span class="bet-badge bp">PEND</span>';
