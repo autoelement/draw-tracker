@@ -1274,7 +1274,6 @@ function saveBet() {
     });
   }
   p.then(function(){
-    if(isMart&&martId&&status==="win"){return sbPatch("martingale_series?id=eq."+martId,{is_active:false});}
   }).then(function(){closeM("modal-bet");showToast("Bet saved!");loadBets();loadBookmakers();if(isMart)loadMartSeries();})
   .catch(function(e){showToast("Error: "+e.message,true);})
   .finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
