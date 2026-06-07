@@ -4,8 +4,6 @@ from datetime import date,datetime,timezone,timedelta
 AKEY=os.environ["ANTHROPIC_API_KEY"]
 SURL=os.environ["SUPABASE_URL"]
 SKEY=os.environ["SUPABASE_KEY"]
-TTOKEN=os.environ["TELEGRAM_BOT_TOKEN"]
-TCHAT=os.environ["TELEGRAM_CHAT_ID"]
 APIKEY=os.environ["APISPORTS_KEY"]
 TZ=timezone(timedelta(hours=4))
 HEADERS={"x-apisports-key":APIKEY}
@@ -209,5 +207,4 @@ print(f"\nTotal API requests: {total_requests}/100")
 final=f"⚽ Draw Tracker · 3 Days\n📊 Edge Model | Tbilisi Time\n📋 Saved {saved} upcoming matches\n\n"
 final+="\n".join(all_messages)
 final+=f"\n🔢 API calls: {total_requests}/100"
-requests.post(f"https://api.telegram.org/bot{TTOKEN}/sendMessage",json={"chat_id":TCHAT,"text":final})
 print("Done!")
