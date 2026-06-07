@@ -1230,7 +1230,7 @@ function openAddBetMart(){
   var series=martSeries.find(function(s){return String(s.id)===String(seriesId);});if(!series)return;
   var base=series.base_stake||5,mult=series.multiplier||2;
   sbGet("bets?martingale_series_id=eq."+seriesId+"&select=martingale_step,status,created_at&order=created_at.desc&limit=1").then(function(d){
-    var lastLoss=0;if(d.length&&(d[0].status==="loss"||d[0].status==="pending"))lastLoss=d[0].martingale_step||1; else if(d.length&&d[0].status==="pending")lastLoss=d[0].martingale_step||1;
+    var lastLoss=0;if(d.length&&d[0].status==="loss")lastLoss=d[0].martingale_step||1; else if(d.length&&d[0].status==="pending")lastLoss=(d[0].martingale_step||1)-1; else if(d.length&&d[0].status==="pending")lastLoss=d[0].martingale_step||1;
     var nextStep=lastLoss+1,nextAmt=+(base*Math.pow(mult,nextStep-1)).toFixed(2);
     setBetMode("martingale");
 document.getElementById("bet-series-pick").value=seriesId;
@@ -1283,7 +1283,7 @@ function onBetSeriesPick(){
   if(!series)return;
   var base=series.base_stake||5,mult=series.multiplier||2;
   sbGet('bets?martingale_series_id=eq.'+seriesId+'&select=martingale_step,status,created_at&order=created_at.desc&limit=1').then(function(d){
-    var lastLoss=0;if(d.length&&(d[0].status==="loss"||d[0].status==="pending"))lastLoss=d[0].martingale_step||1;
+    var lastLoss=0;if(d.length&&d[0].status==="loss")lastLoss=d[0].martingale_step||1; else if(d.length&&d[0].status==="pending")lastLoss=(d[0].martingale_step||1)-1;
     var nextStep=lastLoss+1, nextAmt=parseFloat((base*Math.pow(mult,nextStep-1)).toFixed(2));
     document.getElementById('bet-is-mart').value = seriesId;
     document.getElementById('bet-mart').value = series.name;
