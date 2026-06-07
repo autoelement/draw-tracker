@@ -848,13 +848,11 @@ function loadDashboard() {
 }
 
 var pnlChartData=null;
-function drawPnlChart(bets) {
-  requestAnimationFrame(function(){_drawPnlChart(bets);});
-}
 function _drawPnlChart(bets) {
   var c=document.getElementById("pnlChart"),ctx=c.getContext("2d");
-  c.width=c.offsetWidth*2;c.height=320;ctx.scale(2,2);
-  var w=c.offsetWidth/2,h=160,p=16;ctx.clearRect(0,0,w,h);
+  var cw=c.parentNode.clientWidth-32;
+  c.style.width=cw+"px";c.width=cw*2;c.height=320;ctx.scale(2,2);
+  var w=cw,h=160,p=16;ctx.clearRect(0,0,w,h);
   var s=bets.filter(function(b){return b.status==="win"||b.status==="loss";}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
   if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data yet",w/2,h/2);pnlChartData=null;return;}
   var cum=0,pts=s.map(function(b){cum+=(b.payout||0)-(b.amount||0);return cum;});
@@ -904,13 +902,11 @@ function drawEdgeChart(bets) {
   ctx.textAlign="left";ctx.fillText("max "+mc,2,p+6);
 }
 
-function drawSeriesChart(bets) {
-  requestAnimationFrame(function(){_drawSeriesChart(bets);});
-}
 function _drawSeriesChart(bets) {
   var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
-  c.width=c.offsetWidth*2;c.height=320;ctx.scale(2,2);
-  var w=c.offsetWidth/2,h=160,p=16;ctx.clearRect(0,0,w,h);
+  var cw=c.parentNode.clientWidth-32;
+  c.style.width=cw+"px";c.width=cw*2;c.height=320;ctx.scale(2,2);
+  var w=cw,h=160,p=16;ctx.clearRect(0,0,w,h);
   var sm={};
   bets.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]={w:0,p:0};sm[b.martingale_series_id].w+=b.amount||0;sm[b.martingale_series_id].p+=(b.payout||0)-(b.amount||0);});
   var keys=Object.keys(sm);
