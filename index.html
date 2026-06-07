@@ -1232,6 +1232,8 @@ function openAddBetMart(){
   sbGet("bets?martingale_series_id=eq."+seriesId+"&select=martingale_step,status&order=martingale_step.desc&limit=1").then(function(d){
     var lastLoss=0;if(d.length&&d[0].status==="loss")lastLoss=d[0].martingale_step||1;
     var nextStep=lastLoss+1,nextAmt=+(base*Math.pow(mult,nextStep-1)).toFixed(2);
+    setBetMode("martingale");
+document.getElementById("bet-series-pick").value=seriesId;
     document.getElementById("bet-id").value="";document.getElementById("bet-stake-id").value="";document.getElementById("bet-is-mart").value=seriesId;
     document.getElementById("modal-bet-title").textContent=series.name+" — Step "+nextStep;
     document.getElementById("bet-date").value=new Date().toISOString().slice(0,10);
