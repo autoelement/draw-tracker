@@ -827,7 +827,7 @@ else if(dbType==="patent")q+="&bet_type=eq.patent&martingale_series_id=is.null";
       document.getElementById("m-roi").className="stat-val "+(parseFloat(roi)>=0?"green":"red");
       // streaks: per selected series, or best across all
       function calcStreaks(bets){
-        var sorted=bets.slice().sort(function(a,b){return (a.martingale_step||0)-(b.martingale_step||0);});
+        var sorted=bets.slice().sort(function(a,b){return new Date(a.created_at||a.date||0)-new Date(b.created_at||b.date||0);});
         var bw=0,bl=0,cw=0,cl=0;
         sorted.forEach(function(b){
           if(b.status==="win"){cw++;cl=0;if(cw>bw)bw=cw;}
