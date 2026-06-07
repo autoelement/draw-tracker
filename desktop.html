@@ -229,8 +229,10 @@ tr:hover td{background:var(--bg3)}
       <div class="stat-card"><div class="stat-label">Max Loss Run</div><div class="stat-val red" id="m-lstreak">0</div><div class="stat-sub">Consecutive losses</div></div>
     </div>
   </div>
-  <div class="chart-card" style="margin-bottom:20px"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="160" style="cursor:crosshair"></canvas></div>
-  <div class="chart-card" id="series-chart-card" style="margin-bottom:20px;display:none"><div class="chart-title">Series P&L</div><canvas id="edgeChart" height="160"></canvas></div>
+  <div id="charts-wrap" style="display:flex;gap:12px;margin-bottom:20px">
+    <div class="chart-card" id="pnl-chart-card" style="flex:1;min-width:0"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="160" style="cursor:crosshair"></canvas></div>
+    <div class="chart-card" id="series-chart-card" style="flex:1;min-width:0;display:none"><div class="chart-title">Series P&L</div><canvas id="edgeChart" height="160"></canvas></div>
+  </div>
 </div>
 
 <!-- PREDICTIONS -->
