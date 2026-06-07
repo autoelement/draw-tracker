@@ -289,8 +289,8 @@ canvas{width:100%!important}
       <div class="stat-card"><div class="stat-label">Max Loss Run</div><div class="stat-val red" id="m-lstreak">0</div></div>
     </div>
   </div>
-  <div class="chart-card"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="140"></canvas></div>
-  <div class="chart-card"><div class="chart-title" id="chart2-title">Edge Distribution</div><canvas id="edgeChart" height="110"></canvas></div>
+  <div class="chart-card"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="140" style="width:100%;display:block"></canvas></div>
+  <div class="chart-card" id="series-chart-card" style="display:none"><div class="chart-title">Series P&L</div><canvas id="edgeChart" height="140" style="width:100%;display:block"></canvas></div>
 </div>
 
 <!-- PREDICTIONS -->
@@ -760,18 +760,23 @@ function loadDashboard(){
     if(dbType==="trixie"||dbType==="patent"){var tx=settled.filter(function(b){return b.bet_type===dbType;});var full=tx.filter(function(b){return b.status==="win";}).length;var dead=tx.filter(function(b){return b.status==="loss";}).length;var part=tx.length-full-dead;var pct=function(n){return tx.length?(n/tx.length*100).toFixed(0)+"%":"0%";};document.getElementById("t-full").textContent=pct(full);document.getElementById("t-partial").textContent=pct(part);document.getElementById("t-dead").textContent=pct(dead);}
     if(dbType==="martingale"){var seriesFilter=document.getElementById("db-series").value;var sm={};manual.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]=[];sm[b.martingale_series_id].push(b);});var keys=Object.keys(sm);var wonS=keys.filter(function(k){return sm[k].some(function(b){return b.status==="win";});});var stepsArr=wonS.map(function(k){var wb=sm[k].filter(function(b){return b.status==="win";})[0];return wb?wb.martingale_step||1:0;});var avgS=stepsArr.length?(stepsArr.reduce(function(s,v){return s+v;},0)/stepsArr.length).toFixed(1):0;document.getElementById("m-avgsteps").textContent=avgS;document.getElementById("m-roi").textContent=(roi>=0?"+":"")+roi+"%";document.getElementById("m-roi").className="stat-val "+(parseFloat(roi)>=0?"green":"red");function calcStreaks(bets){var sorted=bets.slice().sort(function(a,b){return(a.martingale_step||0)-(b.martingale_step||0);});var bw=0,bl=0,cw=0,cl=0;sorted.forEach(function(b){if(b.status==="win"){cw++;cl=0;if(cw>bw)bw=cw;}else if(b.status==="loss"){cl++;cw=0;if(cl>bl)bl=cl;}});return{w:bw,l:bl};}var wStreak=0,lStreak=0;if(seriesFilter==="all"){keys.forEach(function(k){var st=calcStreaks(sm[k]);if(st.w>wStreak)wStreak=st.w;if(st.l>lStreak)lStreak=st.l;});}else if(sm[seriesFilter]){var st2=calcStreaks(sm[seriesFilter]);wStreak=st2.w;lStreak=st2.l;}document.getElementById("m-wstreak").textContent=wStreak;document.getElementById("m-lstreak").textContent=lStreak;}
     drawPnlChart(all);
-    if(dbType==="martingale"){document.getElementById("chart2-title").textContent="Series P&L";drawSeriesChart(manual);}
-    else{document.getElementById("chart2-title").textContent="Edge Distribution";drawEdgeChart(settled);}
+    var scc=document.getElementById("series-chart-card");
+    if(dbType==="martingale"){scc.style.display="";drawSeriesChart(manual);}
+    else{scc.style.display="none";}
   });
 }
 
-function drawPnlChart(bets){
+var pnlChartData=null;
+function drawPnlChart(bets){requestAnimationFrame(function(){_drawPnlChart(bets);});}
+function _drawPnlChart(bets){
   var c=document.getElementById("pnlChart"),ctx=c.getContext("2d");
-  c.width=c.offsetWidth*2;c.height=280;ctx.scale(2,2);
-  var w=c.offsetWidth/2,h=140,p=12;ctx.clearRect(0,0,w,h);
+  var cw=c.parentNode.clientWidth-32;
+  c.style.width=cw+"px";c.width=cw*2;c.height=280;ctx.scale(2,2);
+  var w=cw,h=140,p=14;ctx.clearRect(0,0,w,h);
   var s=bets.filter(function(b){return b.status==="win"||b.status==="loss";}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
-  if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data yet",w/2,h/2);return;}
+  if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data yet",w/2,h/2);pnlChartData=null;return;}
   var cum=0,pts=s.map(function(b){cum+=(b.payout||0)-(b.amount||0);return cum;});
+  var dates=s.map(function(b){return b.date||"";});
   var mn=Math.min.apply(null,[0].concat(pts)),mx=Math.max.apply(null,[0].concat(pts)),rng=mx-mn||1;
   var xs=function(i){return p+i*(w-p*2)/(pts.length-1||1);};
   var ys=function(v){return h-p-(v-mn)/rng*(h-p*2);};
@@ -780,8 +785,24 @@ function drawPnlChart(bets){
   var g=ctx.createLinearGradient(0,p,0,h-p);g.addColorStop(0,"rgba(0,212,160,.25)");g.addColorStop(1,"rgba(0,212,160,0)");
   ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(xs(0),ys(pts[0]));pts.forEach(function(v,i){ctx.lineTo(xs(i),ys(v));});ctx.lineTo(xs(pts.length-1),h-p);ctx.lineTo(xs(0),h-p);ctx.closePath();ctx.fill();
   ctx.strokeStyle="#00d4a0";ctx.lineWidth=2;ctx.beginPath();pts.forEach(function(v,i){if(i===0)ctx.moveTo(xs(0),ys(v));else ctx.lineTo(xs(i),ys(v));});ctx.stroke();
+  ctx.fillStyle="#7a9ab5";ctx.font="9px Space Mono";ctx.textAlign="left";
+  for(var gi=0;gi<=3;gi++){var gv=mn+(rng*gi/3);ctx.fillText("$"+gv.toFixed(0),2,ys(gv)-2);}
+  pnlChartData={pts:pts,dates:dates,w:w,h:h,p:p};
 }
-
+function pnlHover(ev){
+  if(!pnlChartData)return;
+  var c=document.getElementById("pnlChart");
+  var rect=c.getBoundingClientRect();
+  var mx=(ev.clientX-rect.left);
+  var d=pnlChartData;
+  var idx=Math.round((mx-d.p)/((d.w-d.p*2)/(d.pts.length-1||1)));
+  if(idx<0)idx=0;if(idx>=d.pts.length)idx=d.pts.length-1;
+  var tip=document.getElementById("pnl-tip");
+  if(!tip){tip=document.createElement("div");tip.id="pnl-tip";tip.style.cssText="position:fixed;background:var(--bg2);border:1px solid var(--green);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text);pointer-events:none;z-index:9999;font-family:'Space Mono',monospace";document.body.appendChild(tip);}
+  tip.innerHTML=d.dates[idx]+"<br><span style='color:var(--green)'>$"+d.pts[idx].toFixed(2)+"</span>";
+  tip.style.left=(ev.clientX+12)+"px";tip.style.top=(ev.clientY-10)+"px";tip.style.display="block";
+}
+function pnlLeave(){var tip=document.getElementById("pnl-tip");if(tip)tip.style.display="none";}
 function drawEdgeChart(bets){
   var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
   c.width=c.offsetWidth*2;c.height=240;ctx.scale(2,2);
@@ -797,11 +818,13 @@ function drawEdgeChart(bets){
   ctx.fillStyle="#3a5570";ctx.font="9px Space Mono";ctx.textAlign="center";ctx.fillText("0%",zx,h-2);
 }
 
-function drawSeriesChart(bets){
+function drawSeriesChart(bets){requestAnimationFrame(function(){_drawSeriesChart(bets);});}
+function _drawSeriesChart(bets){
   var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
-  c.width=c.offsetWidth*2;c.height=240;ctx.scale(2,2);
-  var w=c.offsetWidth/2,h=120,p=12;ctx.clearRect(0,0,w,h);
-  var sm={};bets.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]={w:0,p:0};sm[b.martingale_series_id].p+=(b.payout||0)-(b.amount||0);});
+  var cw=c.parentNode.clientWidth-32;
+  c.style.width=cw+"px";c.width=cw*2;c.height=280;ctx.scale(2,2);
+  var w=cw,h=140,p=14;ctx.clearRect(0,0,w,h);
+  var sm={};bets.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]={p:0};sm[b.martingale_series_id].p+=(b.payout||0)-(b.amount||0);});
   var keys=Object.keys(sm);if(!keys.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data",w/2,h/2);return;}
   var vals=keys.map(function(k){return sm[k].p;});var mx=Math.max.apply(null,vals.map(Math.abs))||1;var bW=(w-p*2)/keys.length;
   keys.forEach(function(k,i){var x=p+i*bW,v=sm[k].p,bh=Math.abs(v)/mx*(h/2-p);ctx.fillStyle=v>=0?"rgba(0,212,160,.7)":"rgba(255,69,96,.7)";if(v>=0)ctx.fillRect(x+2,h/2-bh,bW-4,bh);else ctx.fillRect(x+2,h/2,bW-4,bh);});
@@ -1325,7 +1348,7 @@ function selectMatch(el){
   document.getElementById("bet-fixture-id").value=el.getAttribute("data-fixture");
   document.getElementById("match-dropdown").style.display="none";
 }
-
+(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}})();
 checkAuth();
 calcMartingale();
 </script>
