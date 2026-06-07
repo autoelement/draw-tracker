@@ -1405,7 +1405,7 @@ function updateSeriesPreview(seriesId){
   var series=martSeries.find(function(s){return String(s.id)===String(seriesId);});
   if(!series)return;
   var base=series.base_stake||5,mult=series.multiplier||2,steps=series.max_steps||7;
-  sbGet("bets?martingale_series_id=eq."+seriesId+"&select=*&order=martingale_step.asc").then(function(bets){
+  sbGet("bets?martingale_series_id=eq."+seriesId+"&select=*&order=created_at.asc").then(function(bets){
     var lastLoss=0;
     bets.forEach(function(b){if(b.status==="loss")lastLoss=b.martingale_step||1;else if(b.status==="win")lastLoss=0;});
     var nextStep=lastLoss+1,nextAmt=+(base*Math.pow(mult,nextStep-1)).toFixed(2);
