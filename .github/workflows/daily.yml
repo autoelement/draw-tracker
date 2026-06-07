@@ -2,10 +2,9 @@ name: Draw Tracker Daily
 
 on:
   schedule:
-    - cron: '0 5 * * *'   # 09:00 Tbilisi - agent (predictions)
-    - cron: '0 0 * * *'   # 04:00 Tbilisi - fetch matches
-    - cron: '0 3 * * *'   # 07:00 Tbilisi - results morning
-    - cron: '0 15 * * *'  # 19:00 Tbilisi - results evening
+    - cron: '0 5 * * *'
+    - cron: '0 3 * * *'
+    - cron: '0 15 * * *'
   workflow_dispatch:
     inputs:
       job:
@@ -15,7 +14,6 @@ on:
         type: choice
         options:
           - results
-          - fetch_matches
 
 jobs:
   agent:
