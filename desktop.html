@@ -1131,7 +1131,7 @@ function onStatusChange() {
 function openAddBet() {
   document.getElementById("bet-id").value="";
   document.getElementById("bet-stake-id").value="";
-  document.getElementById("bet-is-mart").value="";
+  document.getElementById("bet-is-mart").value=b.martingale_series_id||"";
   var fxEl=document.getElementById("bet-fixture-id");if(fxEl)fxEl.value="";
   var mdEl=document.getElementById("match-dropdown");if(mdEl)mdEl.style.display="none";
   document.getElementById("modal-bet-title").textContent="Add Bet";
