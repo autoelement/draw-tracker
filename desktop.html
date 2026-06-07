@@ -1406,7 +1406,11 @@ function updateSeriesPreview(seriesId){
   var base=series.base_stake||5,mult=series.multiplier||2,steps=series.max_steps||7;
   sbGet("bets?martingale_series_id=eq."+seriesId+"&select=*&order=created_at.asc").then(function(bets){
     var lastLoss=0;
-    bets.forEach(function(b){if(b.status==="loss")lastLoss=b.martingale_step||1;else if(b.status==="win")lastLoss=0;});
+var sortedForNext=bets.slice().sort(function(a,b){return new Date(a.created_at||0)-new Date(b.created_at||0);});
+var lastWinForNext=-1;
+sortedForNext.forEach(function(b,i){if(b.status==="win")lastWinForNext=i;});
+var cycleForNext=lastWinForNext>=0?sortedForNext.slice(lastWinForNext+1):sortedForNext;
+cycleForNext.forEach(function(b){if(b.status==="loss")lastLoss=b.martingale_step||1;});
     var nextStep=lastLoss+1,nextAmt=+(base*Math.pow(mult,nextStep-1)).toFixed(2);
     var nbEl=document.getElementById("next-bet-display");
     if(nextStep<=steps){nbEl.innerHTML='<div class="next-bet"><div><div class="next-bet-label">Next Bet - Step '+nextStep+" / "+steps+'</div><div class="next-bet-amount">$'+nextAmt+'</div></div><div style="color:var(--text3);font-size:11px">x'+mult+" | "+bets.length+" bets done</div></div>";}
