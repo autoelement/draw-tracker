@@ -1201,7 +1201,7 @@ function loadMartingaleHistory(){
   sbGet("martingale_series?select=*&order=created_at.desc").then(function(series){
     var el=document.getElementById("mart-history");
     if(!series.length){el.innerHTML='<div class="empty">No series yet</div>';return;}
-    Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=martingale_step.asc");})).then(function(allBets){
+    Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=created_at.asc");})).then(function(allBets){
       var h="";
       series.forEach(function(s,si){
         var bs=allBets[si];var settledBs=bs.filter(function(b){return b.status==="win"||b.status==="loss";});var tw=bs.reduce(function(t,b){return t+(b.amount||0);},0);var tr=settledBs.reduce(function(t,b){return t+(b.payout||0);},0);var pnl=tr-settledBs.reduce(function(t,b){return t+(b.amount||0);},0);
