@@ -1429,7 +1429,7 @@ function loadMartingaleHistory(){
   sbGet("martingale_series?select=*&order=created_at.desc").then(function(series){
     var el=document.getElementById("mart-history");
     if(!series.length){el.innerHTML='<div class="empty">No martingale series yet</div>';return;}
-    Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=martingale_step.asc");})).then(function(allBets){
+    Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=created_at.asc");})).then(function(allBets){
       var h='<table><thead><tr><th>Series</th><th>Config</th><th>Steps</th><th>Staked</th><th>Return</th><th>P&L</th><th>Status</th><th>Timeline</th><th>Actions</th></tr></thead><tbody>';
       series.forEach(function(s,si){
         var bs=allBets[si];
