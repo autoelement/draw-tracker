@@ -1035,8 +1035,8 @@ function renderBetsPage(){
   var h='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Selection</th><th>Type</th><th>Odds</th><th>Amount</th><th>Payout</th><th>P&L</th><th>My%</th><th>Edge</th><th>Bookmaker</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
   pageItems.forEach(function(b){
     b._src="manual";
-    var pnl=(b.payout||0)-(b.amount||0);
     var isPending=b.status==="pending";
+    var pnl=isPending?0:(b.payout||0)-(b.amount||0);
     var autoScore=b.notes&&b.notes.indexOf("auto:FT:")===0?' <span style="color:var(--text3);font-size:11px">'+b.notes.split("auto:FT:")[1]+'</span>':"";
     var oc=b.status==="win"?'<span class="badge bw">WIN</span>':b.status==="loss"?'<span class="badge bl">LOSS</span>':'<span class="badge bp">PEND</span>';
     var tp2=b.bet_type==="trixie"?'<span class="badge bm">TRIX</span>':b.bet_type==="patent"?'<span class="badge bm">PAT</span>':'<span class="badge" style="background:var(--bg3);color:var(--text3)">SGL</span>';
