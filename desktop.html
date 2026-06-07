@@ -950,7 +950,7 @@ function saveInline(id, src, field, val, extraId) {
         var oldEff=ob.balance_applied?settledEffect(ob.status,ob.amount,ob.payout):0;
         var newStatus=field==="status"?val:ob.status;
         var newBk=field==="bookmaker"?val:ob.bookmaker;
-        var newApplied=(newStatus==="win"||newStatus==="loss");
+        var newApplied=true;
         var newEff=newApplied?settledEffect(newStatus,ob.amount,ob.payout):0;
         patch.balance_applied=newApplied;
         return adjustBalance(ob.bookmaker,-oldEff).then(function(){
@@ -1245,7 +1245,7 @@ function saveBet() {
   var fixtureId=parseInt(document.getElementById("bet-fixture-id").value)||null;
   var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:martId,martingale_step:martStep,notes:notes};
   var newEff=settledEffect(status,amt,payout);
-  row.balance_applied=(status==="win"||status==="loss");
+  row.balance_applied=true;
   var p;
   if(stakeId){row.notes="stake:"+stakeId;row.bookmaker="Stake";p=id?sbPatch("bets?id=eq."+id,row):sbPost("bets",row);}
   else if(id){
@@ -1286,6 +1286,7 @@ function settledEffect(status, amount, payout){
   var amt=amount||0, pay=payout||0;
   if(status==="win") return pay-amt;
   if(status==="loss") return -amt;
+  if(status==="pending") return -amt;
   return 0;
 }
 function deleteBet(id){confirmAction("Delete this bet?",function(){
