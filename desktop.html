@@ -1412,10 +1412,16 @@ function updateSeriesPreview(seriesId){
     var nbEl=document.getElementById("next-bet-display");
     if(nextStep<=steps){nbEl.innerHTML='<div class="next-bet"><div><div class="next-bet-label">Next Bet - Step '+nextStep+" / "+steps+'</div><div class="next-bet-amount">$'+nextAmt+'</div></div><div style="color:var(--text3);font-size:11px">x'+mult+" | "+bets.length+" bets done</div></div>";}
     else{nbEl.innerHTML='<div class="next-bet" style="border-color:var(--red)"><div class="next-bet-label" style="color:var(--red)">Max steps reached!</div></div>';}
-    var sd="";
-    for(var i=0;i<steps;i++){
-      var step=i+1,betForStep=null;
-      bets.forEach(function(b){if((b.martingale_step||1)===step)betForStep=b;});
+    // Find last win index
+var lastWinIdx=-1;
+var sortedBets=bets.slice().sort(function(a,b){return new Date(a.created_at||0)-new Date(b.created_at||0);});
+sortedBets.forEach(function(b,i){if(b.status==="win")lastWinIdx=i;});
+var currentCycleBets=lastWinIdx>=0?sortedBets.slice(lastWinIdx+1):sortedBets;
+
+var sd="";
+for(var i=0;i<steps;i++){
+  var step=i+1,betForStep=null;
+  currentCycleBets.forEach(function(b){if((b.martingale_step||1)===step)betForStep=b;});
       var cls="mart-step",stepAmt=+(base*Math.pow(mult,i)).toFixed(2),label="Step "+step+" | $"+stepAmt;
       if(betForStep){if(betForStep.status==="win"){cls+=" win";label+=" WIN";}else if(betForStep.status==="loss"){cls+=" loss";label+=" LOSS";}else{cls+=" current";label+=" PEND";}}
       else if(step===nextStep){cls+=" current";}
