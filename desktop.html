@@ -212,7 +212,7 @@ tr:hover td{background:var(--bg3)}
     <div class="stat-card" onclick="showPage('balances',document.getElementById('nav-balances'));" style="cursor:pointer"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div></div>
     <div class="stat-card"><div class="stat-label">Best Bookmaker</div><div class="stat-val green" id="s-bk">-</div><div class="stat-sub">By ROI</div></div>
     <div class="stat-card"><div class="stat-label">Avg Odds</div><div class="stat-val amber" id="s-odds">0.00</div><div class="stat-sub">Settled bets</div></div>
-    <div class="stat-card"><div class="stat-label">Draw Accuracy</div><div class="stat-val" id="s-draw">0%</div><div class="stat-sub">Draw picks</div></div>
+    <div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val" id="s-pf">0.00</div><div class="stat-sub">Wins ÷ Losses</div></div>
   </div>
   <div id="trixie-section" style="display:none">
     <div class="trix-grid">
@@ -797,9 +797,11 @@ function loadDashboard() {
     var best="-",br2=-999;
     Object.keys(bkMap).forEach(function(k){var r=bkMap[k].w?bkMap[k].p/bkMap[k].w*100:0;if(r>br2){br2=r;best=k;}});
     document.getElementById("s-bk").textContent=best;
-    var db=all.filter(function(b){return(b.selection||"").indexOf("Draw")!==-1&&(b.status==="win"||b.status==="loss");});
-    var dw=db.filter(function(b){return b.status==="win";});
-    document.getElementById("s-draw").textContent=db.length?((dw.length/db.length)*100).toFixed(0)+"%":"0%";
+    var grossWin=wins.reduce(function(s,b){return s+((b.payout||0)-(b.amount||0));},0);
+    var grossLoss=settled.filter(function(b){return b.status==="loss";}).reduce(function(s,b){return s+(b.amount||0);},0);
+    var pf=grossLoss>0?(grossWin/grossLoss).toFixed(2):(grossWin>0?"∞":"0.00");
+    document.getElementById("s-pf").textContent=pf;
+    document.getElementById("s-pf").className="stat-val "+(parseFloat(pf)>=1||pf==="∞"?"green":"red");
     if (dbType==="trixie"||dbType==="patent") {
       var tx=settled.filter(function(b){return b.bet_type===dbType;});
       var full=tx.filter(function(b){return b.status==="win";}).length;
