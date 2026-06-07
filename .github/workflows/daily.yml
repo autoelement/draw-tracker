@@ -14,10 +14,11 @@ on:
         type: choice
         options:
           - results
+          - agent
 
 jobs:
   agent:
-    if: github.event.schedule == '0 5 * * *'
+    if: github.event.schedule == '0 5 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'agent')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,21 +29,6 @@ jobs:
       - run: python agent.py
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_API }}
-          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
-
-  fetch_matches:
-    if: github.event.schedule == '0 0 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'fetch_matches')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - run: pip install requests
-      - run: python fetch_matches.py
-        env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_API }}
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
