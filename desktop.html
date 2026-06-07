@@ -878,7 +878,9 @@ function drawEdgeChart(bets) {
   var mc=Math.max.apply(null,cnt)||1,bW=(w-p*2)/bins;
   cnt.forEach(function(c2,i){var x=p+i*bW,bh=(c2/mc)*(h-p*2),ev=emin+i*bw;ctx.fillStyle=ev>=0?"rgba(0,212,160,.6)":"rgba(255,69,96,.6)";ctx.fillRect(x+1,h-p-bh,bW-2,bh);});
   var zx=p+((0-emin)/bw)*bW;ctx.strokeStyle="#3a5570";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(zx,p);ctx.lineTo(zx,h-p);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle="#3a5570";ctx.font="10px Space Mono";ctx.textAlign="center";ctx.fillText("0%",zx,h-4);
+  ctx.fillStyle="#7a9ab5";ctx.font="9px Space Mono";ctx.textAlign="center";
+  ctx.fillText("-20%",p+8,h-2);ctx.fillText("0%",zx,h-2);ctx.fillText("+20%",w-p-8,h-2);
+  ctx.textAlign="left";ctx.fillText("max "+mc,2,p+6);
 }
 
 function drawSeriesChart(bets) {
