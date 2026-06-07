@@ -1478,6 +1478,8 @@ function openAddBetMart(){
     if(d.length&&d[0].status==="loss")lastLoss=d[0].martingale_step||1;
     var nextStep=lastLoss+1,nextAmt=+(base*Math.pow(mult,nextStep-1)).toFixed(2);
     document.getElementById("bet-id").value="";
+    setBetMode("martingale");
+document.getElementById("bet-series-pick").value=seriesId;
     document.getElementById("bet-stake-id").value="";
     document.getElementById("bet-is-mart").value=seriesId;
     document.getElementById("modal-bet-title").textContent="Add Bet - "+series.name+" (Step "+nextStep+")";
