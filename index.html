@@ -1082,7 +1082,7 @@ function saveBet(){
       return adjustBalance(bk,row.balance_applied?newEff:0);
     });
   }
-  p.then(function(){if(isMart&&status==="win")return sbPatch("martingale_series?id=eq."+isMart,{is_active:false});})
+  p.then(function(){})
   .then(function(){closeM("modal-bet");showToast("Bet saved!");loadBets();loadBookmakers();if(isMart)loadMartSeries();})
   .catch(function(e){showToast("Error: "+e.message,true);}).finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
 }
