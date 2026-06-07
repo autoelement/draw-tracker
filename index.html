@@ -859,9 +859,12 @@ function saveInline(id,src,field,val,extraId){
         var oldEff=ob.balance_applied?settledEffect(ob.status,ob.amount,ob.payout):0;
         var newStatus=field==="status"?val:ob.status;
         var newBk=field==="bookmaker"?val:ob.bookmaker;
-        var newApplied=(newStatus==="win"||newStatus==="loss");
+        var newApplied=true;
         patch.balance_applied=newApplied;
-        var newEff=newApplied?settledEffect(newStatus,ob.amount,ob.payout):0;
+        var effPayout=ob.payout;
+        if(newStatus==="win"&&(!ob.payout||ob.payout===0)&&ob.odds&&ob.amount){effPayout=+(ob.amount*ob.odds).toFixed(2);patch.payout=effPayout;}
+        if(newStatus==="loss"||newStatus==="pending"){effPayout=0;patch.payout=0;}
+        var newEff=settledEffect(newStatus,ob.amount,effPayout);
         return adjustBalance(ob.bookmaker,-oldEff).then(function(){
           return sbPatch("bets?id=eq."+id,patch);
         }).then(function(){
@@ -899,8 +902,8 @@ function renderBetsPage(){
   var h="";
   pageItems.forEach(function(b){
     b._src="manual";
-    var pnl=(b.payout||0)-(b.amount||0);
     var isPending=b.status==="pending";
+    var pnl=(b.payout||0)-(b.amount||0);
     var autoScore="";
     if(b.notes&&b.notes.indexOf("auto:FT:")===0){autoScore='<span style="font-size:11px;color:var(--text3);margin-left:6px;display:inline-block;vertical-align:middle">'+b.notes.split("auto:FT:")[1]+'</span>';}
     var oc=b.status==="win"?'<span class="bet-badge bw">WIN</span>':b.status==="loss"?'<span class="bet-badge bl">LOSS</span>':'<span class="bet-badge bp">PEND</span>';
@@ -912,7 +915,7 @@ function renderBetsPage(){
     var matchDisplay=(b.match||"—")+(autoScore?' <span style="color:var(--text3);font-size:13px">'+b.notes.split("auto:FT:")[1]+'</span>':"");
     h+='<div class="bet-card"><div class="bet-card-top"><div class="bet-match">'+matchDisplay+'</div>'+oc+'</div>';
     h+='<div class="bet-meta"><span class="bet-tag">'+(b.date||"")+'</span><span class="bet-tag"><strong>'+selS+'</strong></span><span class="bet-tag"><span class="odds-badge">'+(b.odds||0)+'</span></span>'+(b.league?'<span class="bet-tag">'+(b.league)+'</span>':"")+tp2+mart+'</div>';
-    h+='<div class="bet-nums"><div><div class="bet-num-label">Amount</div><div class="bet-num-val">$'+((b.amount||0).toFixed(2))+'</div></div><div><div class="bet-num-label">Payout</div><div class="bet-num-val">$'+((b.payout||0).toFixed(2))+'</div></div><div><div class="bet-num-label">P&L</div><div class="bet-num-val '+(pnl>=0?"pnl-pos":"pnl-neg")+'">'+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+'</div></div></div>';
+    h+='<div class="bet-nums"><div><div class="bet-num-label">Amount</div><div class="bet-num-val">$'+((b.amount||0).toFixed(2))+'</div></div><div><div class="bet-num-label">Payout</div><div class="bet-num-val">$'+((b.payout||0).toFixed(2))+'</div></div><div><div class="bet-num-label">P&L</div><div class="bet-num-val '+(isPending?"":(pnl>=0?"pnl-pos":"pnl-neg"))+'" style="'+(isPending?"color:var(--text3)":"")+'">'+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+'</div></div></div>';
     if(isPending){
       h+='<div class="bet-actions" style="flex-wrap:wrap;gap:6px">';
       h+='<input class="inline-input" style="width:70px" type="number" value="'+(b.my_probability||"")+'" placeholder="My%" onchange="saveInline(\''+editId+'\',\'manual\',\'my_probability\',parseFloat(this.value)||null,\'\')">';
@@ -1049,7 +1052,7 @@ function saveBet(){
   var fixtureId=parseInt(document.getElementById("bet-fixture-id").value)||null;
   var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:isMart||null,martingale_step:martStep,notes:notes,fixture_id:fixtureId};
   var newEff=settledEffect(status,amt,payout);
-  row.balance_applied=(status==="win"||status==="loss");
+  row.balance_applied=true;
   var p;
   if(stakeId){row.notes="stake:"+stakeId;row.bookmaker="Stake";p=id?sbPatch("bets?id=eq."+id,row):sbPost("bets",row);}
   else if(id){
@@ -1073,7 +1076,13 @@ function saveBet(){
   .catch(function(e){showToast("Error: "+e.message,true);}).finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
 }
 
-function adjustBalance(bk,delta){   if(!bk||bk==="Stake"||!delta)return Promise.resolve();   return sbGet("balances?bookmaker=eq."+encodeURIComponent(bk)+"&select=balance").then(function(ex){     if(!ex.length)return;     var nb=(ex[0].balance||0)+delta;     return sbPatch("balances?bookmaker=eq."+encodeURIComponent(bk),{balance:nb,updated_at:new Date().toISOString()});   }); } function settledEffect(status,amount,payout){   var amt=amount||0,pay=payout||0;   if(status==="win")return pay-amt;   if(status==="loss")return -amt;   return 0; } function deleteBet(id){confirmAction("Delete this bet?",function(){   sbGet("bets?id=eq."+id+"&select=*").then(function(old){     var ob=old[0]||{};     var eff=ob.balance_applied?settledEffect(ob.status,ob.amount,ob.payout):0;     return adjustBalance(ob.bookmaker,-eff).then(function(){return sbDelete("bets?id=eq."+id);});   }).then(function(){showToast("Deleted!");loadBets();loadBookmakers();}); });}
+function adjustBalance(bk,delta){   if(!bk||bk==="Stake"||!delta)return Promise.resolve();   return sbGet("balances?bookmaker=eq."+encodeURIComponent(bk)+"&select=balance").then(function(ex){     if(!ex.length)return;     var nb=(ex[0].balance||0)+delta;     return sbPatch("balances?bookmaker=eq."+encodeURIComponent(bk),{balance:nb,updated_at:new Date().toISOString()});   }); } function settledEffect(status,amount,payout){
+  var amt=amount||0,pay=payout||0;
+  if(status==="win")return pay-amt;
+  if(status==="loss")return -amt;
+  if(status==="pending")return -amt;
+  return 0;
+} function deleteBet(id){confirmAction("Delete this bet?",function(){   sbGet("bets?id=eq."+id+"&select=*").then(function(old){     var ob=old[0]||{};     var eff=ob.balance_applied?settledEffect(ob.status,ob.amount,ob.payout):0;     return adjustBalance(ob.bookmaker,-eff).then(function(){return sbDelete("bets?id=eq."+id);});   }).then(function(){showToast("Deleted!");loadBets();loadBookmakers();}); });}
 var txPage=1;var txPerPage=20;var txAll=[];
 function renderTxPage(){
   var tb=document.getElementById("tx-body");
