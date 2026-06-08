@@ -616,7 +616,7 @@ function showApp(email){
   document.getElementById("app").style.display="block";
   var nu=document.getElementById("nav-user");if(nu)nu.textContent=email?email.split("@")[0]:"";
   document.getElementById("set-email").value=email||"";
-loadBookmakers().then(function(){loadDashboard();loadSettings();loadUpcomingMatches();loadMartSeries();});
+loadBookmakers().then(function(){loadSettings().then(function(){loadDashboard();});loadUpcomingMatches();loadMartSeries();});
 }
 function syncResults(){
   var token=localStorage.getItem("gh_token");
@@ -685,8 +685,8 @@ function loadMartSeries() {
   });
 }
 
-function loadSettings() {
-  sbGet("settings?select=*&limit=1").then(function(rows) {
+function loadSettings(){
+  return sbGet("settings?select=*&limit=1").then(function(rows){
     if (rows.length) {
       settings = rows[0];
       document.getElementById("set-single").value = settings.single_pct || 0;
