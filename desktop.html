@@ -515,10 +515,13 @@ tr:hover td{background:var(--bg3)}
 <div class="overlay" id="modal-confirm">
   <div class="modal modal-sm">
     <div class="modal-title"><span>Confirm</span><button class="modal-close" onclick="closeM('modal-confirm')">x</button></div>
-    <p style="color:var(--text2);font-size:13px;margin-bottom:16px" id="confirm-msg">Are you sure?</p>
-    <div class="mf">
-      <button class="btn btn-ghost" onclick="closeM('modal-confirm')">Cancel</button>
-      <button class="btn btn-red" id="confirm-btn">Delete</button>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:12px" id="confirm-msg">Are you sure?</p>
+<div id="confirm-input-wrap" style="display:none;margin-bottom:12px">
+  <input type="text" class="fi" id="confirm-input" placeholder="Type to confirm">
+</div>
+<div class="mf">
+  <button class="btn btn-ghost" onclick="closeM('modal-confirm')">Cancel</button>
+  <button class="btn btn-red" id="confirm-btn">Delete</button>
     </div>
   </div>
 </div>
@@ -570,9 +573,11 @@ function showToast(msg, isErr) {
 }
 function openM(id) { document.getElementById(id).classList.add("open"); }
 function closeM(id) { document.getElementById(id).classList.remove("open"); }
-function confirmAction(msg, fn) {
-  document.getElementById("confirm-msg").textContent = msg;
-  document.getElementById("confirm-btn").onclick = function() { closeM("modal-confirm"); fn(); };
+function confirmAction(msg,fn){
+  document.getElementById("confirm-msg").textContent=msg;
+  document.getElementById("confirm-input-wrap").style.display="none";
+  document.getElementById("confirm-input").value="";
+  document.getElementById("confirm-btn").onclick=function(){closeM("modal-confirm");fn();};
   openM("modal-confirm");
 }
 
@@ -1481,8 +1486,19 @@ function saveBookmaker(){
   sbPost("balances",{bookmaker:name,balance:bal}).then(function(){closeM("modal-add-bk");document.getElementById("bk-name").value="";document.getElementById("bk-balance").value="";showToast("Added!");return loadBookmakers();}).then(function(){loadBalances();});
 }
 
-function deleteBookmaker(name){   var input=prompt("Type \""+name+"\" to confirm deletion:");   if(input!==name){showToast("Cancelled — name didn't match",true);return;}   sbDelete("balances?bookmaker=eq."+encodeURIComponent(name)).then(function(){showToast("Deleted!");return loadBookmakers();}).then(function(){loadBalances();}); }
-
+function deleteBookmaker(name){
+  document.getElementById("confirm-msg").textContent="Type \""+name+"\" to delete this bookmaker:";
+  document.getElementById("confirm-input-wrap").style.display="block";
+  document.getElementById("confirm-input").value="";
+  document.getElementById("confirm-btn").textContent="Delete";
+  document.getElementById("confirm-btn").onclick=function(){
+    if(document.getElementById("confirm-input").value!==name){showToast("Name didn't match!",true);return;}
+    closeM("modal-confirm");
+    document.getElementById("confirm-input-wrap").style.display="none";
+    sbDelete("balances?bookmaker=eq."+encodeURIComponent(name)).then(function(){showToast("Deleted!");return loadBookmakers();}).then(function(){loadBalances();});
+  };
+  openM("modal-confirm");
+}
 function calcMartingale(){
   var base=parseFloat(document.getElementById("m-base").value)||5;
   var steps=parseInt(document.getElementById("m-steps").value)||7;
