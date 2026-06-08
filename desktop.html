@@ -864,7 +864,7 @@ if(oddsCard){
       var avgS=stepsArr.length?(stepsArr.reduce(function(s,v){return s+v;},0)/stepsArr.length).toFixed(1):0;
       document.getElementById("m-avgsteps").textContent=avgS;
       var stepsCard=document.getElementById("m-avgsteps").closest(".stat-card");
-if(stepsCard)stepsCard.style.border=parseFloat(avgS)>stepsThreshold?"1px solid var(--red)":"1px solid var(--border)";
+if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border="1px solid var(--red)";     stepsCard.title="⚠️ Avg Steps "+avgS+" exceeds threshold "+stepsThreshold;   } else {     stepsCard.style.border="1px solid var(--border)";     stepsCard.title="";   } }
       document.getElementById("m-roi").textContent=(roi>=0?"+":"")+roi+"%";
       document.getElementById("m-roi").className="stat-val "+(parseFloat(roi)>=0?"green":"red");
       // streaks: per selected series, or best across all
