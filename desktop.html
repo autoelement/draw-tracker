@@ -907,23 +907,58 @@ function drawEdgeChart(bets) {
   ctx.textAlign="left";ctx.fillText("max "+mc,2,p+6);
 }
 
-function drawSeriesChart(bets){requestAnimationFrame(function(){_drawSeriesChart(bets);});}
 function _drawSeriesChart(bets) {
   var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
   var cw=c.parentNode.clientWidth-32;
   c.style.width=cw+"px";c.width=cw*2;c.height=320;ctx.scale(2,2);
   var w=cw,h=160,p=16;ctx.clearRect(0,0,w,h);
+
+  // group by series
   var sm={};
-  bets.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]={w:0,p:0};sm[b.martingale_series_id].w+=b.amount||0;sm[b.martingale_series_id].p+=(b.payout||0)-(b.amount||0);});
+  bets.filter(function(b){return b.martingale_series_id;}).forEach(function(b){
+    var k=b.martingale_series_id;
+    if(!sm[k])sm[k]={risk:0,ret:0};
+    sm[k].ret+=(b.payout||0)-(b.amount||0);
+  });
+  // calc max risk per series
+  martSeries.forEach(function(s){
+    if(!sm[s.id])return;
+    var risk=0;
+    for(var i=0;i<(s.max_steps||7);i++)risk+=+(s.base_stake||5)*Math.pow(s.multiplier||2,i);
+    sm[s.id].risk=risk;
+  });
+
   var keys=Object.keys(sm);
   if(!keys.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No series data",w/2,h/2);return;}
-  var vals=keys.map(function(k){return sm[k].p;});
-  var mx=Math.max.apply(null,vals.map(Math.abs))||1;
-  var bW=(w-p*2)/keys.length;
-  keys.forEach(function(k,i){var x=p+i*bW,v=sm[k].p,bh=Math.abs(v)/mx*(h/2-p);ctx.fillStyle=v>=0?"rgba(0,212,160,.7)":"rgba(255,69,96,.7)";if(v>=0)ctx.fillRect(x+2,h/2-bh,bW-4,bh);else ctx.fillRect(x+2,h/2,bW-4,bh);});
-  ctx.strokeStyle="#3a5570";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(p,h/2);ctx.lineTo(w-p,h/2);ctx.stroke();ctx.setLineDash([]);
-}
 
+  var maxVal=Math.max.apply(null,keys.map(function(k){return Math.max(sm[k].risk,Math.abs(sm[k].ret));}));
+  var bW=(w-p*2)/keys.length;
+  var barW=bW*0.35;
+
+  keys.forEach(function(k,i){
+    var x=p+i*bW+bW/2;
+    var risk=sm[k].risk;
+    var ret=sm[k].ret;
+    // risk bar (red, going down)
+    var rh=Math.min(risk/maxVal*(h/2-p),h/2-p);
+    ctx.fillStyle="rgba(255,69,96,.7)";
+    ctx.fillRect(x-barW-2,h/2,barW,rh);
+    // return bar (green up, red down)
+    var retH=Math.min(Math.abs(ret)/maxVal*(h/2-p),h/2-p);
+    ctx.fillStyle=ret>=0?"rgba(0,212,160,.7)":"rgba(255,69,96,.5)";
+    if(ret>=0)ctx.fillRect(x+2,h/2-retH,barW,retH);
+    else ctx.fillRect(x+2,h/2,barW,retH);
+  });
+
+  // zero line
+  ctx.strokeStyle="#3a5570";ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(p,h/2);ctx.lineTo(w-p,h/2);ctx.stroke();ctx.setLineDash([]);
+
+  // labels
+  ctx.fillStyle="#3a5570";ctx.font="9px Space Mono";ctx.textAlign="center";
+  ctx.fillText("RISK",p+barW/2,h/2+12);
+  ctx.fillText("RETURN",p+barW+barW/2+4,h/2-4);
+}
 function loadPredictions() {
   var el=document.getElementById("pred-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
