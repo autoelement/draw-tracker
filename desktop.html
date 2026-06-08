@@ -719,7 +719,10 @@ function saveSettings() {
   var row = {
     single_pct: parseFloat(document.getElementById("set-single").value) || 0,
     trixie_pct: parseFloat(document.getElementById("set-trixie").value) || 0,
-    patent_pct: parseFloat(document.getElementById("set-patent").value) || 0
+    patent_pct: parseFloat(document.getElementById("set-patent").value) || 0,
+    pf_threshold: parseFloat(document.getElementById("set-pf").value) || 1.2,
+    odds_threshold: parseFloat(document.getElementById("set-odds").value) || 2.0,
+    steps_threshold: parseFloat(document.getElementById("set-steps").value) || 5
   };
   settings = row;
   sbGet("settings?select=id&limit=1").then(function(rows) {
@@ -727,7 +730,6 @@ function saveSettings() {
     else return sbPost("settings", row);
   }).then(function() { showToast("Settings saved!"); updateSettingsPreview(); });
 }
-
 function showPage(name, el) {
   document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
   document.querySelectorAll(".nav-tab").forEach(function(t) { t.classList.remove("active"); });
