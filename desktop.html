@@ -826,8 +826,24 @@ var oddsThreshold=parseFloat(settings.odds_threshold)||2.0;
 var stepsThreshold=parseFloat(settings.steps_threshold)||5;
 var pfCard=document.getElementById("s-pf").closest(".stat-card");
 var oddsCard=document.getElementById("s-odds").closest(".stat-card");
-if(pfCard)pfCard.style.border=parseFloat(pf)<pfThreshold&&pf!=="∞"?"1px solid var(--red)":"1px solid var(--border)";
-if(oddsCard)oddsCard.style.border=parseFloat(avgO)<oddsThreshold?"1px solid var(--red)":"1px solid var(--border)";
+if(pfCard){
+  if(parseFloat(pf)<pfThreshold&&pf!=="∞"){
+    pfCard.style.border="1px solid var(--red)";
+    pfCard.title="⚠️ Profit Factor "+pf+" is below threshold "+pfThreshold;
+  } else {
+    pfCard.style.border="1px solid var(--border)";
+    pfCard.title="";
+  }
+}
+if(oddsCard){
+  if(parseFloat(avgO)<oddsThreshold){
+    oddsCard.style.border="1px solid var(--red)";
+    oddsCard.title="⚠️ Avg Odds "+avgO+" is below threshold "+oddsThreshold;
+  } else {
+    oddsCard.style.border="1px solid var(--border)";
+    oddsCard.title="";
+  }
+}
     if (dbType==="trixie"||dbType==="patent") {
       var tx=settled.filter(function(b){return b.bet_type===dbType;});
       var full=tx.filter(function(b){return b.status==="win";}).length;
