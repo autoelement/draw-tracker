@@ -901,7 +901,7 @@ if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border
 }
 
 var pnlChartData=null;
-function drawPnlChart(bets){requestAnimationFrame(function(){_drawPnlChart(bets);});}
+function drawPnlChart(bets){_drawPnlChart(bets);}
 function _drawPnlChart(bets) {
   var c=document.getElementById("pnlChart"),ctx=c.getContext("2d");
   var cw=c.parentNode.clientWidth-32;
