@@ -906,6 +906,29 @@ function drawEdgeChart(bets) {
   ctx.fillText("-20%",p+8,h-2);ctx.fillText("0%",zx,h-2);ctx.fillText("+20%",w-p-8,h-2);
   ctx.textAlign="left";ctx.fillText("max "+mc,2,p+6);
 }
+function seriesChartHover(ev){
+  var d=window._seriesChartData;if(!d)return;
+  var c=document.getElementById("edgeChart");
+  var rect=c.getBoundingClientRect();
+  var mx=(ev.clientX-rect.left)*(d.w/rect.width);
+  var tip=document.getElementById("series-tip");
+  if(!tip){tip=document.createElement("div");tip.id="series-tip";tip.style.cssText="position:fixed;background:var(--bg2);border:1px solid var(--amber);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text);pointer-events:none;z-index:9999;font-family:'Space Mono',monospace";document.body.appendChild(tip);}
+  var found=false;
+  d.keys.forEach(function(k,i){
+    var x=d.p+i*d.bW+d.bW/2;
+    if(mx>=x-d.bW/2&&mx<x+d.bW/2){
+      var s=(martSeries||[]).find(function(ms){return String(ms.id)===String(k);});
+      var name=s?s.name:"Series "+k;
+      tip.innerHTML=name+"<br><span style='color:var(--red)'>Risk: -$"+d.sm[k].risk.toFixed(2)+"</span><br><span style='color:"+(d.sm[k].ret>=0?"var(--green)":"var(--red)")+"'>Return: "+(d.sm[k].ret>=0?"+":"-")+"$"+Math.abs(d.sm[k].ret).toFixed(2)+"</span>";
+      tip.style.left=(ev.clientX+12)+"px";
+      tip.style.top=(ev.clientY-10)+"px";
+      tip.style.display="block";
+      found=true;
+    }
+  });
+  if(!found){tip.style.display="none";}
+}
+function seriesChartLeave(){var tip=document.getElementById("series-tip");if(tip)tip.style.display="none";}
 function drawSeriesChart(bets){requestAnimationFrame(function(){_drawSeriesChart(bets);});}
 function _drawSeriesChart(bets) {
   var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
@@ -961,6 +984,7 @@ function _drawSeriesChart(bets) {
   ctx.fillStyle="#3a5570";ctx.font="9px Space Mono";ctx.textAlign="center";
   ctx.fillText("RISK",p+barW/2,h/2+12);
   ctx.fillText("RETURN",p+barW+barW/2+4,h/2-4);
+  window._seriesChartData={keys:keys,sm:sm,bW:bW,barW:barW,w:w,h:h,p:p};
 }
 function loadPredictions() {
   var el=document.getElementById("pred-body");
@@ -1688,7 +1712,7 @@ function initSettings(){
     if(!rows.length)sbPost("settings",{single_pct:2,trixie_pct:1,patent_pct:0.5});
   }).catch(function(){});
 }
-(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}})();
+(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}})();
 checkAuth();
 initSettings();
 calcMartingale();
