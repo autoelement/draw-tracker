@@ -920,12 +920,16 @@ function _drawSeriesChart(bets) {
     if(!sm[k])sm[k]={risk:0,ret:0};
     sm[k].ret+=(b.payout||0)-(b.amount||0);
   });
-  // calc max risk per series
-  martSeries.forEach(function(s){
-    if(!sm[s.id])return;
-    var risk=0;
-    for(var i=0;i<(s.max_steps||7);i++)risk+=+(s.base_stake||5)*Math.pow(s.multiplier||2,i);
-    sm[s.id].risk=risk;
+  // calc max risk per series from martSeries or estimate from bets
+  keys.forEach(function(k){
+    var s=martSeries.find(function(x){return String(x.id)===String(k);});
+    if(s){
+      var risk=0;
+      for(var i=0;i<(s.max_steps||7);i++)risk+=+(s.base_stake||5)*Math.pow(s.multiplier||2,i);
+      sm[k].risk=risk;
+    } else {
+      sm[k].risk=0;
+    }
   });
 
   var keys=Object.keys(sm);
