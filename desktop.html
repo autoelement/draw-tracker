@@ -351,19 +351,19 @@ tr:hover td{background:var(--bg3)}
   <div class="settings-grid">
     <div class="settings-card">
       <div class="settings-title">Stake % of Bankroll</div>
-      <div class="fg"><label class="fl">Single Bet %</label><input type="number" class="fi" id="set-single" placeholder="0" step="0.1" min="0" max="100"></div>
-      <div class="fg"><label class="fl">Trixie Unit Stake %</label><input type="number" class="fi" id="set-trixie" placeholder="0" step="0.1" min="0" max="100"></div>
-      <div class="fg"><label class="fl">Patent Unit Stake %</label><input type="number" class="fi" id="set-patent" placeholder="0" step="0.1" min="0" max="100"></div>
+      <input type="number" class="fi" id="set-single" placeholder="0" step="0.1" min="0" max="100" oninput="updateSettingsPreview();onStakeChange()">
+      <input type="number" class="fi" id="set-trixie" placeholder="0" step="0.1" min="0" max="100" oninput="updateSettingsPreview();onStakeChange()">
+      <input type="number" class="fi" id="set-patent" placeholder="0" step="0.1" min="0" max="100" oninput="updateSettingsPreview();onStakeChange()">
       <div id="settings-preview" style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);margin-bottom:16px"></div>
       <button class="btn btn-green" style="width:100%;opacity:.4;cursor:not-allowed" id="save-stake-btn" disabled onclick="saveSettings()">Save Settings</button>
     </div>
     <div class="settings-card">
       <div class="settings-title">⚠️ Alert Thresholds</div>
-      <div class="fg"><label class="fl">Profit Factor Min</label><input type="number" class="fi" id="set-pf" placeholder="1.2" step="0.1"></div>
-      <div class="fg"><label class="fl">Avg Odds Min</label><input type="number" class="fi" id="set-odds" placeholder="2.0" step="0.1"></div>
-      <div class="fg"><label class="fl">Avg Steps Max</label><input type="number" class="fi" id="set-steps" placeholder="5" step="1"></div>
+      <input type="number" class="fi" id="set-pf" placeholder="1.2" step="0.1" oninput="onThreshChange()">
+      <input type="number" class="fi" id="set-odds" placeholder="2.0" step="0.1" oninput="onThreshChange()">
+      <input type="number" class="fi" id="set-steps" placeholder="5" step="1" oninput="onThreshChange()">
       <div id="thresholds-preview" style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);margin-bottom:16px"></div>
-      <button class="btn btn-green" style="width:100%;margin-top:6px" onclick="saveSettings()">Save</button>
+      <button class="btn btn-green" style="width:100%;opacity:.4;cursor:not-allowed" id="save-thresh-btn" disabled onclick="saveSettings()">Save</button>
     </div>
   </div>
 </div>
@@ -716,7 +716,8 @@ function updateSettingsPreview() {
     'Trixie unit: <strong>$' + trix + '</strong> (' + tp + '%) &nbsp;|&nbsp; ' +
     'Patent unit: <strong>$' + pat + '</strong> (' + pp + '%)';
 }
-
+function onStakeChange(){var b=document.getElementById("save-stake-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}}
+function onThreshChange(){var b=document.getElementById("save-thresh-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}}
 function saveSettings() {
   var row = {
     single_pct: parseFloat(document.getElementById("set-single").value) || 0,
@@ -730,7 +731,7 @@ function saveSettings() {
   sbGet("settings?select=id&limit=1").then(function(rows) {
     if (rows.length) return sbPatch("settings?id=eq." + rows[0].id, row);
     else return sbPost("settings", row);
-  }).then(function() { showToast("Settings saved!"); updateSettingsPreview(); });
+  }).then(function() { showToast("Settings saved!"); updateSettingsPreview(); var bs=document.getElementById("save-stake-btn");if(bs){bs.disabled=true;bs.style.opacity=".4";bs.style.cursor="not-allowed";}var bt=document.getElementById("save-thresh-btn");if(bt){bt.disabled=true;bt.style.opacity=".4";bt.style.cursor="not-allowed";}});
 }
 function showPage(name, el) {
   document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
