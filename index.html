@@ -698,10 +698,20 @@ function updateSettingsPreview(){
   document.getElementById('settings-preview').innerHTML='Bankroll: <strong>$'+br.toFixed(2)+'</strong><br>Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*tp/100).toFixed(2)+'</strong> ('+tp+'%) | Patent unit: <strong>$'+(br*pp/100).toFixed(2)+'</strong> ('+pp+'%)';
 }
 
-function saveSettings(){
-  var row={single_pct:parseFloat(document.getElementById("set-single").value)||0,trixie_pct:parseFloat(document.getElementById("set-trixie").value)||0,patent_pct:parseFloat(document.getElementById("set-patent").value)||0};
-  settings=row;
-  sbGet("settings?select=id&limit=1").then(function(rows){return rows.length?sbPatch("settings?id=eq."+rows[0].id,row):sbPost("settings",row);}).then(function(){showToast("Settings saved!");updateSettingsPreview();});
+function saveSettings() {
+  var row = {
+    single_pct: parseFloat(document.getElementById("set-single").value) || 0,
+    trixie_pct: parseFloat(document.getElementById("set-trixie").value) || 0,
+    patent_pct: parseFloat(document.getElementById("set-patent").value) || 0,
+    pf_threshold: parseFloat(document.getElementById("set-pf").value) || 1.2,
+    odds_threshold: parseFloat(document.getElementById("set-odds").value) || 2.0,
+    steps_threshold: parseFloat(document.getElementById("set-steps").value) || 5
+  };
+  settings = row;
+  sbGet("settings?select=id&limit=1").then(function(rows) {
+    if (rows.length) return sbPatch("settings?id=eq." + rows[0].id, row);
+    else return sbPost("settings", row);
+  }).then(function() { showToast("Settings saved!"); updateSettingsPreview(); });
 }
 
 function showPage(name,el){
