@@ -292,7 +292,7 @@ canvas{width:100%!important}
     </div>
   </div>
   <div class="chart-card"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="140" style="width:100%;display:block"></canvas></div>
-  <div class="chart-card" id="series-chart-card" style="display:none"><div class="chart-title">Series P&L</div><canvas id="edgeChart" height="140" style="width:100%;display:block"></canvas></div>
+  <div class="chart-card" id="series-chart-card" style="display:none"><div class="chart-title">Risk vs Return</div><canvas id="edgeChart" height="140" style="width:100%;display:block"></canvas></div>
 </div>
 
 <!-- PREDICTIONS -->
@@ -828,18 +828,57 @@ function drawEdgeChart(bets){
   var zx=p+((0-emin)/bw)*bW;ctx.strokeStyle="#3a5570";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(zx,p);ctx.lineTo(zx,h-p);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle="#3a5570";ctx.font="9px Space Mono";ctx.textAlign="center";ctx.fillText("0%",zx,h-2);
 }
-
+function seriesChartHover(ev){
+  var d=window._seriesChartData;if(!d)return;
+  var c=document.getElementById("edgeChart");
+  var rect=c.getBoundingClientRect();
+  var mx=(ev.clientX-rect.left)*(d.w/rect.width);
+  var tip=document.getElementById("series-tip");
+  if(!tip){tip=document.createElement("div");tip.id="series-tip";tip.style.cssText="position:fixed;background:var(--bg2);border:1px solid var(--amber);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text);pointer-events:none;z-index:9999;font-family:'Space Mono',monospace";document.body.appendChild(tip);}
+  var found=false;
+  d.keys.forEach(function(k,i){
+    var x=d.p+i*d.bW+d.bW/2;
+    if(mx>=x-d.bW/2&&mx<x+d.bW/2){
+      var s=(martSeries||[]).find(function(ms){return String(ms.id)===String(k);});
+      var name=s?s.name:"Series "+k;
+      tip.innerHTML=name+"<br><span style='color:var(--red)'>Risk: -$"+d.sm[k].risk.toFixed(2)+"</span><br><span style='color:"+(d.sm[k].ret>=0?"var(--green)":"var(--red)")+"'>Return: "+(d.sm[k].ret>=0?"+":"-")+"$"+Math.abs(d.sm[k].ret).toFixed(2)+"</span>";
+      tip.style.left=(ev.clientX+12)+"px";tip.style.top=(ev.clientY-10)+"px";tip.style.display="block";found=true;
+    }
+  });
+  if(!found){tip.style.display="none";}
+}
+function seriesChartLeave(){var tip=document.getElementById("series-tip");if(tip)tip.style.display="none";}
 function drawSeriesChart(bets){requestAnimationFrame(function(){_drawSeriesChart(bets);});}
 function _drawSeriesChart(bets){
   var c=document.getElementById("edgeChart"),ctx=c.getContext("2d");
   var cw=c.parentNode.clientWidth-32;
   c.style.width=cw+"px";c.width=cw*2;c.height=280;ctx.scale(2,2);
   var w=cw,h=140,p=14;ctx.clearRect(0,0,w,h);
-  var sm={};bets.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]={p:0};sm[b.martingale_series_id].p+=(b.payout||0)-(b.amount||0);});
-  var keys=Object.keys(sm);if(!keys.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data",w/2,h/2);return;}
-  var vals=keys.map(function(k){return sm[k].p;});var mx=Math.max.apply(null,vals.map(Math.abs))||1;var bW=(w-p*2)/keys.length;
-  keys.forEach(function(k,i){var x=p+i*bW,v=sm[k].p,bh=Math.abs(v)/mx*(h/2-p);ctx.fillStyle=v>=0?"rgba(0,212,160,.7)":"rgba(255,69,96,.7)";if(v>=0)ctx.fillRect(x+2,h/2-bh,bW-4,bh);else ctx.fillRect(x+2,h/2,bW-4,bh);});
+  var sm={};
+  bets.filter(function(b){return b.martingale_series_id;}).forEach(function(b){
+    var k=b.martingale_series_id;
+    if(!sm[k])sm[k]={risk:0,ret:0};
+    sm[k].ret+=(b.payout||0)-(b.amount||0);
+  });
+  var keys=Object.keys(sm);
+  keys.forEach(function(k){
+    var s=(martSeries||[]).find(function(x){return String(x.id)===String(k);});
+    if(s){var risk=0;for(var i=0;i<(s.max_steps||7);i++)risk+=+(s.base_stake||5)*Math.pow(s.multiplier||2,i);sm[k].risk=risk;}
+    else{sm[k].risk=0;}
+  });
+  if(!keys.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No data",w/2,h/2);return;}
+  var maxVal=Math.max.apply(null,keys.map(function(k){return Math.max(sm[k].risk,Math.abs(sm[k].ret));}));
+  var bW=(w-p*2)/keys.length;var barW=bW*0.35;
+  keys.forEach(function(k,i){
+    var x=p+i*bW+bW/2;var risk=sm[k].risk;var ret=sm[k].ret;
+    var rh=Math.min(risk/maxVal*(h/2-p),h/2-p);
+    ctx.fillStyle="rgba(255,69,96,.7)";ctx.fillRect(x-barW-2,h/2,barW,rh);
+    var retH=Math.min(Math.abs(ret)/maxVal*(h/2-p),h/2-p);
+    ctx.fillStyle=ret>=0?"rgba(0,212,160,.7)":"rgba(255,69,96,.5)";
+    if(ret>=0)ctx.fillRect(x+2,h/2-retH,barW,retH);else ctx.fillRect(x+2,h/2,barW,retH);
+  });
   ctx.strokeStyle="#3a5570";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(p,h/2);ctx.lineTo(w-p,h/2);ctx.stroke();ctx.setLineDash([]);
+  window._seriesChartData={keys:keys,sm:sm,bW:bW,barW:barW,w:w,h:h,p:p};
 }
 
 function loadPredictions(){
@@ -1407,7 +1446,7 @@ function selectMatch(el){
   document.getElementById("bet-fixture-id").value=el.getAttribute("data-fixture");
   document.getElementById("match-dropdown").style.display="none";
 }
-(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}})();
+(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}})();
 checkAuth();
 calcMartingale();
 </script>
