@@ -378,6 +378,12 @@ canvas{width:100%!important}
     <div class="fg"><label class="fl">Single Bet %</label><input type="number" class="fi" id="set-single" placeholder="0" step="0.1" oninput="updateSettingsPreview()"></div>
     <div class="fg"><label class="fl">Trixie Unit %</label><input type="number" class="fi" id="set-trixie" placeholder="0" step="0.1" oninput="updateSettingsPreview()"></div>
     <div class="fg"><label class="fl">Patent Unit %</label><input type="number" class="fi" id="set-patent" placeholder="0" step="0.1" oninput="updateSettingsPreview()"></div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+  <div class="settings-title" style="font-size:12px;margin-bottom:12px">⚠️ Alert Thresholds</div>
+  <div class="fg"><label class="fl">Profit Factor Min</label><input type="number" class="fi" id="set-pf" placeholder="1.2" step="0.1" oninput="updateSettingsPreview()"></div>
+  <div class="fg"><label class="fl">Avg Odds Min</label><input type="number" class="fi" id="set-odds" placeholder="2.0" step="0.1" oninput="updateSettingsPreview()"></div>
+  <div class="fg"><label class="fl">Avg Steps Max</label><input type="number" class="fi" id="set-steps" placeholder="5" step="1" oninput="updateSettingsPreview()"></div>
+</div>
     <div class="settings-preview" id="settings-preview"></div>
     <button class="btn btn-green" style="width:100%" onclick="saveSettings()">Save Settings</button>
   </div>
@@ -685,6 +691,9 @@ function updateSettingsPreview(){
   var sp=parseFloat(document.getElementById("set-single").value)||0;
   var tp=parseFloat(document.getElementById("set-trixie").value)||0;
   var pp=parseFloat(document.getElementById("set-patent").value)||0;
+  document.getElementById("set-pf").value=settings.pf_threshold||1.2;
+  document.getElementById("set-odds").value=settings.odds_threshold||2.0;
+  document.getElementById("set-steps").value=settings.steps_threshold||5;
   var br=bankroll||0;
   document.getElementById('settings-preview').innerHTML='Bankroll: <strong>$'+br.toFixed(2)+'</strong><br>Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*tp/100).toFixed(2)+'</strong> ('+tp+'%) | Patent unit: <strong>$'+(br*pp/100).toFixed(2)+'</strong> ('+pp+'%)';
 }
@@ -774,8 +783,15 @@ else if(dbType==="patent")q+="&bet_type=eq.patent&martingale_series_id=is.null";
     var pf=grossLoss>0?(grossWin/grossLoss).toFixed(2):(grossWin>0?"∞":"0.00");
     document.getElementById("s-pf").textContent=pf;
     document.getElementById("s-pf").className="stat-val "+(parseFloat(pf)>=1||pf==="∞"?"green":"red");
+    var pfThreshold=parseFloat(settings.pf_threshold)||1.2;
+var oddsThreshold=parseFloat(settings.odds_threshold)||2.0;
+var stepsThreshold=parseFloat(settings.steps_threshold)||5;
+var pfCard=document.getElementById("s-pf").closest(".stat-card");
+var oddsCard=document.getElementById("s-odds").closest(".stat-card");
+if(pfCard)pfCard.style.border=parseFloat(pf)<pfThreshold&&pf!=="∞"?"1px solid var(--red)":"1px solid var(--border)";
+if(oddsCard)oddsCard.style.border=parseFloat(avgO)<oddsThreshold?"1px solid var(--red)":"1px solid var(--border)";
     if(dbType==="trixie"||dbType==="patent"){var tx=settled.filter(function(b){return b.bet_type===dbType;});var full=tx.filter(function(b){return b.status==="win";}).length;var dead=tx.filter(function(b){return b.status==="loss";}).length;var part=tx.length-full-dead;var pct=function(n){return tx.length?(n/tx.length*100).toFixed(0)+"%":"0%";};document.getElementById("t-full").textContent=pct(full);document.getElementById("t-partial").textContent=pct(part);document.getElementById("t-dead").textContent=pct(dead);}
-    if(dbType==="martingale"){var seriesFilter=document.getElementById("db-series").value;var sm={};manual.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]=[];sm[b.martingale_series_id].push(b);});var keys=Object.keys(sm);var wonS=keys.filter(function(k){return sm[k].some(function(b){return b.status==="win";});});var stepsArr=wonS.map(function(k){var wb=sm[k].filter(function(b){return b.status==="win";})[0];return wb?wb.martingale_step||1:0;});var avgS=stepsArr.length?(stepsArr.reduce(function(s,v){return s+v;},0)/stepsArr.length).toFixed(1):0;document.getElementById("m-avgsteps").textContent=avgS;document.getElementById("m-roi").textContent=(roi>=0?"+":"")+roi+"%";document.getElementById("m-roi").className="stat-val "+(parseFloat(roi)>=0?"green":"red");function calcStreaks(bets){var sorted=bets.slice().sort(function(a,b){return new Date(a.created_at||a.date||0)-new Date(b.created_at||b.date||0);});var bw=0,bl=0,cw=0,cl=0;sorted.forEach(function(b){if(b.status==="win"){cw++;cl=0;if(cw>bw)bw=cw;}else if(b.status==="loss"){cl++;cw=0;if(cl>bl)bl=cl;}});return{w:bw,l:bl};}var wStreak=0,lStreak=0;if(seriesFilter==="all"){keys.forEach(function(k){var st=calcStreaks(sm[k]);if(st.w>wStreak)wStreak=st.w;if(st.l>lStreak)lStreak=st.l;});}else if(sm[seriesFilter]){var st2=calcStreaks(sm[seriesFilter]);wStreak=st2.w;lStreak=st2.l;}document.getElementById("m-wstreak").textContent=wStreak;document.getElementById("m-lstreak").textContent=lStreak;}
+    if(dbType==="martingale"){var seriesFilter=document.getElementById("db-series").value;var sm={};manual.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]=[];sm[b.martingale_series_id].push(b);});var keys=Object.keys(sm);var wonS=keys.filter(function(k){return sm[k].some(function(b){return b.status==="win";});});var stepsArr=wonS.map(function(k){var wb=sm[k].filter(function(b){return b.status==="win";})[0];return wb?wb.martingale_step||1:0;});var avgS=stepsArr.length?(stepsArr.reduce(function(s,v){return s+v;},0)/stepsArr.length).toFixed(1):0;document.getElementById("m-avgsteps").textContent=avgS;var stepsCard=document.getElementById("m-avgsteps").closest(".stat-card");if(stepsCard)stepsCard.style.border=parseFloat(avgS)>stepsThreshold?"1px solid var(--red)":"1px solid var(--border)";document.getElementById("m-roi").textContent=(roi>=0?"+":"")+roi+"%";document.getElementById("m-roi").className="stat-val "+(parseFloat(roi)>=0?"green":"red");function calcStreaks(bets){var sorted=bets.slice().sort(function(a,b){return new Date(a.created_at||a.date||0)-new Date(b.created_at||b.date||0);});var bw=0,bl=0,cw=0,cl=0;sorted.forEach(function(b){if(b.status==="win"){cw++;cl=0;if(cw>bw)bw=cw;}else if(b.status==="loss"){cl++;cw=0;if(cl>bl)bl=cl;}});return{w:bw,l:bl};}var wStreak=0,lStreak=0;if(seriesFilter==="all"){keys.forEach(function(k){var st=calcStreaks(sm[k]);if(st.w>wStreak)wStreak=st.w;if(st.l>lStreak)lStreak=st.l;});}else if(sm[seriesFilter]){var st2=calcStreaks(sm[seriesFilter]);wStreak=st2.w;lStreak=st2.l;}document.getElementById("m-wstreak").textContent=wStreak;document.getElementById("m-lstreak").textContent=lStreak;}
     drawPnlChart(all);
     var scc=document.getElementById("series-chart-card");
     if(dbType==="martingale"){scc.style.display="";drawSeriesChart(manual);}
