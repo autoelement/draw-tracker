@@ -339,7 +339,10 @@ tr:hover td{background:var(--bg3)}
   <div class="table-card">
     <div class="table-hd">
       <div class="table-title">Series History</div>
-      <button class="btn btn-ghost" onclick="loadMartingaleHistory()">Refresh</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost" onclick="exportSeriesHistory()">⬇ CSV</button>
+        <button class="btn btn-ghost" onclick="loadMartingaleHistory()">Refresh</button>
+      </div>
     </div>
     <div id="mart-history"><div class="loading"><div class="sp"></div>Loading...</div></div>
   </div>
@@ -1581,6 +1584,18 @@ for(var i=0;i<steps;i++){
     document.getElementById("m-series-display").innerHTML=sd;
   });
 }
+function exportSeriesHistory(){
+  if(!window._seriesHistoryData||!window._seriesHistoryData.length){showToast("No data to export",true);return;}
+  exportCSV(window._seriesHistoryData,[
+    {key:"name",label:"Series"},
+    {key:"config",label:"Config"},
+    {key:"total_steps",label:"Total Steps"},
+    {key:"staked",label:"Staked"},
+    {key:"returned",label:"Return"},
+    {key:"pnl",label:"P&L"},
+    {key:"status",label:"Status"}
+  ],"series_history_"+new Date().toISOString().slice(0,10)+".csv");
+}
 
 function loadMartingaleHistory(){
   sbGet("martingale_series?select=*&order=created_at.desc").then(function(series){
@@ -1614,10 +1629,18 @@ stepsAfterWin=currentCycle.length;
         h+="<tr><td style='color:var(--text);font-weight:500'>"+s.name+"</td><td style='font-size:11px;color:var(--text3)'>"+cfg+"</td><td>"+totalSteps+"/"+stepsAfterWin+"</td><td class='mono'>$"+tw.toFixed(2)+"</td><td class='mono'>$"+tr2.toFixed(2)+"</td><td class='"+(pnl>=0?"pnl-pos":"pnl-neg")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+st+"</td><td style='display:flex;gap:4px;flex-wrap:wrap;align-items:center'>"+tl+"</td><td style='white-space:nowrap'>"+actBtns+"</td></tr>";
       });
       h+="</tbody></table>";el.innerHTML=h;
+      window._seriesHistoryData=series.map(function(s,si){
+        var bs=allBets[si];
+        var settledBs=bs.filter(function(b){return b.status==="win"||b.status==="loss";});
+        var tw=bs.reduce(function(t,b){return t+(b.amount||0);},0);
+        var tr=settledBs.reduce(function(t,b){return t+(b.payout||0);},0);
+        var pnl=tr-settledBs.reduce(function(t,b){return t+(b.amount||0);},0);
+        var isWon=bs.some(function(b){return b.status==="win";});
+        return{name:s.name,config:"$"+(s.base_stake||5)+" x"+(s.multiplier||2)+" / "+(s.max_steps||7)+"st",total_steps:bs.length,staked:tw.toFixed(2),returned:tr.toFixed(2),pnl:pnl.toFixed(2),status:isWon?"WIN":s.is_active?"ACTIVE":"ENDED"};
+      });
     });
   });
 }
-
 function openAddBetMart(){
   var seriesId=document.getElementById("m-series-sel").value;
   if(!seriesId||seriesId==="__new__"){showToast("Select or create a series first",true);return;}
