@@ -347,24 +347,25 @@ tr:hover td{background:var(--bg3)}
 <div class="page" id="page-settings">
   <div class="settings-grid">
     <div class="settings-card">
-      <div class="settings-title">Stake Settings (% of Bankroll)</div>
+      <div class="settings-title">Stake % of Bankroll</div>
       <div class="fg"><label class="fl">Single Bet %</label><input type="number" class="fi" id="set-single" placeholder="0" step="0.1" min="0" max="100"></div>
       <div class="fg"><label class="fl">Trixie Unit Stake %</label><input type="number" class="fi" id="set-trixie" placeholder="0" step="0.1" min="0" max="100"></div>
       <div class="fg"><label class="fl">Patent Unit Stake %</label><input type="number" class="fi" id="set-patent" placeholder="0" step="0.1" min="0" max="100"></div>
       <div id="settings-preview" style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);margin-bottom:16px"></div>
-      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-  <div class="settings-title" style="font-size:12px;margin-bottom:12px">⚠️ Alert Thresholds</div>
-  <div class="fg"><label class="fl">Profit Factor Min</label><input type="number" class="fi" id="set-pf" placeholder="1.2" step="0.1" oninput="updateSettingsPreview()"></div>
-  <div class="fg"><label class="fl">Avg Odds Min</label><input type="number" class="fi" id="set-odds" placeholder="2.0" step="0.1" oninput="updateSettingsPreview()"></div>
-  <div class="fg"><label class="fl">Avg Steps Max</label><input type="number" class="fi" id="set-steps" placeholder="5" step="1" oninput="updateSettingsPreview()"></div>
-</div>
       <button class="btn btn-green" style="width:100%" onclick="saveSettings()">Save Settings</button>
     </div>
     <div class="settings-card">
-      <div class="settings-title">Account</div>
-      <div class="fg"><label class="fl">Email</label><input type="text" class="fi" id="set-email" readonly></div>
-      <button class="btn btn-red" style="width:100%;margin-top:8px" onclick="doLogout()">Logout</button>
+      <div class="settings-title">⚠️ Alert Thresholds</div>
+      <div class="fg"><label class="fl">Profit Factor Min</label><input type="number" class="fi" id="set-pf" placeholder="1.2" step="0.1"></div>
+      <div class="fg"><label class="fl">Avg Odds Min</label><input type="number" class="fi" id="set-odds" placeholder="2.0" step="0.1"></div>
+      <div class="fg"><label class="fl">Avg Steps Max</label><input type="number" class="fi" id="set-steps" placeholder="5" step="1"></div>
+      <button class="btn btn-green" style="width:100%;margin-top:6px" onclick="saveSettings()">Save</button>
     </div>
+  </div>
+  <div class="settings-card" style="max-width:400px">
+    <div class="settings-title">Account</div>
+    <div class="fg"><label class="fl">Email</label><input type="text" class="fi" id="set-email" readonly></div>
+    <button class="btn btn-red" style="width:100%;margin-top:8px" onclick="doLogout()">Logout</button>
   </div>
 </div>
 
