@@ -846,7 +846,7 @@ else if(dbType==="patent")q+="&bet_type=eq.patent&martingale_series_id=is.null";
     }
     drawPnlChart(all);
     var scc=document.getElementById("series-chart-card");
-    if (dbType==="martingale") { scc.style.display=""; drawSeriesChart(manual); }
+    function drawSeriesChart(bets){requestAnimationFrame(function(){_drawSeriesChart(bets);});}
     else { scc.style.display="none"; }
   });
 }
