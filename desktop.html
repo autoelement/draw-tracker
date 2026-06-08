@@ -614,7 +614,7 @@ function showApp(email){
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
   var nu=document.getElementById("nav-user");if(nu)nu.textContent=email?email.split("@")[0]:"";
-  document.getElementById("set-email").value=email||"";
+  var emailEl=document.getElementById("set-email");if(emailEl){if(emailEl.tagName==="INPUT")emailEl.value=email||"";else emailEl.textContent=email||"";}
 loadBookmakers().then(function(){loadSettings().then(function(){loadDashboard();});loadUpcomingMatches();loadMartSeries();});
 }
 function syncResults(){
