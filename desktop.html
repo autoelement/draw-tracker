@@ -1596,15 +1596,22 @@ function exportSeriesHistory(){
     {key:"status",label:"Status"}
   ],"series_history_"+new Date().toISOString().slice(0,10)+".csv");
 }
-
+function gotoSeriesPage(p){window._seriesPage=p;loadMartingaleHistory();window.scrollTo(0,0);}
 function loadMartingaleHistory(){
   sbGet("martingale_series?select=*&order=created_at.desc").then(function(series){
     var el=document.getElementById("mart-history");
     if(!series.length){el.innerHTML='<div class="empty">No martingale series yet</div>';return;}
     Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=created_at.asc");})).then(function(allBets){
+      var seriesPage=window._seriesPage||1;var seriesPerPage=20;
+var totalSeriesPages=Math.ceil(series.length/seriesPerPage);
+if(seriesPage>totalSeriesPages)seriesPage=1;
+window._seriesPage=seriesPage;
+var startS=(seriesPage-1)*seriesPerPage;
+var pageSeries=series.slice(startS,startS+seriesPerPage);
+var pageAllBets=allBets.slice(startS,startS+seriesPerPage);
       var h='<table><thead><tr><th>Series</th><th>Config</th><th>Steps</th><th>Staked</th><th>Return</th><th>P&L</th><th>Status</th><th>Timeline</th><th>Actions</th></tr></thead><tbody>';
-      series.forEach(function(s,si){
-        var bs=allBets[si];
+      pageSeries.forEach(function(s,si){
+        var bs=pagepageAllBets[si];
         var settledBs=bs.filter(function(b){return b.status==="win"||b.status==="loss";});
         var tw=bs.reduce(function(t,b){return t+(b.amount||0);},0);
         var tr2=settledBs.reduce(function(t,b){return t+(b.payout||0);},0);
@@ -1629,6 +1636,7 @@ stepsAfterWin=currentCycle.length;
         h+="<tr><td style='color:var(--text);font-weight:500'>"+s.name+"</td><td style='font-size:11px;color:var(--text3)'>"+cfg+"</td><td>"+totalSteps+"/"+stepsAfterWin+"</td><td class='mono'>$"+tw.toFixed(2)+"</td><td class='mono'>$"+tr2.toFixed(2)+"</td><td class='"+(pnl>=0?"pnl-pos":"pnl-neg")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+st+"</td><td style='display:flex;gap:4px;flex-wrap:wrap;align-items:center'>"+tl+"</td><td style='white-space:nowrap'>"+actBtns+"</td></tr>";
       });
       h+="</tbody></table>";el.innerHTML=h;
+      h+=pagControls(seriesPage,totalSeriesPages,"gotoSeriesPage");
       window._seriesHistoryData=series.map(function(s,si){
         var bs=allBets[si];
         var settledBs=bs.filter(function(b){return b.status==="win"||b.status==="loss";});
