@@ -1021,7 +1021,8 @@ function openEditBet(id,src,extraId,odds){
 if(b.martingale_series_id){
   setBetMode("martingale");
   document.getElementById("bet-series-pick").value=b.martingale_series_id;
-  document.getElementById("bet-mart").value=b.martingale_series_id;
+  var editS=martSeries.find(function(s){return String(s.id)===String(b.martingale_series_id);});
+document.getElementById("bet-mart").value=editS?editS.name:b.martingale_series_id;
   document.getElementById("bet-mart-step").value=b.martingale_step||1;
   var editSeries=martSeries.find(function(s){return String(s.id)===String(b.martingale_series_id);});
   document.getElementById("mart-bet-info-text").innerHTML="Series: <strong>"+(editSeries?editSeries.name:b.martingale_series_id)+"</strong> | Step: <strong>"+(b.martingale_step||1)+"</strong>";
@@ -1049,7 +1050,7 @@ calcBetFields();openM("modal-bet");
 if(b.martingale_series_id){
   setBetMode("martingale");
   document.getElementById("bet-series-pick").value=b.martingale_series_id;
-  document.getElementById("bet-mart").value=b.martingale_series_id;
+  document.getElementById("bet-mart").value=editSeries?editSeries.name:b.martingale_series_id;
   document.getElementById("bet-mart-step").value=b.martingale_step||1;
   var editSeries=martSeries.find(function(s){return String(s.id)===String(b.martingale_series_id);});
   document.getElementById("mart-bet-info-text").innerHTML="Series: <strong>"+(editSeries?editSeries.name:b.martingale_series_id)+"</strong> | Step: <strong>"+(b.martingale_step||1)+"</strong>";
