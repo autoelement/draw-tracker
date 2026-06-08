@@ -344,6 +344,7 @@ tr:hover td{background:var(--bg3)}
 </div>
 
 <!-- SETTINGS -->
+<input type="hidden" id="set-email">
 <div class="page" id="page-settings">
   <div class="settings-grid">
     <div class="settings-card">
@@ -361,11 +362,6 @@ tr:hover td{background:var(--bg3)}
       <div class="fg"><label class="fl">Avg Steps Max</label><input type="number" class="fi" id="set-steps" placeholder="5" step="1"></div>
       <button class="btn btn-green" style="width:100%;margin-top:6px" onclick="saveSettings()">Save</button>
     </div>
-  </div>
-  <div class="settings-card" style="max-width:400px">
-    <div class="settings-title">Account</div>
-    <div class="fg"><label class="fl">Email</label><input type="text" class="fi" id="set-email" readonly></div>
-    <button class="btn btn-red" style="width:100%;margin-top:8px" onclick="doLogout()">Logout</button>
   </div>
 </div>
 
