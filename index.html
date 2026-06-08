@@ -990,7 +990,7 @@ function calcBetFields(){
 function onStatusChange(){if(document.getElementById("bet-status").value==="loss"){document.getElementById("bet-payout").value="0";payoutManual=true;}else{payoutManual=false;calcBetFields();}}
 
 function openAddBet(){
-  document.getElementById("bet-id").value="";document.getElementById("bet-stake-id").value="";document.getElementById("bet-is-mart").value=b.martingale_series_id||"";
+  document.getElementById("bet-id").value="";document.getElementById("bet-stake-id").value="";document.getElementById("bet-is-mart").value="";
   document.getElementById("modal-bet-title").textContent="Add Bet";
   document.getElementById("bet-date").value=new Date().toISOString().slice(0,10);
   document.getElementById("bet-status").value="pending";document.getElementById("bet-type").value="single";document.getElementById("bet-sel").value="Draw (X)";
@@ -1051,6 +1051,8 @@ if(b.martingale_series_id){
   document.getElementById("bet-series-pick").value=b.martingale_series_id;
   document.getElementById("bet-mart").value=b.martingale_series_id;
   document.getElementById("bet-mart-step").value=b.martingale_step||1;
+  var editSeries=martSeries.find(function(s){return String(s.id)===String(b.martingale_series_id);});
+  document.getElementById("mart-bet-info-text").innerHTML="Series: <strong>"+(editSeries?editSeries.name:b.martingale_series_id)+"</strong> | Step: <strong>"+(b.martingale_step||1)+"</strong>";
   document.getElementById("mart-bet-info").style.display="block";
   document.getElementById("mart-extra-fields").style.display="block";
 } else {
