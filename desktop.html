@@ -846,7 +846,7 @@ else if(dbType==="patent")q+="&bet_type=eq.patent&martingale_series_id=is.null";
     }
     drawPnlChart(all);
     var scc=document.getElementById("series-chart-card");
-    function drawSeriesChart(bets){requestAnimationFrame(function(){_drawSeriesChart(bets);});}
+    if (dbType==="martingale") { scc.style.display=""; drawSeriesChart(manual); }
     else { scc.style.display="none"; }
   });
 }
@@ -921,6 +921,7 @@ function _drawSeriesChart(bets) {
     sm[k].ret+=(b.payout||0)-(b.amount||0);
   });
   // calc max risk per series from martSeries or estimate from bets
+  var keys=Object.keys(sm);
   keys.forEach(function(k){
     var s=(martSeries||[]).find(function(x){return String(x.id)===String(k);});
     if(s){
@@ -931,8 +932,6 @@ function _drawSeriesChart(bets) {
       sm[k].risk=0;
     }
   });
-
-  var keys=Object.keys(sm);
   if(!keys.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No series data",w/2,h/2);return;}
 
   var maxVal=Math.max.apply(null,keys.map(function(k){return Math.max(sm[k].risk,Math.abs(sm[k].ret));}));
