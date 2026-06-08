@@ -710,11 +710,7 @@ function updateSettingsPreview() {
   var single = +(br * sp / 100).toFixed(2);
   var trix = +(br * tp / 100).toFixed(2);
   var pat = +(br * pp / 100).toFixed(2);
-  document.getElementById("settings-preview").innerHTML =
-    'Bankroll: <strong>$' + br.toFixed(2) + '</strong><br>' +
-    'Single: <strong>$' + single + '</strong> (' + sp + '%) &nbsp;|&nbsp; ' +
-    'Trixie unit: <strong>$' + trix + '</strong> (' + tp + '%) &nbsp;|&nbsp; ' +
-    'Patent unit: <strong>$' + pat + '</strong> (' + pp + '%)';
+  document.getElementById('settings-preview').innerHTML='Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*tp/100).toFixed(2)+'</strong> ('+tp+'%) | Patent unit: <strong>$'+(br*pp/100).toFixed(2)+'</strong> ('+pp+'%)';
 }
 function onStakeChange(){var b=document.getElementById("save-stake-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}}
 function onThreshChange(){var b=document.getElementById("save-thresh-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}}
