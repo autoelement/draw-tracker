@@ -1131,7 +1131,7 @@ function onStatusChange() {
 function openAddBet() {
   document.getElementById("bet-id").value="";
   document.getElementById("bet-stake-id").value="";
-  document.getElementById("bet-is-mart").value=b.martingale_series_id||"";
+  document.getElementById("bet-is-mart").value="";
   var fxEl=document.getElementById("bet-fixture-id");if(fxEl)fxEl.value="";
   var mdEl=document.getElementById("match-dropdown");if(mdEl)mdEl.style.display="none";
   document.getElementById("modal-bet-title").textContent="Add Bet";
@@ -1177,7 +1177,8 @@ function openEditBet(id,src,extraId,odds) {
       document.getElementById("bet-notes").value="";
       document.getElementById("single-fields").style.display="block";
       document.getElementById("trixie-fields").style.display="none";
-      document.getElementById("bet-is-mart").value=b.martingale_series_id||"";
+      document.getElementById("bet-fixture-id").value=b.fixture_id||"";
+    document.getElementById("bet-is-mart").value=b.martingale_series_id||"";
 if(b.martingale_series_id){
   setBetMode("martingale");
   document.getElementById("bet-series-pick").value=b.martingale_series_id;
