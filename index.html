@@ -702,7 +702,7 @@ if(tp)tp.innerHTML="PF Min: <strong>"+(settings.pf_threshold||1.2)+"</strong> | 
   document.getElementById('settings-preview').innerHTML='Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*tp/100).toFixed(2)+'</strong> ('+tp+'%) | Patent unit: <strong>$'+(br*pp/100).toFixed(2)+'</strong> ('+pp+'%)';
 }
 function onStakeChange(){var b=document.getElementById("save-stake-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}}
-function onThreshChange(){var b=document.getElementById("save-thresh-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}}
+function onThreshChange(){   var b=document.getElementById("save-thresh-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}   var tp=document.getElementById("thresholds-preview");   if(tp)tp.innerHTML="PF Min: <strong>"+(document.getElementById("set-pf").value||1.2)+"</strong> | Odds Min: <strong>"+(document.getElementById("set-odds").value||2.0)+"</strong> | Steps Max: <strong>"+(document.getElementById("set-steps").value||5)+"</strong>"; }
 function saveSettings() {
   var row = {
     single_pct: parseFloat(document.getElementById("set-single").value) || 0,
