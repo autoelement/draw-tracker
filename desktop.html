@@ -922,7 +922,7 @@ function _drawSeriesChart(bets) {
   });
   // calc max risk per series from martSeries or estimate from bets
   keys.forEach(function(k){
-    var s=martSeries.find(function(x){return String(x.id)===String(k);});
+    var s=(martSeries||[]).find(function(x){return String(x.id)===String(k);});
     if(s){
       var risk=0;
       for(var i=0;i<(s.max_steps||7);i++)risk+=+(s.base_stake||5)*Math.pow(s.multiplier||2,i);
