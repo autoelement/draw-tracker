@@ -148,6 +148,8 @@ tr:hover td{background:var(--bg3)}
 .loading{text-align:center;padding:30px;color:var(--text3);font-size:12px}
 .sp{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--border2) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px;display:inline-block}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--green);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--green);z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s}
 .toast.show{transform:translateY(0);opacity:1}
 </style>
@@ -763,6 +765,10 @@ function loadDashboard() {
 else if(dbType==="single")q+="&bet_type=eq.single&martingale_series_id=is.null";
 else if(dbType==="trixie")q+="&bet_type=eq.trixie&martingale_series_id=is.null";
 else if(dbType==="patent")q+="&bet_type=eq.patent&martingale_series_id=is.null";
+  ["s-pnl","s-wr","s-roi","s-edge","s-bankroll","s-active","s-odds","s-pf"].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el)el.innerHTML='<span class="skeleton" style="width:80px;height:22px">&nbsp;</span>';
+});
   Promise.all([sbGet(q), sbGet("stake_bets?select=*"), sbGet("balances?select=balance")]).then(function(res) {
     var manual = res[0], stake = res[1], bals = res[2];
     bankroll = bals.reduce(function(s, b) { return s + (b.balance || 0); }, 0);
