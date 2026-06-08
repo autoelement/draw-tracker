@@ -607,7 +607,7 @@ function showApp(email){
   document.getElementById("app").style.display="block";
   document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
   document.getElementById("set-email").value=email||"";
-  loadBookmakers().then(function(){loadDashboard();loadSettings();});
+  loadBookmakers().then(function(){loadSettings().then(function(){loadDashboard();});});
   loadMartSeries();
   loadUpcomingMatches();
 }
@@ -681,7 +681,7 @@ function loadMartSeries(){
 }
 
 function loadSettings(){
-  sbGet("settings?select=*&limit=1").then(function(rows){
+  return sbGet("settings?select=*&limit=1").then(function(rows){
     if(rows.length){settings=rows[0];document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;}
     updateSettingsPreview();
   }).catch(function(){});
