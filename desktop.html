@@ -1481,7 +1481,7 @@ function saveBookmaker(){
   sbPost("balances",{bookmaker:name,balance:bal}).then(function(){closeM("modal-add-bk");document.getElementById("bk-name").value="";document.getElementById("bk-balance").value="";showToast("Added!");return loadBookmakers();}).then(function(){loadBalances();});
 }
 
-function deleteBookmaker(name){confirmAction("Delete "+name+"?",function(){sbDelete("balances?bookmaker=eq."+encodeURIComponent(name)).then(function(){showToast("Deleted!");return loadBookmakers();}).then(function(){loadBalances();});});}
+function deleteBookmaker(name){   var input=prompt("Type \""+name+"\" to confirm deletion:");   if(input!==name){showToast("Cancelled — name didn't match",true);return;}   sbDelete("balances?bookmaker=eq."+encodeURIComponent(name)).then(function(){showToast("Deleted!");return loadBookmakers();}).then(function(){loadBalances();}); }
 
 function calcMartingale(){
   var base=parseFloat(document.getElementById("m-base").value)||5;
