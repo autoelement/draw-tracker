@@ -1191,6 +1191,7 @@ function saveBet(){
   if(status==="loss"||status==="pending")payout=0;
   if(!payoutManual&&odds>0&&amt>0)payout=parseFloat((amt*odds).toFixed(2));
   var martStep=isMart?parseInt(document.getElementById("bet-mart-step").value)||1:1;
+  if(isMart&&!document.getElementById("bet-series-pick").value){showToast("Please select a series",true);btn.textContent="Save Bet";btn.disabled=false;return;}
   var fixtureId=parseInt(document.getElementById("bet-fixture-id").value)||null;
   var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:isMart||null,martingale_step:martStep,notes:notes,fixture_id:fixtureId};
   var newEff=settledEffect(status,amt,payout);
