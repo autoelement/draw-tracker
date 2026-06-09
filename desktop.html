@@ -932,7 +932,7 @@ function pnlHover(ev){
   if(!pnlChartData)return;
   var c=document.getElementById("pnlChart");
   var rect=c.getBoundingClientRect();
-  var mx=(ev.clientX-rect.left)*(d.w/rect.width)*2;
+  var mx=(ev.clientX-rect.left);
   var d=pnlChartData;
   var idx=Math.round((mx-d.p)/((d.w-d.p*2)/(d.pts.length-1||1)));
   if(idx<0)idx=0;if(idx>=d.pts.length)idx=d.pts.length-1;
@@ -963,7 +963,7 @@ function seriesChartHover(ev){
   var d=window._seriesChartData;if(!d)return;
   var c=document.getElementById("edgeChart");
   var rect=c.getBoundingClientRect();
-  var mx=(ev.clientX-rect.left)*(d.w/rect.width)*2;
+  var mx=(ev.clientX-rect.left);
   var tip=document.getElementById("series-tip");
   if(!tip){tip=document.createElement("div");tip.id="series-tip";tip.style.cssText="position:fixed;background:var(--bg2);border:1px solid var(--amber);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text);pointer-events:none;z-index:9999;font-family:'Space Mono',monospace";document.body.appendChild(tip);}
   var found=false;
