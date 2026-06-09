@@ -924,7 +924,7 @@ function _drawSeriesChart(bets){
   bets.filter(function(b){return b.martingale_series_id;}).forEach(function(b){
     var k=b.martingale_series_id;
     if(!sm[k])sm[k]={risk:0,ret:0};
-    sm[k].ret+=(b.payout||0)-(b.amount||0);
+    if(b.status==="pending")sm[k].ret+=0; else sm[k].ret+=(b.payout||0)-(b.amount||0);
   });
   var keys=Object.keys(sm);
   keys.forEach(function(k){
