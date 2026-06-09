@@ -1366,7 +1366,7 @@ function saveBet() {
   var date=document.getElementById("bet-date").value;
   var status=document.getElementById("bet-status").value;
   var notes=document.getElementById("bet-notes").value||null;
-  var martId=isMart||null;
+  if(isMart&&!document.getElementById("bet-series-pick").value){showToast("Please select a series",true);btn.textContent="Save Bet";btn.disabled=false;return;}
 
   if(isTrix&&!id){
     var unit=parseFloat(document.getElementById("trix-unit").value)||0;
