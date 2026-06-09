@@ -737,11 +737,11 @@ function saveSettings() {
     else return sbPost("settings", row);
   }).then(function() { showToast("Settings saved!"); updateSettingsPreview(); var bs=document.getElementById("save-stake-btn");if(bs){bs.disabled=true;bs.style.opacity=".4";bs.style.cursor="not-allowed";}var bt=document.getElementById("save-thresh-btn");if(bt){bt.disabled=true;bt.style.opacity=".4";bt.style.cursor="not-allowed";}});
 }
-function showPage(name, el) {
-  document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
-  document.querySelectorAll(".nav-tab").forEach(function(t) { t.classList.remove("active"); });
-  document.getElementById("page-" + name).classList.add("active");
-  el.classList.add("active");
+function showPage(name,el){
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");});
+  document.querySelectorAll(".nav-tab").forEach(function(t){t.classList.remove("active");});
+  document.getElementById("page-"+name).classList.add("active");
+  if(el)el.classList.add("active");
   if (name === "dashboard") loadDashboard();
   if (name === "predictions") loadPredictions();
   if (name === "bets") loadBets();
