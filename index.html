@@ -1170,7 +1170,9 @@ if(b.martingale_series_id){
 }
 function saveBet(){
   var btn=document.getElementById("save-bet-btn");btn.textContent="Saving...";btn.disabled=true;
-  var id=document.getElementById("bet-id").value;var stakeId=document.getElementById("bet-stake-id").value;var isMart=document.getElementById("bet-is-mart").value;
+  var id=document.getElementById("bet-id").value;var stakeId=document.getElementById("bet-stake-id").value;
+  var isMart=document.getElementById("bet-is-mart").value;
+  var martId=isMart||null;
   var type=document.getElementById("bet-type").value;var isTrix=type==="trixie"||type==="patent";
   var bk=document.getElementById("bet-bk").value;var date=document.getElementById("bet-date").value;var status=document.getElementById("bet-status").value;var notes=document.getElementById("bet-notes").value||null;
   if(isTrix&&!id){
