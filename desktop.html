@@ -901,7 +901,7 @@ if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border
 }
 
 var pnlChartData=null;
-function drawPnlChart(bets){   var c=document.getElementById("pnlChart");   if(c){c.style.opacity="0";c.style.transition="opacity 0.5s ease";}   _drawPnlChart(bets);   if(c){setTimeout(function(){c.style.opacity="1";},50);} }
+function drawPnlChart(bets){   var c=document.getElementById("pnlChart");   if(c){c.style.opacity="0";c.style.transition="opacity 0.5s ease";}   requestAnimationFrame(function(){     _drawPnlChart(bets);     if(c){setTimeout(function(){c.style.opacity="1";},50);}   }); }
 function _drawPnlChart(bets) {
   var c=document.getElementById("pnlChart"),ctx=c.getContext("2d");
   var cw=c.parentNode.offsetWidth-32;
