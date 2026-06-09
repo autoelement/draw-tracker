@@ -1367,7 +1367,7 @@ function saveBet() {
   var date=document.getElementById("bet-date").value;
   var status=document.getElementById("bet-status").value;
   var notes=document.getElementById("bet-notes").value||null;
-  var isMartMode=document.getElementById("mode-mart").style.background!=="transparent"&&document.getElementById("mode-mart").style.background!==""; if(isMartMode&&!document.getElementById("bet-series-pick").value){showToast("Please select a series",true);btn.textContent="Save Bet";btn.disabled=false;return;}
+  var isMartMode=document.getElementById("mode-mart").style.background!=="transparent"&&document.getElementById("mode-mart").style.background!==""; if(isMartMode&&!document.getElementById("bet-series-pick").value){   showToast("Please select a series",true);   document.getElementById("bet-series-pick").style.border="1px solid var(--red)";   btn.textContent="Save Bet";btn.disabled=false;return; } document.getElementById("bet-series-pick").style.border="";
 
   if(isTrix&&!id){
     var unit=parseFloat(document.getElementById("trix-unit").value)||0;
@@ -1712,6 +1712,7 @@ function onBetSeriesPick(){
   if(document.getElementById("bet-is-mart").value)return;
   var seriesId=document.getElementById('bet-series-pick').value;
   if(!seriesId)return;
+  document.getElementById("bet-series-pick").style.border="";
   var series=martSeries.find(function(s){return String(s.id)===String(seriesId);});
   if(!series)return;
   var base=series.base_stake||5,mult=series.multiplier||2;
