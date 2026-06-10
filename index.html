@@ -1410,13 +1410,27 @@ for(var i=0;i<steps;i++){
       sd+='<div class="'+cls+'">'+label+"</div>";
     }
     document.getElementById("m-series-display").innerHTML=sd;
+document.getElementById("m-add-bet-btn-wrap").style.display="block";
   });
+}
+function saveSeriesFilter(){
+  var v=document.getElementById("series-status-filter").value;
+  localStorage.setItem("series_filter",v);
+}
+function loadSeriesFilter(){
+  var v=localStorage.getItem("series_filter")||"all";
+  var el=document.getElementById("series-status-filter");
+  if(el)el.value=v;
 }
 function gotoSeriesPage(p){window._seriesPage=p;loadMartingaleHistory();window.scrollTo(0,0);}
 function loadMartingaleHistory(){
   sbGet("martingale_series?select=*&order=created_at.desc").then(function(series){
+    loadSeriesFilter();
+    var filterVal=document.getElementById("series-status-filter")?document.getElementById("series-status-filter").value:"all";
+    if(filterVal==="active")series=series.filter(function(s){return s.is_active;});
+    else if(filterVal==="ended")series=series.filter(function(s){return !s.is_active;});
     var el=document.getElementById("mart-history");
-    if(!series.length){el.innerHTML='<div class="empty">No series yet</div>';return;}
+    if(!series.length){el.innerHTML='<div class="empty">No series found</div>';return;}
     Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=created_at.asc");})).then(function(allBets){
       var seriesPage=window._seriesPage||1;var seriesPerPage=20;
       var totalSeriesPages=Math.ceil(series.length/seriesPerPage);
