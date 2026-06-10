@@ -365,22 +365,10 @@ canvas{width:100%!important}
   <div id="m-add-bet-btn-wrap" style="display:none;margin-bottom:16px">
     <button class="btn btn-green" style="width:100%" onclick="openAddBetMart()">+ Add Next Bet</button>
   </div>
-  <div class="section-hd"><div class="section-title">Calculator</div></div>
-  <div class="cal-card">
-    <div class="fr" style="margin-bottom:10px">
-      <div class="fg"><label class="fl">Base Stake ($)</label><input type="number" class="fi" id="m-base" value="5" oninput="calcMartingale()"></div>
-      <div class="fg"><label class="fl">Steps</label><input type="number" class="fi" id="m-steps" value="7" oninput="calcMartingale()"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Multiplier</label><input type="number" class="fi" id="m-mult" value="2" step="0.1" oninput="calcMartingale()"></div>
-      <div class="fg"><label class="fl">Bankroll ($)</label><input type="number" class="fi" id="m-bank" value="500" oninput="calcMartingale()"></div>
-    </div>
-    <div id="mart-result"></div>
-  </div>
   <div class="section-hd">
     <div class="section-title">Series History</div>
     <div style="display:flex;gap:6px;align-items:center">
-      <select class="fs" id="series-status-filter" onchange="saveSeriesFilter();loadMartingaleHistory()" style="width:auto;padding:4px 10px;font-size:11px">
+      <!-- FAB --> <div style="position:fixed;bottom:24px;right:20px;z-index:100;display:flex;flex-direction:column;gap:10px;align-items:center">   <button class="fab" style="width:42px;height:42px;font-size:18px;background:var(--bg2);color:var(--text2);border:1px solid var(--border2);box-shadow:none" onclick="openM('modal-calculator')" title="Calculator">⊞</button>   <button class="fab" onclick="openAddBet()" title="Add Bet">+</button> </div>
         <option value="all">All</option>
         <option value="active">Active</option>
         <option value="ended">Ended</option>
@@ -419,7 +407,10 @@ canvas{width:100%!important}
 </div><!-- end app pages -->
 
 <!-- FAB -->
-<button class="fab" onclick="openAddBet()" title="Add Bet">+</button>
+<div style="position:fixed;bottom:24px;right:20px;z-index:100;display:flex;flex-direction:column;gap:10px;align-items:center">
+  <button id="calc-fab" style="display:none;width:42px;height:42px;border-radius:50%;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);font-size:18px;cursor:pointer" onclick="openM('modal-calculator')">⊞</button>
+  <button class="fab" onclick="openAddBet()" title="Add Bet">+</button>
+</div>
 
 </div><!-- end app -->
 
@@ -565,7 +556,22 @@ canvas{width:100%!important}
     </div>
   </div>
 </div>
-
+<!-- CALCULATOR MODAL -->
+<div class="overlay" id="modal-calculator">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span>Calculator</span><button class="modal-close" onclick="closeM('modal-calculator')">x</button></div>
+    <div class="fr" style="margin-bottom:10px">
+      <div class="fg"><label class="fl">Base Stake ($)</label><input type="number" class="fi" id="m-base" value="5" oninput="calcMartingale()"></div>
+      <div class="fg"><label class="fl">Steps</label><input type="number" class="fi" id="m-steps" value="7" oninput="calcMartingale()"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Multiplier</label><input type="number" class="fi" id="m-mult" value="2" step="0.1" oninput="calcMartingale()"></div>
+      <div class="fg"><label class="fl">Bankroll ($)</label><input type="number" class="fi" id="m-bank" value="500" oninput="calcMartingale()"></div>
+    </div>
+    <div id="mart-result"></div>
+  </div>
+</div>
 <!-- CONFIRM -->
 <div class="overlay" id="modal-confirm">
   <div class="modal">
@@ -798,7 +804,7 @@ function showPage(name,el){
   if(name==="predictions")loadPredictions();
   if(name==="bets")loadBets();
   if(name==="balances")loadBalances();
-  if(name==="martingale"){calcMartingale();loadMartSeries().then(function(){loadMartingaleHistory();});}
+  if(name==="martingale"){calcMartingale();loadMartSeries().then(function(){loadMartingaleHistory();});document.getElementById("calc-fab").style.display="flex";} else{var cf=document.getElementById("calc-fab");if(cf)cf.style.display="none";}
   if(name==="settings"){loadSettings();updateSettingsPreview();}
 }
 
