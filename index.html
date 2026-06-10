@@ -366,16 +366,17 @@ canvas{width:100%!important}
     <button class="btn btn-green" style="width:100%" onclick="openAddBetMart()">+ Add Next Bet</button>
   </div>
   <div class="section-hd">
-    <div class="section-title">Series History</div>
-    <div style="display:flex;gap:6px;align-items:center">
-      <!-- FAB --> <div style="position:fixed;bottom:24px;right:20px;z-index:100;display:flex;flex-direction:column;gap:10px;align-items:center">   <button class="fab" style="width:42px;height:42px;font-size:18px;background:var(--bg2);color:var(--text2);border:1px solid var(--border2);box-shadow:none" onclick="openM('modal-calculator')" title="Calculator">⊞</button>   <button class="fab" onclick="openAddBet()" title="Add Bet">+</button> </div>
-        <option value="all">All</option>
-        <option value="active">Active</option>
-        <option value="ended">Ended</option>
-      </select>
-      <button class="btn btn-ghost btn-sm" onclick="loadMartingaleHistory()">Refresh</button>
-    </div>
+    <div class="section-hd">
+  <div class="section-title">Series History</div>
+  <div style="display:flex;gap:6px;align-items:center">
+    <select class="fs" id="series-status-filter" onchange="saveSeriesFilter();loadMartingaleHistory()" style="width:auto;padding:4px 10px;font-size:11px">
+      <option value="all">All</option>
+      <option value="active">Active</option>
+      <option value="ended">Ended</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" onclick="loadMartingaleHistory()">Refresh</button>
   </div>
+</div>
   <div id="mart-history"><div class="loading"><div class="sp"></div>Loading...</div></div>
 </div>
 
