@@ -312,22 +312,21 @@ tr:hover td{background:var(--bg3)}
       <div id="mart-result"></div>
     </div>
     <div class="mart-card">
-      <div class="chart-title">Active Series</div>
-      <div class="fg">
-        <label class="fl">Series</label>
-        <select class="fs" id="m-series-sel" onchange="onSeriesChange()">
-          <option value="">-- Select series --</option>
-          <option value="__new__">+ Create New Series</option>
-        </select>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="chart-title" style="margin-bottom:0">Active Series</div>
       </div>
-      <div id="m-new-series-form" style="display:none">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="m-series-cards"></div>
+      <div id="m-new-series-form" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
         <div class="fg"><label class="fl">Series Name</label><input type="text" class="fi" id="m-new-name" readonly></div>
         <div class="fr">
           <div class="fg"><label class="fl">Base Stake ($)</label><input type="number" class="fi" id="m-new-base" value="5" step="0.01"></div>
           <div class="fg"><label class="fl">Multiplier</label><input type="number" class="fi" id="m-new-mult" value="2" step="0.1"></div>
         </div>
         <div class="fg"><label class="fl">Max Steps</label><input type="number" class="fi" id="m-new-steps" value="7"></div>
-        <button class="btn btn-green" style="width:100%" onclick="createSeries()">Create Series</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" style="flex:1" onclick="document.getElementById('m-new-series-form').style.display='none';renderSeriesCards()">Cancel</button>
+          <button class="btn btn-green" style="flex:1" onclick="createSeries()">Create</button>
+        </div>
       </div>
       <div id="next-bet-display"></div>
       <div class="mart-seq" id="m-series-display"></div>
@@ -680,19 +679,50 @@ function loadBookmakers() {
 }
 
 function loadMartSeries() {
-  return sbGet("martingale_series?select=*&order=created_at.desc").then(function(rows) {
+  return sbGet("martingale_series?select=*&order=created_at.asc").then(function(rows) {
     martSeries = rows;
-    var sel = document.getElementById("m-series-sel");
-    if (!sel) return;
-    sel.innerHTML = '<option value="">-- Select series --</option>' +
-      '<option value="__new__">+ Create New Series</option>' +
-      rows.map(function(s) {
-        var status = s.is_active ? "" : " (done)";
-        return '<option value="' + s.id + '">' + s.name + status + "</option>";
-      }).join("");
+    renderSeriesCards();
   });
 }
+function renderSeriesCards() {
+  var active = martSeries.filter(function(s) { return s.is_active; });
+  var container = document.getElementById("m-series-cards");
+  if (!container) return;
+  var h = "";
+  active.forEach(function(s) {
+    var isSelected = window._selectedSeriesId && String(window._selectedSeriesId) === String(s.id);
+    h += '<div onclick="selectSeriesCard(\''+s.id+'\')" style="cursor:pointer;background:'+(isSelected?'var(--amber-dim)':'var(--bg3)')+';border:1px solid '+(isSelected?'var(--amber)':'var(--border)')+';border-radius:8px;padding:10px 14px;transition:all .2s">'
+      + '<div style="font-size:11px;font-weight:700;color:'+(isSelected?'var(--amber)':'var(--text)')+';margin-bottom:4px">'+s.name+'</div>'
+      + '<div style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--text3)">$'+s.base_stake+' x'+s.multiplier+' / '+s.max_steps+'st</div>'
+      + '</div>';
+  });
+  h += '<div onclick="openNewSeriesForm()" style="cursor:pointer;background:var(--bg3);border:1px dashed var(--border2);border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text3);font-size:12px;transition:all .2s;min-width:80px" onmouseover="this.style.borderColor=\'var(--green)\';this.style.color=\'var(--green)\'" onmouseout="this.style.borderColor=\'var(--border2)\';this.style.color=\'var(--text3)\'">'
+    + '<span style="font-size:18px;line-height:1">+</span><span>New</span>'
+    + '</div>';
+  container.innerHTML = h;
+}
 
+function selectSeriesCard(id) {
+  window._selectedSeriesId = id;
+  renderSeriesCards();
+  document.getElementById("m-add-bet-btn-wrap").style.display = "block";
+  document.getElementById("m-new-series-form").style.display = "none";
+  updateSeriesPreview(id);
+}
+
+function openNewSeriesForm() {
+  window._selectedSeriesId = null;
+  renderSeriesCards();
+  document.getElementById("next-bet-display").innerHTML = "";
+  document.getElementById("m-series-display").innerHTML = "";
+  document.getElementById("m-add-bet-btn-wrap").style.display = "none";
+  var form = document.getElementById("m-new-series-form");
+  form.style.display = "block";
+  sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows) {
+    var n = (rows.length ? parseInt(rows[0].id) : 0) + 1;
+    document.getElementById("m-new-name").value = "Series " + n;
+  });
+}
 function loadSettings(){
   return sbGet("settings?select=*&limit=1").then(function(rows){
     if (rows.length) {
@@ -1524,22 +1554,8 @@ function calcMartingale(){
 }
 
 function onSeriesChange(){
-  var v=document.getElementById("m-series-sel").value;
-  var newForm=document.getElementById("m-new-series-form");
-  var nextWrap=document.getElementById("m-add-bet-btn-wrap");
-  if(v==="__new__"){
-    newForm.style.display="block";nextWrap.style.display="none";
-    document.getElementById("next-bet-display").innerHTML="";document.getElementById("m-series-display").innerHTML="";
-    sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows){
-      var nextNum=(rows.length?parseInt(rows[0].id):0)+1;
-      document.getElementById("m-new-name").value="Series "+nextNum;
-    });
-  } else if(v){
-    newForm.style.display="none";nextWrap.style.display="block";updateSeriesPreview(v);
-  } else {
-    newForm.style.display="none";nextWrap.style.display="none";
-    document.getElementById("next-bet-display").innerHTML="";document.getElementById("m-series-display").innerHTML="";
-  }
+  var v=document.getElementById("m-series-sel")?document.getElementById("m-series-sel").value:"";
+  if(v&&v!=="__new__")selectSeriesCard(v);
 }
 
 function createSeries(){
@@ -1548,11 +1564,13 @@ function createSeries(){
   var mult=parseFloat(document.getElementById("m-new-mult").value)||2;
   var steps=parseInt(document.getElementById("m-new-steps").value)||7;
   sbPost("martingale_series",{name:name,base_stake:base,multiplier:mult,max_steps:steps,is_active:true}).then(function(){
-    showToast("Series created: "+name);return loadMartSeries();
+    showToast("Series created: "+name);
+    document.getElementById("m-new-series-form").style.display="none";
+    return loadMartSeries();
   }).then(function(){
-    var sel=document.getElementById("m-series-sel"),opts=sel.options;
-    for(var i=0;i<opts.length;i++){if(opts[i].text.indexOf(name)!==-1){sel.value=opts[i].value;break;}}
-    onSeriesChange();loadMartingaleHistory();
+    var newS=martSeries.find(function(s){return s.name===name;});
+    if(newS)selectSeriesCard(newS.id);
+    loadMartingaleHistory();
   });
 }
 
