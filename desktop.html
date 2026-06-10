@@ -1626,7 +1626,7 @@ function exportSeriesHistory(){
 }
 function gotoSeriesPage(p){window._seriesPage=p;loadMartingaleHistory();window.scrollTo(0,0);}
 function loadMartingaleHistory(){
-  sbGet("martingale_series?select=*&order=created_at.desc").then(function(series){
+  sbGet("martingale_series?select=*&order=created_at.asc").then(function(series){
     var el=document.getElementById("mart-history");
     if(!series.length){el.innerHTML='<div class="empty">No martingale series yet</div>';return;}
     Promise.all(series.map(function(s){return sbGet("bets?martingale_series_id=eq."+s.id+"&select=*&order=created_at.asc");})).then(function(allBets){
