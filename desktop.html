@@ -1661,8 +1661,9 @@ stepsAfterWin=currentCycle.length;
         else{actBtns+=' <button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);border:none;cursor:pointer;font-family:Outfit,sans-serif;font-size:11px;padding:3px 8px;border-radius:5px" onclick="deleteSeries('+s.id+')">Delete</button>';}
         h+="<tr><td style='color:var(--text);font-weight:500'>"+s.name+"</td><td style='font-size:11px;color:var(--text3)'>"+cfg+"</td><td>"+totalSteps+"/"+stepsAfterWin+"</td><td class='mono'>$"+tw.toFixed(2)+"</td><td class='mono'>$"+tr2.toFixed(2)+"</td><td class='"+(pnl>=0?"pnl-pos":"pnl-neg")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+st+"</td><td style='display:flex;gap:4px;flex-wrap:wrap;align-items:center'>"+tl+"</td><td style='white-space:nowrap'>"+actBtns+"</td></tr>";
       });
-      h+="</tbody></table>";el.innerHTML=h;
+      h+="</tbody></table>";
       h+=pagControls(seriesPage,totalSeriesPages,"gotoSeriesPage");
+      el.innerHTML=h;
       window._seriesHistoryData=series.map(function(s,si){
         var bs=allBets[si];
         var settledBs=bs.filter(function(b){return b.status==="win"||b.status==="loss";});
