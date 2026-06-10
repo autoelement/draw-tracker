@@ -721,7 +721,7 @@ function openNewSeriesForm() {
   var form = document.getElementById("m-new-series-form");
   form.style.display = "block";
   sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows) {
-    var n = (rows.length ? parseInt(rows[0].id) : 0) + 1;
+    var n = martSeries.length + 1;
     document.getElementById("m-new-name").value = "Series " + n;
   });
 }
