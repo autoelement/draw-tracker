@@ -298,6 +298,39 @@ tr:hover td{background:var(--bg3)}
 
 <!-- MARTINGALE -->
 <div class="page" id="page-martingale">
+
+  <!-- Series Cards Row -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:stretch" id="m-series-cards"></div>
+
+  <!-- Selected Series Detail -->
+  <div id="m-series-detail" style="display:none;margin-bottom:20px">
+    <div class="mart-card" style="background:var(--bg2);border:1px solid var(--amber)">
+      <div id="next-bet-display"></div>
+      <div class="mart-seq" id="m-series-display" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+      <div id="m-add-bet-btn-wrap" style="display:none">
+        <button class="btn btn-green" style="width:100%" onclick="openAddBetMart()">+ Add Next Bet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Series Form -->
+  <div id="m-new-series-form" style="display:none;margin-bottom:20px">
+    <div class="mart-card">
+      <div class="chart-title" style="margin-bottom:16px">New Series</div>
+      <div class="fg"><label class="fl">Series Name</label><input type="text" class="fi" id="m-new-name" readonly></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Base Stake ($)</label><input type="number" class="fi" id="m-new-base" value="5" step="0.01"></div>
+        <div class="fg"><label class="fl">Multiplier</label><input type="number" class="fi" id="m-new-mult" value="2" step="0.1"></div>
+      </div>
+      <div class="fg"><label class="fl">Max Steps</label><input type="number" class="fi" id="m-new-steps" value="7"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" style="flex:1" onclick="document.getElementById('m-new-series-form').style.display='none'">Cancel</button>
+        <button class="btn btn-green" style="flex:1" onclick="createSeries()">Create Series</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calculator + History -->
   <div class="mart-grid">
     <div class="mart-card">
       <div class="chart-title">Calculator</div>
@@ -311,31 +344,11 @@ tr:hover td{background:var(--bg3)}
       </div>
       <div id="mart-result"></div>
     </div>
-    <div class="mart-card">
-      <div class="chart-title">Active Series</div>
-      <div class="fg">
-        <label class="fl">Series</label>
-        <select class="fs" id="m-series-sel" onchange="onSeriesChange()">
-          <option value="">-- Select series --</option>
-          <option value="__new__">+ Create New Series</option>
-        </select>
-      </div>
-      <div id="m-new-series-form" style="display:none">
-        <div class="fg"><label class="fl">Series Name</label><input type="text" class="fi" id="m-new-name" readonly></div>
-        <div class="fr">
-          <div class="fg"><label class="fl">Base Stake ($)</label><input type="number" class="fi" id="m-new-base" value="5" step="0.01"></div>
-          <div class="fg"><label class="fl">Multiplier</label><input type="number" class="fi" id="m-new-mult" value="2" step="0.1"></div>
-        </div>
-        <div class="fg"><label class="fl">Max Steps</label><input type="number" class="fi" id="m-new-steps" value="7"></div>
-        <button class="btn btn-green" style="width:100%" onclick="createSeries()">Create Series</button>
-      </div>
-      <div id="next-bet-display"></div>
-      <div class="mart-seq" id="m-series-display"></div>
-      <div id="m-add-bet-btn-wrap" style="display:none;margin-top:12px">
-        <button class="btn btn-green" style="width:100%" onclick="openAddBetMart()">+ Add Next Bet</button>
-      </div>
+    <div class="mart-card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--text3);font-size:13px" id="m-stats-card">
+      <div id="m-series-stats" style="width:100%"></div>
     </div>
   </div>
+
   <div class="table-card">
     <div class="table-hd">
       <div class="table-title">Series History</div>
@@ -680,16 +693,48 @@ function loadBookmakers() {
 }
 
 function loadMartSeries() {
-  return sbGet("martingale_series?select=*&order=created_at.desc").then(function(rows) {
+  return sbGet("martingale_series?select=*&order=created_at.asc").then(function(rows) {
     martSeries = rows;
-    var sel = document.getElementById("m-series-sel");
-    if (!sel) return;
-    sel.innerHTML = '<option value="">-- Select series --</option>' +
-      '<option value="__new__">+ Create New Series</option>' +
-      rows.map(function(s) {
-        var status = s.is_active ? "" : " (done)";
-        return '<option value="' + s.id + '">' + s.name + status + "</option>";
-      }).join("");
+    renderSeriesCards();
+  });
+}
+
+function renderSeriesCards() {
+  var active = martSeries.filter(function(s) { return s.is_active; });
+  var container = document.getElementById("m-series-cards");
+  if (!container) return;
+  var h = "";
+  active.forEach(function(s) {
+    var isSelected = window._selectedSeriesId && String(window._selectedSeriesId) === String(s.id);
+    h += '<div onclick="selectSeriesCard(\''+s.id+'\')" style="cursor:pointer;background:'+(isSelected?'var(--amber-dim)':'var(--bg2)')+';border:1px solid '+(isSelected?'var(--amber)':'var(--border)')+';border-radius:10px;padding:14px 18px;min-width:140px;transition:all .2s">'
+      + '<div style="font-size:11px;font-weight:600;color:'+(isSelected?'var(--amber)':'var(--text3)')+';text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">'+s.name+'</div>'
+      + '<div style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--text3)">$'+s.base_stake+' x'+s.multiplier+' / '+s.max_steps+'st</div>'
+      + '</div>';
+  });
+  h += '<div onclick="openNewSeriesForm()" style="cursor:pointer;background:var(--bg2);border:1px dashed var(--border2);border-radius:10px;padding:14px 18px;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--text3);font-size:13px;transition:all .2s" onmouseover="this.style.borderColor=\'var(--green)\';this.style.color=\'var(--green)\'" onmouseout="this.style.borderColor=\'var(--border2)\';this.style.color=\'var(--text3)\'">'
+    + '<span style="font-size:20px;line-height:1">+</span><span>New Series</span>'
+    + '</div>';
+  container.innerHTML = h;
+}
+
+function selectSeriesCard(id) {
+  window._selectedSeriesId = id;
+  document.getElementById("m-series-sel") && (document.getElementById("m-series-sel").value = id);
+  renderSeriesCards();
+  document.getElementById("m-series-detail").style.display = "block";
+  document.getElementById("m-add-bet-btn-wrap").style.display = "block";
+  updateSeriesPreview(id);
+}
+
+function openNewSeriesForm() {
+  window._selectedSeriesId = null;
+  renderSeriesCards();
+  document.getElementById("m-series-detail").style.display = "none";
+  var form = document.getElementById("m-new-series-form");
+  form.style.display = "block";
+  sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows) {
+    var n = (rows.length ? parseInt(rows[0].id) : 0) + 1;
+    document.getElementById("m-new-name").value = "Series " + n;
   });
 }
 
@@ -1523,36 +1568,23 @@ function calcMartingale(){
   document.getElementById("mart-result").innerHTML=h;
 }
 
-function onSeriesChange(){
-  var v=document.getElementById("m-series-sel").value;
-  var newForm=document.getElementById("m-new-series-form");
-  var nextWrap=document.getElementById("m-add-bet-btn-wrap");
-  if(v==="__new__"){
-    newForm.style.display="block";nextWrap.style.display="none";
-    document.getElementById("next-bet-display").innerHTML="";document.getElementById("m-series-display").innerHTML="";
-    sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows){
-      var nextNum=(rows.length?parseInt(rows[0].id):0)+1;
-      document.getElementById("m-new-name").value="Series "+nextNum;
-    });
-  } else if(v){
-    newForm.style.display="none";nextWrap.style.display="block";updateSeriesPreview(v);
-  } else {
-    newForm.style.display="none";nextWrap.style.display="none";
-    document.getElementById("next-bet-display").innerHTML="";document.getElementById("m-series-display").innerHTML="";
+function onSeriesChange() {
+  var v = document.getElementById("m-series-sel") ? document.getElementById("m-series-sel").value : "";
+  if (v && v !== "__new__") {
+    selectSeriesCard(v);
   }
 }
-
 function createSeries(){
   var name=document.getElementById("m-new-name").value;
   var base=parseFloat(document.getElementById("m-new-base").value)||5;
   var mult=parseFloat(document.getElementById("m-new-mult").value)||2;
   var steps=parseInt(document.getElementById("m-new-steps").value)||7;
   sbPost("martingale_series",{name:name,base_stake:base,multiplier:mult,max_steps:steps,is_active:true}).then(function(){
-    showToast("Series created: "+name);return loadMartSeries();
+    showToast("Series created: "+name);
+    document.getElementById("m-new-series-form").style.display="none";
+    return loadMartSeries();
   }).then(function(){
-    var sel=document.getElementById("m-series-sel"),opts=sel.options;
-    for(var i=0;i<opts.length;i++){if(opts[i].text.indexOf(name)!==-1){sel.value=opts[i].value;break;}}
-    onSeriesChange();loadMartingaleHistory();
+    loadMartingaleHistory();
   });
 }
 
