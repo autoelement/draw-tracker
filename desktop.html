@@ -1696,7 +1696,7 @@ stepsAfterWin=currentCycle.length;
   });
 }
 function openAddBetMart(){
-  var seriesId=window._selectedSeriesId||document.getElementById("m-series-sel")?document.getElementById("m-series-sel").value:"";
+  var seriesId=window._selectedSeriesId||(document.getElementById("m-series-sel")?document.getElementById("m-series-sel").value:"");
   if(!seriesId||seriesId==="__new__"){showToast("Select or create a series first",true);return;}
   var series=martSeries.find(function(s){return String(s.id)===String(seriesId);});
   if(!series)return;
