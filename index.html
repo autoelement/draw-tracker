@@ -1461,7 +1461,7 @@ function loadMartingaleHistory(){
 }
 
 function openAddBetMart(){
-  var seriesId=document.getElementById("m-series-sel").value;if(!seriesId){showToast("Select a series",true);return;}
+  var seriesId=window._selectedSeriesId||"";if(!seriesId){showToast("Select a series",true);return;}
   var series=martSeries.find(function(s){return String(s.id)===String(seriesId);});if(!series)return;
   var base=series.base_stake||5,mult=series.multiplier||2;
   sbGet("bets?martingale_series_id=eq."+seriesId+"&select=martingale_step,status,created_at&order=created_at.desc&limit=1").then(function(d){
