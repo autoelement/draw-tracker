@@ -299,19 +299,15 @@ tr:hover td{background:var(--bg3)}
 <!-- MARTINGALE -->
 <div class="page" id="page-martingale">
 
-  <!-- Series Cards Row -->
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:stretch" id="m-series-cards"></div>
-
-  <!-- Selected Series Detail -->
-  <div id="m-series-detail" style="display:none;margin-bottom:20px">
-    <div class="mart-card" style="background:var(--bg2);border:1px solid var(--amber)">
-      <div id="next-bet-display"></div>
-      <div class="mart-seq" id="m-series-display" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
-      <div id="m-add-bet-btn-wrap" style="display:none">
-        <button class="btn btn-green" style="width:100%" onclick="openAddBetMart()">+ Add Next Bet</button>
-      </div>
-    </div>
+  <div class="mart-card">
+  <div class="chart-title" style="margin-bottom:16px">Active Series</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="m-series-cards"></div>
+  <div id="next-bet-display"></div>
+  <div class="mart-seq" id="m-series-display" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+  <div id="m-add-bet-btn-wrap" style="display:none;margin-top:12px">
+    <button class="btn btn-green" style="width:100%" onclick="openAddBetMart()">+ Add Next Bet</button>
   </div>
+</div>
 
   <!-- New Series Form -->
   <div id="m-new-series-form" style="display:none;margin-bottom:20px">
@@ -344,10 +340,6 @@ tr:hover td{background:var(--bg3)}
       </div>
       <div id="mart-result"></div>
     </div>
-    <div class="mart-card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--text3);font-size:13px" id="m-stats-card">
-      <div id="m-series-stats" style="width:100%"></div>
-    </div>
-  </div>
 
   <div class="table-card">
     <div class="table-hd">
@@ -737,7 +729,6 @@ function renderSeriesCards() {
 function selectSeriesCard(id) {
   window._selectedSeriesId = id;
   renderSeriesCards();
-  document.getElementById("m-series-detail").style.display = "block";
   document.getElementById("m-add-bet-btn-wrap").style.display = "block";
   updateSeriesPreview(id);
 }
