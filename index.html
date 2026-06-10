@@ -704,13 +704,53 @@ function loadBookmakers(){
 }
 
 function loadMartSeries(){
-  return sbGet("martingale_series?select=*&order=created_at.desc").then(function(rows){
+  return sbGet("martingale_series?select=*&order=created_at.asc").then(function(rows){
     martSeries=rows;
-    var sel=document.getElementById("m-series-sel");if(!sel)return;
-    sel.innerHTML='<option value="">-- Select series --</option>'+rows.map(function(s){return'<option value="'+s.id+'">'+(s.is_active?"":"")+""+s.name+(s.is_active?"":" (done)")+"</option>";}).join("");
+    renderSeriesCards();
   });
 }
 
+function renderSeriesCards(){
+  var active=martSeries.filter(function(s){return s.is_active;});
+  var container=document.getElementById("m-series-cards");
+  if(!container)return;
+  var h="";
+  active.forEach(function(s){
+    var isSelected=window._selectedSeriesId&&String(window._selectedSeriesId)===String(s.id);
+    h+='<div onclick="selectSeriesCard(\''+s.id+'\')" style="cursor:pointer;background:'+(isSelected?'var(--amber-dim)':'var(--bg2)')+';border:1px solid '+(isSelected?'var(--amber)':'var(--border)')+';border-radius:10px;padding:10px 14px;transition:all .2s">'
+      +'<div style="font-size:11px;font-weight:700;color:'+(isSelected?'var(--amber)':'var(--text)')+';margin-bottom:4px">'+s.name+'</div>'
+      +'<div style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--text3)">$'+s.base_stake+' x'+s.multiplier+' / '+s.max_steps+'st</div>'
+      +'</div>';
+  });
+  h+='<div onclick="openNewSeriesForm()" style="cursor:pointer;background:var(--bg2);border:1px dashed var(--border2);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text3);font-size:12px;min-width:80px">'
+    +'<span style="font-size:18px;line-height:1">+</span><span>New</span>'
+    +'</div>';
+  container.innerHTML=h;
+}
+
+function selectSeriesCard(id){
+  window._selectedSeriesId=id;
+  renderSeriesCards();
+  document.getElementById("m-add-bet-btn-wrap").style.display="none";
+  document.getElementById("m-new-series-form").style.display="none";
+  document.getElementById("next-bet-display").innerHTML='<div style="border-radius:10px;height:80px;width:100%;margin-bottom:14px" class="skeleton"></div>';
+  document.getElementById("m-series-display").innerHTML='<div style="height:32px;width:100%;border-radius:6px" class="skeleton"></div>';
+  updateSeriesPreview(id);
+}
+
+function openNewSeriesForm(){
+  window._selectedSeriesId=null;
+  renderSeriesCards();
+  document.getElementById("next-bet-display").innerHTML="";
+  document.getElementById("m-series-display").innerHTML="";
+  document.getElementById("m-add-bet-btn-wrap").style.display="none";
+  var form=document.getElementById("m-new-series-form");
+  form.style.display="block";
+  sbGet("martingale_series?select=id&order=id.desc&limit=1").then(function(rows){
+    var n=martSeries.length+1;
+    document.getElementById("m-new-name").value="Series "+n;
+  });
+}
 function loadSettings(){
   return sbGet("settings?select=*&limit=1").then(function(rows){
     if(rows.length){settings=rows[0];document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;}
@@ -1323,9 +1363,8 @@ function calcMartingale(){
 }
 
 function onSeriesChange(){
-  var v=document.getElementById("m-series-sel").value;var nextWrap=document.getElementById("m-add-bet-btn-wrap");
-  if(v){nextWrap.style.display="block";updateSeriesPreview(v);}
-  else{nextWrap.style.display="none";document.getElementById("next-bet-display").innerHTML="";document.getElementById("m-series-display").innerHTML="";}
+  var v=document.getElementById("m-series-sel")?document.getElementById("m-series-sel").value:"";
+  if(v&&v!=="__new__")selectSeriesCard(v);
 }
 
 function openNewSeries(){
@@ -1336,8 +1375,14 @@ function createSeries(){
   var name=document.getElementById("m-new-name").value;var base=parseFloat(document.getElementById("m-new-base").value)||5;
   var mult=parseFloat(document.getElementById("m-new-mult").value)||2;var steps=parseInt(document.getElementById("m-new-steps").value)||7;
   sbPost("martingale_series",{name:name,base_stake:base,multiplier:mult,max_steps:steps,is_active:true}).then(function(){
-    showToast("Series created!");closeM("modal-new-series");return loadMartSeries();
-  }).then(function(){var sel=document.getElementById("m-series-sel"),opts=sel.options;for(var i=0;i<opts.length;i++){if(opts[i].text.indexOf(name)!==-1){sel.value=opts[i].value;break;}}onSeriesChange();loadMartingaleHistory();});
+    showToast("Series created!");
+    document.getElementById("m-new-series-form").style.display="none";
+    return loadMartSeries();
+  }).then(function(){
+    var newS=martSeries.find(function(s){return s.name===name;});
+    if(newS)selectSeriesCard(newS.id);
+    loadMartingaleHistory();
+  });
 }
 
 function updateSeriesPreview(seriesId){
