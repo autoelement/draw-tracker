@@ -1933,7 +1933,7 @@ function initSettings(){
     if(!rows.length)sbPost("settings",{single_pct:2,trixie_pct:1,patent_pct:0.5});
   }).catch(function(){});
 }
-(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}})();
+(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}})();
 checkAuth();
 initSettings();
 calcMartingale();
