@@ -273,7 +273,7 @@ canvas{width:100%!important}
     <div class="stat-card"><div class="stat-label">Total P&L</div><div class="stat-val green" id="s-pnl">$0.00</div></div>
     <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val" id="s-wr">0%</div><div class="stat-sub" id="s-wr2">0/0</div></div>
     <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val amber" id="s-roi">0%</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div><div class="stat-sub" id="s-edge-sub">All bets</div></div>
     <div class="stat-card" onclick="showPage('balances',document.getElementById('nav-balances'));" style="cursor:pointer"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div></div>
     <div class="stat-card" onclick="document.getElementById('b-status').value='pending';showPage('bets',document.getElementById('nav-bets'));" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
     <div class="stat-card"><div class="stat-label">Avg Odds</div><div class="stat-val amber" id="s-odds">0.00</div></div>     <div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val" id="s-pf">0.00</div></div>
@@ -939,6 +939,8 @@ function updateEdgeStat(bets){
   var avg=filtered.length?(filtered.reduce(function(s,b){return s+b.edge;},0)/filtered.length).toFixed(1):0;
   var el=document.getElementById("s-edge");
   if(el){el.textContent=(parseFloat(avg)>=0?"+":"")+avg+"%";}
+  var subEl=document.getElementById("s-edge-sub");
+  if(subEl){subEl.textContent=_edgeFilter==="all"?"All bets":_edgeFilter==="win"?"Win bets":"Loss bets";}
   var edgeThreshold=parseFloat(settings.edge_threshold)||10;
   var edgeCard=el?el.closest(".stat-card"):null;
   if(edgeCard){
