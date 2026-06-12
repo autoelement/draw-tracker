@@ -954,7 +954,7 @@ if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border
     else { scc.style.display="none"; }
   });
 }
-function drawEdgeTimeChart(bets){requestAnimationFrame(function(){_drawEdgeTimeChart(bets);});}
+function drawEdgeTimeChart(bets){setTimeout(function(){requestAnimationFrame(function(){_drawEdgeTimeChart(bets);});},50);}
 function _drawEdgeTimeChart(bets){
   var c=document.getElementById("edgeTimeChart");if(!c)return;
   var ctx=c.getContext("2d");
