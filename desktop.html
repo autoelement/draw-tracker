@@ -952,6 +952,7 @@ if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border
     var scc=document.getElementById("series-chart-card");
     if (dbType==="martingale") { scc.style.display=""; drawSeriesChart(manual); }
     else { scc.style.display="none"; }
+    setTimeout(function(){drawEdgeTimeChart(all);},100);
   });
 }
 function drawEdgeTimeChart(bets){setTimeout(function(){requestAnimationFrame(function(){_drawEdgeTimeChart(bets);});},50);}
