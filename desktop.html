@@ -1048,6 +1048,7 @@ function _drawPnlChart(bets) {
   var g=ctx.createLinearGradient(0,p,0,h-p);g.addColorStop(0,gradColor);g.addColorStop(1,gradColorEnd);
   ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(xs(0),ys(pts[0]));pts.forEach(function(v,i){ctx.lineTo(xs(i),ys(v));});ctx.lineTo(xs(pts.length-1),h-p);ctx.lineTo(xs(0),h-p);ctx.closePath();ctx.fill();
   ctx.strokeStyle=lineColor;ctx.lineWidth=2;
+  ctx.beginPath();pts.forEach(function(v,i){if(i===0)ctx.moveTo(xs(0),ys(v));else ctx.lineTo(xs(i),ys(v));});ctx.stroke();
   ctx.fillStyle="#7a9ab5";ctx.font="9px Space Mono";ctx.textAlign="left";
   for(var gi=0;gi<=4;gi++){var gv=mn+(rng*gi/4);ctx.fillText("$"+gv.toFixed(0),2,ys(gv)-2);}
   pnlChartData={pts:pts,dates:dates,xs:xs,ys:ys,w:w,h:h,p:p};
