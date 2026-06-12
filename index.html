@@ -826,6 +826,8 @@ function setDbType(t,el){
 }
 
 function loadDashboard(){
+  var savedEdgeFilter=localStorage.getItem("edge_filter")||"all";
+  if(savedEdgeFilter!==_edgeFilter){_edgeFilter=savedEdgeFilter;var efBtn=document.getElementById("edge-filter-"+savedEdgeFilter);if(efBtn){["edge-filter-all","edge-filter-win","edge-filter-loss"].forEach(function(id){var b=document.getElementById(id);if(b){b.style.background="var(--bg3)";b.style.color="var(--text3)";}});efBtn.style.background="var(--blue-dim)";efBtn.style.color="var(--blue)";}}
   var bk=document.getElementById("db-bk").value;
   var range=document.getElementById("db-range").value;
   var now=new Date();var df="";
@@ -912,22 +914,30 @@ if(edgeCard){
     if(dbType==="martingale"){var seriesFilter=document.getElementById("db-series").value;var sm={};manual.filter(function(b){return b.martingale_series_id;}).forEach(function(b){if(!sm[b.martingale_series_id])sm[b.martingale_series_id]=[];sm[b.martingale_series_id].push(b);});var keys=Object.keys(sm);var wonS=keys.filter(function(k){return sm[k].some(function(b){return b.status==="win";});});var stepsArr=wonS.map(function(k){var wb=sm[k].filter(function(b){return b.status==="win";})[0];return wb?wb.martingale_step||1:0;});var avgS=stepsArr.length?(stepsArr.reduce(function(s,v){return s+v;},0)/stepsArr.length).toFixed(1):0;document.getElementById("m-avgsteps").textContent=avgS;var stepsCard=document.getElementById("m-avgsteps").closest(".stat-card");if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border="1px solid var(--red)";     stepsCard.title="⚠️ Avg Steps "+avgS+" exceeds threshold "+stepsThreshold;   } else {     stepsCard.style.border="1px solid var(--border)";     stepsCard.title="";   } }document.getElementById("m-roi").textContent=(roi>=0?"+":"")+roi+"%";document.getElementById("m-roi").className="stat-val "+(parseFloat(roi)>=0?"green":"red");function calcStreaks(bets){var sorted=bets.slice().sort(function(a,b){return new Date(a.created_at||a.date||0)-new Date(b.created_at||b.date||0);});var bw=0,bl=0,cw=0,cl=0;sorted.forEach(function(b){if(b.status==="win"){cw++;cl=0;if(cw>bw)bw=cw;}else if(b.status==="loss"){cl++;cw=0;if(cl>bl)bl=cl;}});return{w:bw,l:bl};}var wStreak=0,lStreak=0;if(seriesFilter==="all"){keys.forEach(function(k){var st=calcStreaks(sm[k]);if(st.w>wStreak)wStreak=st.w;if(st.l>lStreak)lStreak=st.l;});}else if(sm[seriesFilter]){var st2=calcStreaks(sm[seriesFilter]);wStreak=st2.w;lStreak=st2.l;}document.getElementById("m-wstreak").textContent=wStreak;document.getElementById("m-lstreak").textContent=lStreak;}
     drawPnlChart(all);
     drawEdgeTimeChart(all);
+    updateEdgeStat(all);
     var scc=document.getElementById("series-chart-card");
     if(dbType==="martingale"){scc.style.display="";drawSeriesChart(manual);}
     else{scc.style.display="none";}
   });
 }
-  var _edgeFilter="all";
+  var _edgeFilter=localStorage.getItem("edge_filter")||"all";
 function setEdgeFilter(f,el){
   _edgeFilter=f;
+  localStorage.setItem("edge_filter",f);
   ["edge-filter-all","edge-filter-win","edge-filter-loss"].forEach(function(id){
     var b=document.getElementById(id);
     if(!b)return;
     b.style.background="var(--bg3)";b.style.color="var(--text3)";
   });
   el.style.background="var(--blue-dim)";el.style.color="var(--blue)";
-  if(window._lastEdgeBets)drawEdgeTimeChart(window._lastEdgeBets);
+  if(window._lastEdgeBets){drawEdgeTimeChart(window._lastEdgeBets);updateEdgeStat(window._lastEdgeBets);}
 }
+function updateEdgeStat(bets){
+  var filtered=bets.filter(function(b){return((_edgeFilter==="all"?(b.status==="win"||b.status==="loss"):b.status===_edgeFilter))&&b.edge!=null;});
+  var avg=filtered.length?(filtered.reduce(function(s,b){return s+b.edge;},0)/filtered.length).toFixed(1):0;
+  var el=document.getElementById("s-edge");
+  if(el){el.textContent=(parseFloat(avg)>=0?"+":"")+avg+"%";}
+  }
 function drawEdgeTimeChart(bets){
   window._lastEdgeBets=bets;
   var c=document.getElementById("edgeTimeChart");if(!c)return;
