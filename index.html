@@ -300,8 +300,8 @@ canvas{width:100%!important}
 
 <!-- PREDICTIONS -->
 <div class="page" id="page-predictions">
-  <div class="mart-grid" style="margin-bottom:20px">
-    <div class="mart-card">
+  <div class="mart-grid" style="margin-bottom:20px;gap:16px">
+    <div class="mart-card" style="padding:20px">
       <div class="chart-title">Draw Selection Calculator</div>
       <div class="fg">
         <label class="fl">Match Search</label>
@@ -319,13 +319,15 @@ canvas{width:100%!important}
           <option value="72">Next 72 hours</option>
         </select>
       </div>
-      <div class="fr" style="margin-top:8px">
-        <button class="btn btn-ghost" onclick="calcManual()" id="calc-manual-btn" disabled>Calculate Selected</button>
-        <button class="btn btn-green" onclick="calcAuto()">Auto-Fetch & Calculate</button>
-        <button class="btn btn-ghost" id="calc-recalc-btn" onclick="calcRecalculate()" style="display:none">⟳ Recalculate</button>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+        <button class="btn btn-green" style="width:100%;padding:12px" onclick="calcAuto()">Auto-Fetch & Calculate</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" style="flex:1" onclick="calcManual()" id="calc-manual-btn" disabled>Calculate Selected</button>
+          <button class="btn btn-ghost" id="calc-recalc-btn" onclick="calcRecalculate()" style="display:none;flex:1">⟳ Recalculate</button>
+        </div>
       </div>
     </div>
-    <div class="mart-card">
+    <div class="mart-card" style="padding:20px">
       <div class="chart-title">Thresholds</div>
       <div class="fr">
         <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05" oninput="saveCalcThresholds()"></div>
