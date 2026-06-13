@@ -1619,7 +1619,7 @@ function renderCalcResultsWithDate(results){
     var color=r.result.score>=8?"var(--green)":r.result.score>=6?"var(--amber)":"var(--red)";
     var evColor=r.result.ev>0?"var(--green)":r.result.ev<0?"var(--red)":"var(--text2)";
     var detailsId="details-saved-"+r.match.id;
-    var date=r.match._savedAt?(new Date(r.match._savedAt)).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
+    var date=r.match._kickoff?(new Date(r.match._kickoff)).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):r.match._savedAt?(new Date(r.match._savedAt)).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit"}):"";
     h+="<tr>";
     h+="<td class='mono' style='font-size:11px;color:var(--text3)'>"+date+"</td>";
     h+="<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"</td>";
@@ -1724,6 +1724,7 @@ function saveDrawPrediction(match,data,result){
   sbPost("draw_predictions",{
     match:(match.home_name||"")+" vs "+(match.away_name||""),
     league:String(match.competition_id||""),
+    kickoff:match.date_unix?new Date(match.date_unix*1000).toISOString():null,
     league_name:match.league_name||match.competition_name||"",     
     league_name:match.league_name||match.competition_name||"",
     fixture_id:match.id,
@@ -1757,7 +1758,8 @@ function loadDrawPredictions(){
           home_name:p.match.split(" vs ")[0]||"",
           away_name:p.match.split(" vs ")[1]||"",
           competition_id:p.league,
-          _savedAt:p.created_at
+          _savedAt:p.created_at,
+          _kickoff:p.kickoff
         },
         data:{
           odds:p.odds,
