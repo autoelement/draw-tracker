@@ -1722,7 +1722,7 @@ function _buildCalcCards(results){
     h+="<button class='btn btn-ghost btn-sm' style='width:100%' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button>";
     h+="<button class='btn btn-green btn-sm' style='width:100%' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+( r.match.league_name||"")+"\")'>"+"+ Bet</button>";
     h+='</div>';
-    h+='<div id="'+detailsId+'" style="display:none;margin-top:16px;display:flex;flex-direction:column;gap:8px">';
+    h+='<div id="'+detailsId+'" style="display:none;margin-top:16px;flex-direction:column;gap:8px">';
     h+=r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg3);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("");
     h+='</div>';
     h+='</div>';
