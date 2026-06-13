@@ -542,6 +542,7 @@ var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 var H = {"apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json"};
 var bookmakers = [];
 var dbType = "all";
+var _edgeFilter=localStorage.getItem("edge_filter")||"all";
 var payoutManual = false;
 var martSeries = [];
 var settings = {single_pct: 2, trixie_pct: 1, patent_pct: 0.5};
@@ -945,10 +946,8 @@ if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border
     var scc=document.getElementById("series-chart-card");
     if (dbType==="martingale") { scc.style.display=""; drawSeriesChart(manual); }
     else { scc.style.display="none"; }
-    setTimeout(function(){drawEdgeTimeChart(all);},100);
   });
 }
-  var _edgeFilter=localStorage.getItem("edge_filter")||"all";
 function setEdgeFilter(f,el){
   _edgeFilter=f;
   localStorage.setItem("edge_filter",f);
