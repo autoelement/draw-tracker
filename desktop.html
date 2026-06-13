@@ -2578,10 +2578,10 @@ function loadUpcomingMatches(){
   .then(function(r){return r.json();})
   .then(function(d){
     upcomingMatches=(d.data||[]).map(function(m){
-      return{
+     return{
         home:m.home_name,
         away:m.away_name,
-        league:m.competition_id,
+        league:m.competition_name||m.league||String(m.competition_id)||"",
         fixture_id:m.id,
         kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():""
       };
