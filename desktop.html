@@ -1339,6 +1339,7 @@ function loadCalcThresholds(){
   }catch(e){}
 }
 function calcScore(data,t){
+  var score=0;var skip=false;var reasons=[];
   var minDraw=t.minHomeDraw||40;
   if(data.home_draw_pct>0&&data.home_draw_pct!==data.league_draw_rate){
     if(data.home_draw_pct>=60){score+=2;reasons.push("✅✅ Home draw "+data.home_draw_pct+"% ≥60% (+2)");}
