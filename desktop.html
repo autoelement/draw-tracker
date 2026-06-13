@@ -1593,22 +1593,7 @@ function showCalcResult(matchName,data,result){
 
 function renderCalcResults(results){
   window._lastCalcResults=results;
-  var el=document.getElementById("pred-body");
-  if(!results.length){el.innerHTML='<div class="empty">No qualifying matches found</div>';return;}
-  results.sort(function(a,b){
-    var as=isStarred(a.match.id)?1:0;
-    var bs=isStarred(b.match.id)?1:0;
-    if(bs!==as)return bs-as;
-    return b.result.score-a.result.score;
-  });
-  var h='<div class="table-scroll"><table><thead><tr><th>Match</th><th>Score</th><th>Verdict</th><th>Odds</th><th>Our%</th><th>Mkt%</th><th>EV</th><th>League Draw%</th><th>H2H Draw%</th><th>BTTS%</th><th>PPG Home</th><th>PPG Away</th><th></th></tr></thead><tbody>';
-  results.forEach(function(r){
-    var color=r.result.score>=8?"var(--green)":r.result.score>=6?"var(--amber)":"var(--red)";
-    var matchName=(r.match.home_name||"")+" vs "+(r.match.away_name||"");
-    var detailsId="details-"+r.match.id; var evColor=r.result.ev>0?"var(--green)":r.result.ev<0?"var(--red)":"var(--text2)"; h+="<tr>"+ "<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"</td>"+ "<td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/10</td>"+ "<td>"+r.result.verdict+"</td>"+ "<td class='odds-badge'>"+r.data.odds+"</td>"+ "<td style='font-family:Space Mono;color:var(--blue)'>"+r.result.ourProb+"%</td>"+ "<td style='font-family:Space Mono;color:var(--text2)'>"+r.result.mktProb+"%</td>"+ "<td style='font-family:Space Mono;font-weight:700;color:"+evColor+"'>"+(r.result.ev>0?"+":"")+r.result.ev+"</td>"+ "<td>"+r.data.league_draw_rate+"%</td>"+ "<td>"+r.data.h2h_draw_rate+"%</td>"+ "<td>"+r.data.btts_pct+"%</td>"+ "<td class='mono'>"+r.data.ppg_home+"</td>"+ "<td class='mono'>"+r.data.ppg_away+"</td>"+ "<td style='white-space:nowrap'>"+ "<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button> "+ "<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+ "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+( r.match.league_name||"")+"\")'>"+"+ Bet</button>"+ "</td>"+ "</tr>"; h+="<tr id='"+detailsId+"' style='display:none'><td colspan='9' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
-  });
-  h+="</tbody></table></div>";
-  el.innerHTML=h;
+  renderCalcResultsWithDate(results);
 }
 function renderCalcResultsWithDate(results){
   window._lastCalcResults=results;
@@ -1654,7 +1639,7 @@ function _buildCalcRows(results){
   var yr=String(d.getFullYear()).slice(2);
   var hr=String(d.getHours()).padStart(2,"0");
   var min=String(d.getMinutes()).padStart(2,"0");
-  return day+"/"+mon+"/"+yr+" | "+hr+":"+min;
+  return day+"/"+mon+"/"+yr+"<br>"+hr+":"+min;
 }
 var date=r.match._kickoff?fmtDate(r.match._kickoff):r.match._savedAt?fmtDate(r.match._savedAt):"";
     h+="<td class='mono' style='font-size:11px;color:var(--text3)'>"+date+"</td>";
