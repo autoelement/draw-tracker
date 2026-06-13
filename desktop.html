@@ -1646,8 +1646,17 @@ function _buildCalcRows(results){
     var color=r.result.score>=8?"var(--green)":r.result.score>=6?"var(--amber)":"var(--red)";
     var evColor=r.result.ev>0?"var(--green)":r.result.ev<0?"var(--red)":"var(--text2)";
     var detailsId="details-saved-"+r.match.id;
-    var date=r.match._kickoff?(new Date(r.match._kickoff)).toLocaleString("en-GB",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"}):r.match._savedAt?(new Date(r.match._savedAt)).toLocaleString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
-    h+="<tr>";
+    function fmtDate(ts){
+  if(!ts)return"";
+  var d=new Date(ts);
+  var day=String(d.getDate()).padStart(2,"0");
+  var mon=String(d.getMonth()+1).padStart(2,"0");
+  var yr=String(d.getFullYear()).slice(2);
+  var hr=String(d.getHours()).padStart(2,"0");
+  var min=String(d.getMinutes()).padStart(2,"0");
+  return day+"/"+mon+"/"+yr+" | "+hr+":"+min;
+}
+var date=r.match._kickoff?fmtDate(r.match._kickoff):r.match._savedAt?fmtDate(r.match._savedAt):"";
     h+="<td class='mono' style='font-size:11px;color:var(--text3)'>"+date+"</td>";
     h+="<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"</td>";
     h+="<td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/10</td>";
