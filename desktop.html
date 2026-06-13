@@ -2602,7 +2602,7 @@ function searchMatches(q){
     if(!results.length){dd.style.display="none";return;}
     dd.innerHTML=results.map(function(m){
     var kd=m.kickoff?new Date(m.kickoff):"";
-    var ko=kd?String(kd.getDate()).padStart(2,"0")+"/"+String(kd.getMonth()+1).padStart(2,"0")+" "+String(kd.getHours()).padStart(2,"0")+":"+String(kd.getMinutes()).padStart(2,"0"):"";
+    var ko=kd?(String(kd.getDate()).padStart(2,"0")+"/"+String(kd.getMonth()+1).padStart(2,"0")+" "+String(kd.getHours()).padStart(2,"0")+":"+String(kd.getMinutes()).padStart(2,"0")).replace(/"/g,""):"";
       var safeHome=(m.home||"").replace(/"/g,"&quot;");
       var safeAway=(m.away||"").replace(/"/g,"&quot;");
       return'<div onclick="selectMatch(this)" data-home="'+safeHome+'" data-away="'+safeAway+'" data-league="'+(m.league||"")+'" data-fixture="'+(m.fixture_id||"")+'" data-ko="'+ko+'" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+safeHome+' vs '+safeAway+'</div><div style="color:var(--text3);font-size:11px">'+(m.league||"")+" · "+ko+"</div></div>';
