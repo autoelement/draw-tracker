@@ -1403,12 +1403,17 @@ function calcScore(data,t){
   }
 
   // ჩვენი ალბათობა
-  var leagueW=0.30,homeW=0.25,awayW=0.25,h2hW=0.20;
+  var leagueW=0.25,homeW=0.20,awayW=0.20,h2hW=0.15,bttsW=0.10,goalsW=0.10;
   var ourProb=0,probDivider=0;
   if(data.league_draw_rate>0){ourProb+=data.league_draw_rate*leagueW;probDivider+=leagueW;}
-  if(data.home_draw_pct>0){ourProb+=data.home_draw_pct*homeW;probDivider+=homeW;}
-  if(data.away_draw_pct>0){ourProb+=data.away_draw_pct*awayW;probDivider+=awayW;}
+  if(data.home_draw_pct>0&&data.home_draw_pct!==data.league_draw_rate){ourProb+=data.home_draw_pct*homeW;probDivider+=homeW;}
+  if(data.away_draw_pct>0&&data.away_draw_pct!==data.league_draw_rate){ourProb+=data.away_draw_pct*awayW;probDivider+=awayW;}
   if(data.h2h_draw_rate>0){ourProb+=data.h2h_draw_rate*h2hW;probDivider+=h2hW;}
+  var bttsProb=data.btts_pct>0?(100-data.btts_pct):0;
+  if(bttsProb>0){ourProb+=bttsProb*bttsW;probDivider+=bttsW;}
+  var avgGoals=(data.avg_goals_home+data.avg_goals_away)/2;
+  var goalsProb=avgGoals>0?Math.max(0,Math.min(100,(1-avgGoals/5)*100)):0;
+  if(goalsProb>0){ourProb+=goalsProb*goalsW;probDivider+=goalsW;}
   if(probDivider>0)ourProb=ourProb/probDivider;
   ourProb=+ourProb.toFixed(1);
 
