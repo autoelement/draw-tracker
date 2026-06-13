@@ -1429,7 +1429,7 @@ function calcAuto(){
   .then(function(d){
     if(!d.data||!d.data.length){el.innerHTML='<div class="empty">No matches found</div>';return;}
     window._todaysMatches=d.data||[];
-    var matches=d.data.filter(function(m){return m.date_unix<=until&&m.odds_ft_x>=2.80;});
+    var matches=window._todaysMatches.filter(function(m){return m.date_unix<=until&&m.odds_ft_x>=parseFloat(document.getElementById("calc-min-odds").value)||2.80;});
     el.innerHTML='<div class="loading"><div class="sp"></div>Calculating '+matches.length+' matches...</div>';
     if(!matches.length){el.innerHTML='<div class="empty">No qualifying matches found</div>';return;}
     // league cache
