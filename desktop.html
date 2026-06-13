@@ -209,7 +209,7 @@ tr:hover td{background:var(--bg3)}
     <div class="stat-card"><div class="stat-label">Total P&L</div><div class="stat-val green" id="s-pnl">$0.00</div><div class="stat-sub">All time</div></div>
     <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val" id="s-wr">0%</div><div class="stat-sub" id="s-wr2">0/0</div></div>
     <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val amber" id="s-roi">0%</div><div class="stat-sub">Return on investment</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div><div class="stat-sub">vs bookmaker</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div><div class="stat-sub" id="s-edge-sub">All bets</div></div>
     <div class="stat-card" onclick="document.getElementById('b-status').value='pending';showPage('bets',document.querySelectorAll('.nav-tab')[2]);" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div><div class="stat-sub">Pending</div></div>
   </div>
   <div class="stats-grid-4">
@@ -235,7 +235,7 @@ tr:hover td{background:var(--bg3)}
   </div>
   <div id="charts-wrap" style="display:flex;gap:12px;margin-bottom:20px">
     <div class="chart-card" id="pnl-chart-card" style="flex:1;min-width:0"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="160" style="width:100%;display:block;height:160px"></canvas></div>
-    <div class="chart-card" id="edge-chart-card" style="flex:1;min-width:0"><div class="chart-title">Avg Edge Over Time</div><canvas id="edgeTimeChart" height="160" style="width:100%;display:block;height:160px"></canvas></div>
+    <div class="chart-card" id="edge-chart-card" style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="chart-title" style="margin-bottom:0">Avg Edge Over Time</div><div style="display:flex;gap:4px"><button id="edge-filter-all" onclick="setEdgeFilter('all',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--blue-dim);color:var(--blue);font-family:'Outfit',sans-serif">All</button><button id="edge-filter-win" onclick="setEdgeFilter('win',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Win</button><button id="edge-filter-loss" onclick="setEdgeFilter('loss',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Loss</button></div></div><canvas id="edgeTimeChart" height="160" style="width:100%;display:block;height:160px"></canvas></div>
     <div class="chart-card" id="series-chart-card" style="flex:1;min-width:0;display:none"><div class="chart-title">Risk vs Return</div><canvas id="edgeChart" height="160" style="width:100%;display:block"></canvas></div>
   </div>
 </div>
@@ -810,6 +810,10 @@ function setDbType(t, el) {
 }
 
 function loadDashboard() {
+  var savedEdgeFilter=localStorage.getItem("edge_filter")||"all";
+_edgeFilter=savedEdgeFilter;
+var efBtn=document.getElementById("edge-filter-"+savedEdgeFilter);
+if(efBtn){["edge-filter-all","edge-filter-win","edge-filter-loss"].forEach(function(id){var b=document.getElementById(id);if(b){b.style.background="var(--bg3)";b.style.color="var(--text3)";}});efBtn.style.background="var(--blue-dim)";efBtn.style.color="var(--blue)";}
   var bk = document.getElementById("db-bk").value;
   var range = document.getElementById("db-range").value;
   var now = new Date();
@@ -893,17 +897,6 @@ if(oddsCard){
     oddsCard.title="";
   }
 }
-    var edgeThreshold=parseFloat(settings.edge_threshold)||10;
-var edgeCard=document.getElementById("s-edge").closest(".stat-card");
-if(edgeCard){
-  if(parseFloat(avgE)<edgeThreshold){
-    edgeCard.style.border="1px solid var(--red)";
-    edgeCard.title="⚠️ Avg Edge "+avgE+"% is below threshold "+edgeThreshold+"%";
-  } else {
-    edgeCard.style.border="1px solid var(--border)";
-    edgeCard.title="";
-  }
-}
     if (dbType==="trixie"||dbType==="patent") {
       var tx=settled.filter(function(b){return b.bet_type===dbType;});
       var full=tx.filter(function(b){return b.status==="win";}).length;
@@ -949,13 +942,40 @@ if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border
     drawPnlChart(all);
     drawPnlChart(all);
     drawEdgeTimeChart(all);
+    updateEdgeStat(all);
     var scc=document.getElementById("series-chart-card");
     if (dbType==="martingale") { scc.style.display=""; drawSeriesChart(manual); }
     else { scc.style.display="none"; }
     setTimeout(function(){drawEdgeTimeChart(all);},100);
   });
 }
-function drawEdgeTimeChart(bets){setTimeout(function(){requestAnimationFrame(function(){_drawEdgeTimeChart(bets);});},50);}
+  var _edgeFilter=localStorage.getItem("edge_filter")||"all";
+function setEdgeFilter(f,el){
+  _edgeFilter=f;
+  localStorage.setItem("edge_filter",f);
+  ["edge-filter-all","edge-filter-win","edge-filter-loss"].forEach(function(id){
+    var b=document.getElementById(id);
+    if(!b)return;
+    b.style.background="var(--bg3)";b.style.color="var(--text3)";
+  });
+  el.style.background="var(--blue-dim)";el.style.color="var(--blue)";
+  if(window._lastEdgeBets){drawEdgeTimeChart(window._lastEdgeBets);updateEdgeStat(window._lastEdgeBets);}
+}
+function updateEdgeStat(bets){
+  var filtered=bets.filter(function(b){return((_edgeFilter==="all"?(b.status==="win"||b.status==="loss"):b.status===_edgeFilter))&&b.edge!=null;});
+  var avg=filtered.length?(filtered.reduce(function(s,b){return s+b.edge;},0)/filtered.length).toFixed(1):0;
+  var el=document.getElementById("s-edge");
+  if(el){el.textContent=(parseFloat(avg)>=0?"+":"")+avg+"%";}
+  var subEl=document.getElementById("s-edge-sub");
+  if(subEl){subEl.textContent=_edgeFilter==="all"?"All bets":_edgeFilter==="win"?"Win bets":"Loss bets";}
+  var edgeThreshold=parseFloat(settings.edge_threshold)||10;
+  var edgeCard=el?el.closest(".stat-card"):null;
+  if(edgeCard){
+    if(parseFloat(avg)<edgeThreshold){edgeCard.style.border="1px solid var(--red)";edgeCard.title="⚠️ Avg Edge "+avg+"% is below threshold "+edgeThreshold+"%";}
+    else{edgeCard.style.border="1px solid var(--border)";edgeCard.title="";}
+  }
+}
+function drawEdgeTimeChart(bets){window._lastEdgeBets=bets;setTimeout(function(){requestAnimationFrame(function(){_drawEdgeTimeChart(bets);});},50);}
 function _drawEdgeTimeChart(bets){
   var c=document.getElementById("edgeTimeChart");if(!c)return;
   var ctx=c.getContext("2d");
@@ -992,7 +1012,7 @@ function _drawEdgeTimeChart(bets){
   var cw=c.parentNode.offsetWidth-32;
   c.style.width=cw+"px";c.width=cw*2;c.height=320;ctx.scale(2,2);
   var w=cw,h=160,p=16;ctx.clearRect(0,0,w,h);
-  var s=bets.filter(function(b){return (b.status==="win"||b.status==="loss")&&b.edge!=null;}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
+  var s=bets.filter(function(b){return((_edgeFilter==="all"?(b.status==="win"||b.status==="loss"):b.status===_edgeFilter))&&b.edge!=null;}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
   if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No edge data",w/2,h/2);return;}
   var pts=s.map(function(b,i){var slice=s.slice(Math.max(0,i-4),i+1);return slice.reduce(function(sum,x){return sum+x.edge;},0)/slice.length;});
   var dates=s.map(function(b){return b.date||"";});
