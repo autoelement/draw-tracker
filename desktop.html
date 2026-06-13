@@ -1293,7 +1293,6 @@ function calcScore(data,t){
   // საბაზო ფილტრი
   if(data.league_draw_rate<25){skip=true;reasons.push("League draw rate "+data.league_draw_rate+"% < 25%");}
   if(data.odds<2.80){skip=true;reasons.push("Odds "+data.odds+" < 2.80");}
-  if(data.math_advantage<=0){skip=true;reasons.push("No mathematical advantage");}
   if(skip)return{score:0,skip:true,verdict:"🔴 SKIP",reasons:reasons};
   // A. Draw Pattern
   if(data.home_draw_pct>=60){score+=2;reasons.push("✅ Home draw "+data.home_draw_pct+"% ≥60% (+2)");}
@@ -1407,8 +1406,8 @@ function calcAuto(){
         }
         var data={
           league_draw_rate:league.drawPercentage||0,
-          home_draw_pct:m.home_draw_percentage||0,
-          away_draw_pct:m.away_draw_percentage||0,
+          home_draw_pct:m.home_draw_percentage||(league.drawPercentage||0),
+          away_draw_pct:m.away_draw_percentage||(league.drawPercentage||0),
           avg_goals_home:league.seasonAVG_home||0,
           avg_goals_away:league.seasonAVG_away||0,
           btts_pct:m.btts_potential||0,
