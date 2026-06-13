@@ -1010,6 +1010,7 @@ function drawEdgeTimeChart(bets){
   window._edgeTimeChartData={pts:pts,dates:dates,xs:xs,ys:ys,w:w,h:h,p:p};
 }
   function drawEdgeTimeChart(bets){
+  window._lastEdgeBets=bets;
   var c=document.getElementById("edgeTimeChart");if(!c)return;
   var ctx=c.getContext("2d");
   var cw=c.parentNode.offsetWidth-32;
