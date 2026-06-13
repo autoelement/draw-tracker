@@ -270,31 +270,18 @@ tr:hover td{background:var(--bg3)}
     <div class="mart-card">
       <div class="chart-title">Thresholds</div>
       <div class="fr">
-        <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05"></div>
-        <div class="fg"><label class="fl">Min League Draw %</label><input type="number" class="fi" id="calc-min-league-draw" value="25" step="1"></div>
+        <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05" oninput="saveCalcThresholds()"></div>
+        <div class="fg"><label class="fl">Min League Draw %</label><input type="number" class="fi" id="calc-min-league-draw" value="25" step="1" oninput="saveCalcThresholds()"></div>
       </div>
       <div class="fr">
-        <div class="fg"><label class="fl">Min Home Draw % (5)</label><input type="number" class="fi" id="calc-min-home-draw" value="40" step="5"></div>
-        <div class="fg"><label class="fl">Min Away Draw % (5)</label><input type="number" class="fi" id="calc-min-away-draw" value="40" step="5"></div>
+        <div class="fg"><label class="fl">Min Home Draw % (5)</label><input type="number" class="fi" id="calc-min-home-draw" value="40" step="5" oninput="saveCalcThresholds()"></div>
+        <div class="fg"><label class="fl">Min Away Draw % (5)</label><input type="number" class="fi" id="calc-min-away-draw" value="40" step="5" oninput="saveCalcThresholds()"></div>
       </div>
       <div class="fr">
-        <div class="fg"><label class="fl">Max Avg Goals</label><input type="number" class="fi" id="calc-max-goals" value="2.60" step="0.1"></div>
-        <div class="fg"><label class="fl">Max PPG Diff %</label><input type="number" class="fi" id="calc-max-ppg" value="30" step="5"></div>
+        <div class="fg"><label class="fl">Max Avg Goals</label><input type="number" class="fi" id="calc-max-goals" value="2.60" step="0.1" oninput="saveCalcThresholds()"></div>
+        <div class="fg"><label class="fl">Max PPG Diff %</label><input type="number" class="fi" id="calc-max-ppg" value="30" step="5" oninput="saveCalcThresholds()"></div>
       </div>
     </div>
-  </div>
-  <div class="table-card">
-    <div class="table-hd">
-      <div class="table-title">Draw Predictions</div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost" onclick="loadDrawPredictions()">Refresh</button>
-        <button class="btn btn-ghost" onclick="loadPredictions()">Old Predictions</button>
-      </div>
-    </div>
-    <div id="pred-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
-  </div>
-</div>
-
 <!-- MY BETS -->
 <div class="page" id="page-bets">
   <div class="filters-bar">
@@ -1356,8 +1343,13 @@ function calcScore(data,t){
     if(ppgDiff<=15){score+=1;reasons.push("✅ PPG diff "+ppgDiff.toFixed(1)+"% ≤15% (+1)");}
     else if(ppgDiff>30){score-=1;reasons.push("❌ PPG diff "+ppgDiff.toFixed(1)+"% >30% (-1)");}
   }
+  if(data.h2h_draw_rate>0){
   if(data.h2h_draw_rate>=40){score+=1;reasons.push("✅ H2H draw "+data.h2h_draw_rate+"% ≥40% (+1)");}
   else if(data.h2h_draw_rate<25){score-=1;reasons.push("❌ H2H draw "+data.h2h_draw_rate+"% <25% (-1)");}
+  else{reasons.push("➖ H2H draw "+data.h2h_draw_rate+"% (neutral)");}
+} else {
+  reasons.push("➖ H2H draw — no data");
+}
   // D. ბაზარი
   if(data.sbo_odds&&data.odds){
     if(data.sbo_odds>data.odds){score+=1;reasons.push("✅ Smart money: Sbo > bet365 (+1)");}
