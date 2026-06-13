@@ -31,7 +31,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_API }}
-          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          FOOTYSTATS_KEY: ${{ secrets.FOOTYSTATS_KEY }}
 
   results:
     if: github.event.schedule == '0 3 * * *' || github.event.schedule == '0 15 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'results')
@@ -46,4 +46,4 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_API }}
-          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          FOOTYSTATS_KEY: ${{ secrets.FOOTYSTATS_KEY }}
