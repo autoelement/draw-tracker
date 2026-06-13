@@ -1633,6 +1633,10 @@ function renderCalcResultsWithDate(results){
   window._lastCalcResults=results;
   var el=document.getElementById("pred-body");
   if(!results.length){el.innerHTML='<div class="empty">No qualifying matches found</div>';return;}
+  if(window.innerWidth<768){
+    el.innerHTML='<div style="display:flex;flex-direction:column;gap:10px;padding:10px">'+_buildCalcCards(results)+'</div>';
+    return;
+  }
   var h='<div class="table-scroll"><table><thead><tr>'+
   '<th onclick="sortCalcResults(\'date\')" style="cursor:pointer;white-space:nowrap">Date <span id="sort-date">⇅</span></th>'+
   '<th>Match</th>'+
@@ -1688,7 +1692,42 @@ function _buildCalcRows(results){
   });
   return h;
 }
-
+function _buildCalcCards(results){
+  var h="";
+  results.forEach(function(r,idx){
+    var matchName=(r.match.home_name||"")+" vs "+(r.match.away_name||"");
+    var color=r.result.score>=8?"var(--green)":r.result.score>=6?"var(--amber)":"var(--red)";
+    var evColor=r.result.ev>0?"var(--green)":r.result.ev<0?"var(--red)":"var(--text2)";
+    var detailsId="details-card-"+r.match.id+"-"+idx;
+    var date=r.match._kickoff?fmtDate(r.match._kickoff):r.match._savedAt?fmtDate(r.match._savedAt):"";
+    h+='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+    h+='<div style="font-size:12px;color:var(--text3);font-family:Space Mono">'+date.replace("<br>"," ")+'</div>';
+    h+='<div style="font-family:Space Mono;font-weight:700;font-size:18px;color:'+color+'">'+r.result.score+'/10</div>';
+    h+='</div>';
+    h+='<div style="font-weight:600;color:var(--text);margin-bottom:6px">'+matchName+'</div>';
+    h+='<div style="font-size:13px;margin-bottom:10px">'+r.result.verdict+'</div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;font-size:12px">';
+    h+='<div style="background:var(--bg3);padding:6px;border-radius:6px"><span style="color:var(--text3)">Odds</span><br><span class="odds-badge">'+r.data.odds+'</span></div>';
+    h+='<div style="background:var(--bg3);padding:6px;border-radius:6px"><span style="color:var(--text3)">My Prob</span><br><span style="color:var(--blue);font-family:Space Mono">'+r.result.ourProb+'%</span></div>';
+    h+='<div style="background:var(--bg3);padding:6px;border-radius:6px"><span style="color:var(--text3)">EV</span><br><span style="color:'+evColor+';font-family:Space Mono">'+(r.result.ev>0?"+":"")+r.result.ev+'</span></div>';
+    h+='<div style="background:var(--bg3);padding:6px;border-radius:6px"><span style="color:var(--text3)">League Draw%</span><br>'+r.data.league_draw_rate+'%</div>';
+    h+='<div style="background:var(--bg3);padding:6px;border-radius:6px"><span style="color:var(--text3)">H2H Draw%</span><br>'+r.data.h2h_draw_rate+'%</div>';
+    h+='<div style="background:var(--bg3);padding:6px;border-radius:6px"><span style="color:var(--text3)">BTTS%</span><br>'+r.data.btts_pct+'%</div>';
+    h+='</div>';
+    h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+    h+="<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button>";
+    h+="<button class='btn btn-ghost btn-sm' onclick='toggleCalcDetails(\""+detailsId+"\")'>Details</button>";
+    h+="<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button>";
+    h+="<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+( r.match.league_name||"")+"\")'>"+"+ Bet</button>";
+    h+='</div>';
+    h+='<div id="'+detailsId+'" style="display:none;margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+    h+=r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg3);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("");
+    h+='</div>';
+    h+='</div>';
+  });
+  return h;
+}
 function sortCalcResults(field){
   if(_sortField===field){
     if(_sortDir===-1){_sortDir=1;}
