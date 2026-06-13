@@ -282,6 +282,18 @@ tr:hover td{background:var(--bg3)}
         <div class="fg"><label class="fl">Max PPG Diff %</label><input type="number" class="fi" id="calc-max-ppg" value="30" step="5" oninput="saveCalcThresholds()"></div>
       </div>
     </div>
+  </div>
+  <div class="table-card">
+    <div class="table-hd">
+      <div class="table-title">Draw Predictions</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost" onclick="loadDrawPredictions()">Refresh</button>
+        <button class="btn btn-ghost" onclick="loadPredictions()">Old Predictions</button>
+      </div>
+    </div>
+    <div id="pred-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
+  </div>
+</div>
 <!-- MY BETS -->
 <div class="page" id="page-bets">
   <div class="filters-bar">
