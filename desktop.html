@@ -833,7 +833,7 @@ function showPage(name,el){
   document.getElementById("page-"+name).classList.add("active");
   if(el)el.classList.add("active");
   if (name === "dashboard") loadDashboard();
-  if (name === "predictions") loadPredictions();
+  if (name === "predictions") { loadPredictions(); loadCalcThresholds(); }
   if (name === "bets") loadBets();
   if (name === "balances") loadBalances();
   if (name === "martingale") { calcMartingale(); loadMartSeries().then(function() { loadMartingaleHistory(); }); }
@@ -1306,7 +1306,30 @@ function getCalcThresholds(){
     maxPpg: parseFloat(document.getElementById("calc-max-ppg").value)||30
   };
 }
+function saveCalcThresholds(){
+  localStorage.setItem("calc_thresholds",JSON.stringify({
+    minOdds:parseFloat(document.getElementById("calc-min-odds").value)||2.80,
+    minLeagueDraw:parseFloat(document.getElementById("calc-min-league-draw").value)||25,
+    minHomeDraw:parseFloat(document.getElementById("calc-min-home-draw").value)||40,
+    minAwayDraw:parseFloat(document.getElementById("calc-min-away-draw").value)||40,
+    maxGoals:parseFloat(document.getElementById("calc-max-goals").value)||2.60,
+    maxPpg:parseFloat(document.getElementById("calc-max-ppg").value)||30
+  }));
+}
 
+function loadCalcThresholds(){
+  var t=localStorage.getItem("calc_thresholds");
+  if(!t)return;
+  try{
+    var v=JSON.parse(t);
+    if(v.minOdds)document.getElementById("calc-min-odds").value=v.minOdds;
+    if(v.minLeagueDraw)document.getElementById("calc-min-league-draw").value=v.minLeagueDraw;
+    if(v.minHomeDraw)document.getElementById("calc-min-home-draw").value=v.minHomeDraw;
+    if(v.minAwayDraw)document.getElementById("calc-min-away-draw").value=v.minAwayDraw;
+    if(v.maxGoals)document.getElementById("calc-max-goals").value=v.maxGoals;
+    if(v.maxPpg)document.getElementById("calc-max-ppg").value=v.maxPpg;
+  }catch(e){}
+}
 function calcScore(data,t){
   var score=0;var skip=false;var reasons=[];
   // საბაზო ფილტრი
