@@ -2581,7 +2581,8 @@ function loadUpcomingMatches(){
      return{
         home:m.home_name,
         away:m.away_name,
-        league:m.competition_name||m.league||String(m.competition_id)||"",
+        league:"",
+        competition_id:m.competition_id,
         fixture_id:m.id,
         kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():""
       };
