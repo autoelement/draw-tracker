@@ -1447,6 +1447,7 @@ function calcManual(){
     if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]&&m.odds_comparison["FT Result"]["Draw"]["Sbo"]){
       sboOdds=parseFloat(m.odds_comparison["FT Result"]["Draw"]["Sbo"]);
     }
+    m._kickoff=m.date_unix?new Date(m.date_unix*1000).toISOString():null;
     var data={
       league_draw_rate:league.drawPercentage||0,
       home_draw_pct:m.home_draw_percentage||0,
@@ -1502,6 +1503,7 @@ function calcAuto(){
         if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]&&m.odds_comparison["FT Result"]["Draw"]["Sbo"]){
           sboOdds=parseFloat(m.odds_comparison["FT Result"]["Draw"]["Sbo"]);
         }
+            m._kickoff=m.date_unix?new Date(m.date_unix*1000).toISOString():null;
         var data={
           league_draw_rate:league.drawPercentage||0,
           home_draw_pct:m.home_draw_percentage||0,
@@ -1759,6 +1761,7 @@ function calcRecalculate(){
     if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]&&m.odds_comparison["FT Result"]["Draw"]["Sbo"]){
       sboOdds=parseFloat(m.odds_comparison["FT Result"]["Draw"]["Sbo"]);
     }
+        m._kickoff=m.date_unix?new Date(m.date_unix*1000).toISOString():null;
     var data={
       league_draw_rate:league.drawPercentage||0,
       home_draw_pct:m.home_draw_percentage||0,
