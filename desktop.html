@@ -1520,10 +1520,14 @@ function renderCalcResults(results){
   results.forEach(function(r){
     var color=r.result.score>=8?"var(--green)":r.result.score>=6?"var(--amber)":"var(--red)";
     var matchName=(r.match.home_name||"")+" vs "+(r.match.away_name||"");
-    h+="<tr><td style='color:var(--text);font-weight:500'>"+matchName+"</td><td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/10</td><td>"+r.result.verdict+"</td><td class='odds-badge'>"+r.data.odds+"</td><td>"+r.data.league_draw_rate+"%</td><td>"+r.data.h2h_draw_rate+"%</td><td>"+r.data.btts_pct+"%</td><td class='mono'>"+r.data.ppg_home+"</td><td class='mono'>"+r.data.ppg_away+"</td></tr>";
+    var detailsId="details-"+r.match.id; h+="<tr onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer'><td style='color:var(--text);font-weight:500'>"+matchName+"</td><td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/10</td><td>"+r.result.verdict+"</td><td class='odds-badge'>"+r.data.odds+"</td><td>"+r.data.league_draw_rate+"%</td><td>"+r.data.h2h_draw_rate+"%</td><td>"+r.data.btts_pct+"%</td><td class='mono'>"+r.data.ppg_home+"</td><td class='mono'>"+r.data.ppg_away+"</td></tr>"; h+="<tr id='"+detailsId+"' style='display:none'><td colspan='9' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
   });
   h+="</tbody></table></div>";
   el.innerHTML=h;
+}
+function toggleCalcDetails(id){
+  var el=document.getElementById(id);
+  if(el)el.style.display=el.style.display==="none"?"table-row":"none";
 }
 function calcRecalculate(){
   if(!window._todaysMatches||!window._todaysMatches.length){showToast("No data — run Auto-Fetch first",true);return;}
