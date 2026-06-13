@@ -2574,10 +2574,20 @@ var matchSearchTimeout=null;
 var upcomingMatches=[];
 
 function loadUpcomingMatches(){
-  sbGet("upcoming_matches?select=*&order=kickoff.asc&limit=500").then(function(rows){
-    upcomingMatches=rows;
-    console.log("Loaded "+rows.length+" upcoming matches");
-  });
+  fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    upcomingMatches=(d.data||[]).map(function(m){
+      return{
+        home:m.home_name,
+        away:m.away_name,
+        league:m.competition_id,
+        fixture_id:m.id,
+        kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():""
+      };
+    });
+    console.log("Loaded "+upcomingMatches.length+" upcoming matches");
+  }).catch(function(){});
 }
 
 function searchMatches(q){
@@ -2592,7 +2602,7 @@ function searchMatches(q){
     if(!results.length){dd.style.display="none";return;}
     dd.innerHTML=results.map(function(m){
       var ko=m.kickoff?new Date(m.kickoff).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
-      return'<div onclick="selectMatch(this)" data-home="'+m.home+'" data-away="'+m.away+'" data-league="'+(m.league||"")+'" data-fixture="'+(m.fixture_id||"")+'" data-ko="'+ko+'" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.home+' vs '+m.away+'</div><div style="color:var(--text3);font-size:11px">'+(m.league||"")+" · "+ko+"</div></div>";
+      return'<div onclick="selectMatch(this)" data-home="'+m.home+'" data-away="'+m.away+'" data-league="'+(m.league||"")+'" data-fixture="'+(m.fixture_id||"")+'" data-ko="'+ko+'" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.home+' vs '+m.away+'</div><div style="color:var(--text3);font-size:11px">'+(m.league||"")+" · "+ko+"</div></div>';
     }).join("");
     dd.style.display="block";
   },300);
