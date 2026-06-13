@@ -1615,17 +1615,17 @@ function renderCalcResultsWithDate(results){
   var el=document.getElementById("pred-body");
   if(!results.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
   var h='<div class="table-scroll"><table><thead><tr>'+
-  '<th onclick="sortCalcResults(\'date\')" style="cursor:pointer">Date <span id="sort-date">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'date\')" style="cursor:pointer;white-space:nowrap">Date <span id="sort-date">⇅</span></th>'+
   '<th>Match</th>'+
-  '<th onclick="sortCalcResults(\'score\')" style="cursor:pointer">Score <span id="sort-score">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'score\')" style="cursor:pointer;white-space:nowrap">Score <span id="sort-score">⇅</span></th>'+
   '<th>Verdict</th>'+
-  '<th onclick="sortCalcResults(\'odds\')" style="cursor:pointer">Odds <span id="sort-odds">⇅</span></th>'+
-  '<th onclick="sortCalcResults(\'ourProb\')" style="cursor:pointer">Our% <span id="sort-ourProb">⇅</span></th>'+
-  '<th onclick="sortCalcResults(\'mktProb\')" style="cursor:pointer">Mkt% <span id="sort-mktProb">⇅</span></th>'+
-  '<th onclick="sortCalcResults(\'ev\')" style="cursor:pointer">EV <span id="sort-ev">⇅</span></th>'+
-  '<th onclick="sortCalcResults(\'leagueDraw\')" style="cursor:pointer">League Draw% <span id="sort-leagueDraw">⇅</span></th>'+
-  '<th onclick="sortCalcResults(\'h2hDraw\')" style="cursor:pointer">H2H Draw% <span id="sort-h2hDraw">⇅</span></th>'+
-  '<th onclick="sortCalcResults(\'btts\')" style="cursor:pointer">BTTS% <span id="sort-btts">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'odds\')" style="cursor:pointer;white-space:nowrap">Odds <span id="sort-odds">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'ourProb\')" style="cursor:pointer;white-space:nowrap">Our% <span id="sort-ourProb">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'mktProb\')" style="cursor:pointer;white-space:nowrap">Mkt% <span id="sort-mktProb">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'ev\')" style="cursor:pointer;white-space:nowrap">EV <span id="sort-ev">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'leagueDraw\')" style="cursor:pointer;white-space:nowrap">League Draw% <span id="sort-leagueDraw">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'h2hDraw\')" style="cursor:pointer;white-space:nowrap">H2H Draw% <span id="sort-h2hDraw">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'btts\')" style="cursor:pointer;white-space:nowrap">BTTS% <span id="sort-btts">⇅</span></th>'+
   '<th></th>'+
   '</tr></thead><tbody>';
   el.innerHTML=h+_buildCalcRows(results)+'</tbody></table></div>';
@@ -1672,8 +1672,15 @@ function _buildCalcRows(results){
 var _sortField=null;
 var _sortDir=1;
 function sortCalcResults(field){
-  if(_sortField===field){_sortDir*=-1;}
-  else{_sortField=field;_sortDir=-1;}
+  if(_sortField===field){
+  if(_sortDir===-1){_sortDir=1;}
+  else{_sortField=null;_sortDir=1;
+    document.querySelectorAll("[id^='sort-']").forEach(function(el){el.textContent="⇅";});
+    window._lastCalcResults.sort(function(a,b){return b.result.score-a.result.score;});
+    _renderCalcResultsWithDateOnly(window._lastCalcResults);
+    return;
+  }
+} else{_sortField=field;_sortDir=-1;}
   document.querySelectorAll("[id^='sort-']").forEach(function(el){el.textContent="⇅";});
   var el=document.getElementById("sort-"+field);
   if(el)el.textContent=_sortDir===-1?"↓":"↑";
