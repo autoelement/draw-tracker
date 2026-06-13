@@ -1735,6 +1735,8 @@ function saveDrawPrediction(match,data,result){
     h2h_draw_rate:data.h2h_draw_rate,
     math_advantage:data.math_advantage,
     sbo_odds:data.sbo_odds,
+    our_prob:result.ourProb||0,
+    ev:result.ev||0,
     details:JSON.stringify(result.reasons)
   }).catch(function(){});
 }
