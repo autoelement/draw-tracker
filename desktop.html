@@ -292,7 +292,7 @@ tr:hover td{background:var(--bg3)}
       <div class="table-title">Draw Predictions</div>
       <div style="display:flex;gap:6px">
         <button class="btn btn-ghost" onclick="loadDrawPredictions()">Refresh</button>
-        <button class="btn btn-ghost" onclick="loadPredictions()">Old Predictions</button>
+        <button class="btn btn-red" onclick="clearDrawPredictions()">Clear</button>
       </div>
     </div>
     <div id="pred-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
@@ -1854,6 +1854,14 @@ function loadDrawPredictions(){
     });
     window._lastCalcResults=results;
     renderCalcResultsWithDate(results);
+  });
+}
+function clearDrawPredictions(){
+  confirmAction("Delete all draw predictions?",function(){
+    sbDelete("draw_predictions?id=gt.0").then(function(){
+      showToast("Cleared!");
+      loadDrawPredictions();
+    });
   });
 }
 function saveInline(id, src, field, val, extraId) {
