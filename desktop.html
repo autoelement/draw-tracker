@@ -975,7 +975,10 @@ function updateEdgeStat(bets){
     else{edgeCard.style.border="1px solid var(--border)";edgeCard.title="";}
   }
 }
-function drawEdgeTimeChart(bets){window._lastEdgeBets=bets;setTimeout(function(){requestAnimationFrame(function(){_drawEdgeTimeChart(bets);});},50);}
+function drawEdgeTimeChart(bets){
+  window._lastEdgeBets=bets;
+  _drawEdgeTimeChart(bets);
+}
 function _drawEdgeTimeChart(bets){
   var c=document.getElementById("edgeTimeChart");if(!c)return;
   var ctx=c.getContext("2d");
