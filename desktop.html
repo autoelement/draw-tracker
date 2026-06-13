@@ -1340,30 +1340,24 @@ function loadCalcThresholds(){
 }
 function calcScore(data,t){
   var score=0;var skip=false;var reasons=[];
+  if(data.league_draw_rate<t.minLeagueDraw){skip=true;reasons.push("❌ League draw rate "+data.league_draw_rate+"% < "+t.minLeagueDraw+"%");}
+  if(data.odds<t.minOdds){skip=true;reasons.push("❌ Odds "+data.odds+" < "+t.minOdds);}
+  if(skip)return{score:0,skip:true,verdict:"🔴 SKIP",reasons:reasons,ourProb:0,mktProb:0,ev:0};
+
   var minDraw=t.minHomeDraw||40;
   if(data.home_draw_pct>0&&data.home_draw_pct!==data.league_draw_rate){
     if(data.home_draw_pct>=60){score+=2;reasons.push("✅✅ Home draw "+data.home_draw_pct+"% ≥60% (+2)");}
     else if(data.home_draw_pct>=minDraw){score+=1;reasons.push("✅ Home draw "+data.home_draw_pct+"% ≥"+minDraw+"% (+1)");}
     else{reasons.push("❌ Home draw "+data.home_draw_pct+"% <"+minDraw+"% (+0)");}
-  } else {
-    reasons.push("➖ Home draw — no individual data");
-  }
+  } else{reasons.push("➖ Home draw — no individual data");}
 
   var minAwayDraw=t.minAwayDraw||40;
-  if(data.away_draw_pct>0&&data.away_draw_pct!==data.league_draw_rate&&data.away_draw_pct!==data.home_draw_pct){
+  if(data.away_draw_pct>0&&data.away_draw_pct!==data.league_draw_rate){
     if(data.away_draw_pct>=60){score+=2;reasons.push("✅✅ Away draw "+data.away_draw_pct+"% ≥60% (+2)");}
     else if(data.away_draw_pct>=minAwayDraw){score+=1;reasons.push("✅ Away draw "+data.away_draw_pct+"% ≥"+minAwayDraw+"% (+1)");}
     else{reasons.push("❌ Away draw "+data.away_draw_pct+"% <"+minAwayDraw+"% (+0)");}
-  } else {
-    reasons.push("➖ Away draw — no individual data");
-  }
+  } else{reasons.push("➖ Away draw — no individual data");}
 
-  var minAwayDraw=t.minAwayDraw||40;
-  if(data.away_draw_pct>=60){score+=2;reasons.push("✅✅ Away draw "+data.away_draw_pct+"% ≥60% (+2)");}
-  else if(data.away_draw_pct>=minAwayDraw){score+=1;reasons.push("✅ Away draw "+data.away_draw_pct+"% ≥"+minAwayDraw+"% (+1)");}
-  else{reasons.push("❌ Away draw "+data.away_draw_pct+"% <"+minAwayDraw+"% (+0)");}
-
-  // B. გოლები (მაქს 3)
   var avgGoals=(data.avg_goals_home+data.avg_goals_away)/2;
   var maxGoals=t.maxGoals||2.60;
   if(avgGoals<=2.00){score+=2;reasons.push("✅✅ Avg goals "+avgGoals.toFixed(2)+" ≤2.00 (+2)");}
@@ -1375,7 +1369,6 @@ function calcScore(data,t){
   else if(data.btts_pct<=maxBtts){score+=1;reasons.push("✅ BTTS "+data.btts_pct+"% ≤"+maxBtts+"% (+1)");}
   else{reasons.push("❌ BTTS "+data.btts_pct+"% >"+maxBtts+"% (+0)");}
 
-  // C. ძალთა ბალანსი (მაქს 2)
   var maxPpg=t.maxPpg||30;
   var ppgDiff=data.ppg_home&&data.ppg_away?+(Math.abs(data.ppg_home-data.ppg_away)/Math.max(data.ppg_home,data.ppg_away)*100).toFixed(1):null;
   if(ppgDiff!==null){
@@ -1390,19 +1383,13 @@ function calcScore(data,t){
     else if(data.h2h_draw_rate>=minH2h){score+=1;reasons.push("✅ H2H draw "+data.h2h_draw_rate+"% ≥"+minH2h+"% (+1)");}
     else if(data.h2h_draw_rate<25){score-=1;reasons.push("❌ H2H draw "+data.h2h_draw_rate+"% <25% (-1)");}
     else{reasons.push("➖ H2H draw "+data.h2h_draw_rate+"% (neutral)");}
-  } else {
-    reasons.push("➖ H2H draw — no data");
-  }
+  } else{reasons.push("➖ H2H draw — no data");}
 
-  // D. ბაზარი (მაქს 1)
   if(data.sbo_odds&&data.odds){
     if(data.sbo_odds>data.odds){score+=1;reasons.push("✅ Smart money: Sbo("+data.sbo_odds+") > bet365("+data.odds+") (+1)");}
     else{score-=1;reasons.push("❌ Smart money: Sbo("+data.sbo_odds+") < bet365("+data.odds+") (-1)");}
-  } else {
-    reasons.push("➖ Smart money — no data");
-  }
+  } else{reasons.push("➖ Smart money — no data");}
 
-  // ჩვენი ალბათობა
   var leagueW=0.25,homeW=0.20,awayW=0.20,h2hW=0.15,bttsW=0.10,goalsW=0.10;
   var ourProb=0,probDivider=0;
   if(data.league_draw_rate>0){ourProb+=data.league_draw_rate*leagueW;probDivider+=leagueW;}
@@ -1411,18 +1398,14 @@ function calcScore(data,t){
   if(data.h2h_draw_rate>0){ourProb+=data.h2h_draw_rate*h2hW;probDivider+=h2hW;}
   var bttsProb=data.btts_pct>0?(100-data.btts_pct):0;
   if(bttsProb>0){ourProb+=bttsProb*bttsW;probDivider+=bttsW;}
-  var avgGoals=(data.avg_goals_home+data.avg_goals_away)/2;
-  var goalsProb=avgGoals>0?Math.max(0,Math.min(100,(1-avgGoals/5)*100)):0;
+  var avgGoals2=(data.avg_goals_home+data.avg_goals_away)/2;
+  var goalsProb=avgGoals2>0?Math.max(0,Math.min(100,(1-avgGoals2/5)*100)):0;
   if(goalsProb>0){ourProb+=goalsProb*goalsW;probDivider+=goalsW;}
   if(probDivider>0)ourProb=ourProb/probDivider;
   ourProb=+ourProb.toFixed(1);
 
-  // მარკეტის ალბათობა
   var mktProb=data.odds>0?+(100/data.odds).toFixed(1):0;
-
-  // EV
   var ev=data.odds>0?+((ourProb/100*data.odds)-1).toFixed(3):0;
-
   var verdict=score>=8?"✅✅✅ STRONG BET":score>=6?"✅✅ BET":score>=4?"⚠️ CONSIDER":score>=2?"⚠️ SKIP":"🔴 SKIP";
   return{score:score,skip:false,verdict:verdict,reasons:reasons,ourProb:ourProb,mktProb:mktProb,ev:ev};
 }
