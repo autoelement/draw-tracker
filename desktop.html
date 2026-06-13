@@ -836,7 +836,7 @@ function showPage(name,el){
   document.getElementById("page-"+name).classList.add("active");
   if(el)el.classList.add("active");
   if (name === "dashboard") loadDashboard();
-  if (name === "predictions") { loadPredictions(); loadCalcThresholds(); loadDrawPredictions(); }
+  if (name === "predictions") { loadCalcThresholds(); loadDrawPredictions(); }
   if (name === "bets") loadBets();
   if (name === "balances") loadBalances();
   if (name === "martingale") { calcMartingale(); loadMartSeries().then(function() { loadMartingaleHistory(); }); }
