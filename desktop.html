@@ -1858,7 +1858,7 @@ function loadDrawPredictions(){
 }
 function clearDrawPredictions(){
   confirmAction("Delete all draw predictions?",function(){
-    sbDelete("draw_predictions?id=gt.0").then(function(){
+    sbDelete("draw_predictions?created_at=gte.2000-01-01").then(function(){
       window._lastCalcResults=[];
       showToast("Cleared!");
       var el=document.getElementById("pred-body");
