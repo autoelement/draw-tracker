@@ -1333,8 +1333,8 @@ function loadCalcThresholds(){
 function calcScore(data,t){
   var score=0;var skip=false;var reasons=[];
   // საბაზო ფილტრი
-  if(data.league_draw_rate<25){skip=true;reasons.push("League draw rate "+data.league_draw_rate+"% < 25%");}
-  if(data.odds<2.80){skip=true;reasons.push("Odds "+data.odds+" < 2.80");}
+  if(data.league_draw_rate<t.minLeagueDraw){skip=true;reasons.push("League draw rate "+data.league_draw_rate+"% < "+t.minLeagueDraw+"%");}
+  if(data.odds<t.minOdds){skip=true;reasons.push("Odds "+data.odds+" < "+t.minOdds);}
   if(skip)return{score:0,skip:true,verdict:"🔴 SKIP",reasons:reasons};
   // A. Draw Pattern
   if(data.home_draw_pct>=60){score+=2;reasons.push("✅ Home draw "+data.home_draw_pct+"% ≥60% (+2)");}
