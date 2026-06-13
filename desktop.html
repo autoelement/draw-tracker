@@ -264,6 +264,7 @@ tr:hover td{background:var(--bg3)}
       <div class="fr" style="margin-top:8px">
         <button class="btn btn-ghost" onclick="calcManual()" id="calc-manual-btn" disabled>Calculate Selected</button>
         <button class="btn btn-green" onclick="calcAuto()">Auto-Fetch & Calculate</button>
+        <button class="btn btn-ghost" id="calc-recalc-btn" onclick="calcRecalculate()" style="display:none">⟳ Recalculate</button>
       </div>
     </div>
     <div class="mart-card">
@@ -1437,7 +1438,7 @@ function calcAuto(){
           odds:m.odds_ft_x||0,
           sbo_odds:sboOdds
         };
-        var result=calcScore(data,getCalcThresholds());
+       var result=calcScore(data,getCalcThresholds());
         if(!result.skip&&result.score>=4){
           results.push({match:m,data:data,result:result});
           saveDrawPrediction(m,data,result);
@@ -1446,6 +1447,7 @@ function calcAuto(){
         if(done===matches.length){
           results.sort(function(a,b){return b.result.score-a.result.score;});
           renderCalcResults(results);
+          var rb=document.getElementById("calc-recalc-btn");if(rb)rb.style.display="";
         }
       }
       if(leagueCache[leagueId]){
@@ -1455,6 +1457,7 @@ function calcAuto(){
         .then(function(r){return r.json();})
         .then(function(ld){
           leagueCache[leagueId]=ld.data||{};
+          m._leagueData=leagueCache[leagueId];
           processMatch(leagueCache[leagueId]);
         })
         .catch(function(){
@@ -1493,6 +1496,48 @@ function renderCalcResults(results){
   });
   h+="</tbody></table></div>";
   el.innerHTML=h;
+}
+function calcRecalculate(){
+  if(!window._todaysMatches||!window._todaysMatches.length){showToast("No data — run Auto-Fetch first",true);return;}
+  var hours=parseInt(document.getElementById("calc-time-range").value)||48;
+  var now=Math.floor(Date.now()/1000);
+  var until=now+hours*3600;
+  var matches=window._todaysMatches.filter(function(m){return m.date_unix<=until&&m.odds_ft_x>=2.80;});
+  var results=[];
+  matches.forEach(function(m){
+    if(!m._leagueData)return;
+    var league=m._leagueData;
+    var h2hDraw=0;
+    if(m.h2h&&m.h2h.previous_matches_results&&m.h2h.previous_matches_results.totalMatches>0){
+      h2hDraw=+(m.h2h.previous_matches_results.draw/m.h2h.previous_matches_results.totalMatches*100).toFixed(1);
+    }
+    var sboOdds=0;
+    if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]&&m.odds_comparison["FT Result"]["Draw"]["Sbo"]){
+      sboOdds=parseFloat(m.odds_comparison["FT Result"]["Draw"]["Sbo"]);
+    }
+    var data={
+      league_draw_rate:league.drawPercentage||0,
+      home_draw_pct:m.home_draw_percentage||(league.drawPercentage||0),
+      away_draw_pct:m.away_draw_percentage||(league.drawPercentage||0),
+      avg_goals_home:league.seasonAVG_home||0,
+      avg_goals_away:league.seasonAVG_away||0,
+      btts_pct:m.btts_potential||0,
+      ppg_home:m.home_ppg||0,
+      ppg_away:m.away_ppg||0,
+      h2h_draw_rate:h2hDraw,
+      h2h_avg_goals:m.h2h&&m.h2h.betting_stats?m.h2h.betting_stats.avg_goals:0,
+      math_advantage:m.avg_potential||0,
+      odds:m.odds_ft_x||0,
+      sbo_odds:sboOdds
+    };
+    var result=calcScore(data,getCalcThresholds());
+    if(!result.skip&&result.score>=4){
+      results.push({match:m,data:data,result:result});
+    }
+  });
+  results.sort(function(a,b){return b.result.score-a.result.score;});
+  renderCalcResults(results);
+  showToast("Recalculated with new thresholds!");
 }
 function saveDrawPrediction(match,data,result){
   sbPost("draw_predictions",{
