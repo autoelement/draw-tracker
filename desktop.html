@@ -1535,10 +1535,13 @@ function calcAuto(){
               fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+r.match.id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
               .then(function(res){return res.json();})
               .then(function(md){
-                if(md.data&&md.data.h2h&&md.data.h2h.previous_matches_results&&md.data.h2h.previous_matches_results.totalMatches>0){
-                  var h2h=md.data.h2h.previous_matches_results;
-                  r.data.h2h_draw_rate=+(h2h.draw/h2h.totalMatches*100).toFixed(1);
-                  // recalculate score with H2H
+                if(md.data){
+                  if(md.data.h2h&&md.data.h2h.previous_matches_results&&md.data.h2h.previous_matches_results.totalMatches>0){
+                    var h2h=md.data.h2h.previous_matches_results;
+                    r.data.h2h_draw_rate=+(h2h.draw/h2h.totalMatches*100).toFixed(1);
+                  }
+                  if(md.data.home_draw_percentage)r.data.home_draw_pct=md.data.home_draw_percentage;
+                  if(md.data.away_draw_percentage)r.data.away_draw_pct=md.data.away_draw_percentage;
                   var newResult=calcScore(r.data,getCalcThresholds());
                   r.result=newResult;
                 }
