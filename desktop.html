@@ -1255,17 +1255,35 @@ function searchCalcMatch(q){
   if(!q||q.length<2){dd.style.display="none";return;}
   clearTimeout(_calcMatchTimeout);
   _calcMatchTimeout=setTimeout(function(){
-    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=search-match&query="+encodeURIComponent(q),{headers:authH})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(!d.data||!d.data.length){dd.style.display="none";return;}
-      dd.innerHTML=d.data.slice(0,8).map(function(m){
-        var date=m.date_unix?new Date(m.date_unix*1000).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
-        return'<div onclick="selectCalcMatch('+m.id+',\''+m.homeTeam.cleanName+' vs '+m.awayTeam.cleanName+'\',\''+m.competition_id+'\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.homeTeam.cleanName+' vs '+m.awayTeam.cleanName+'</div><div style="color:var(--text3);font-size:11px">'+(m.competition_id||"")+" · "+date+'</div></div>';
-      }).join("");
-      dd.style.display="block";
-    });
-  },400);
+    var ql=q.toLowerCase();
+    var results=[];
+    if(window._todaysMatches&&window._todaysMatches.length){
+      results=window._todaysMatches.filter(function(m){
+        return (m.home_name||"").toLowerCase().indexOf(ql)!==-1||(m.away_name||"").toLowerCase().indexOf(ql)!==-1;
+      }).slice(0,8);
+      showCalcDropdown(results);
+    } else {
+      fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        window._todaysMatches=d.data||[];
+        results=window._todaysMatches.filter(function(m){
+          return (m.home_name||"").toLowerCase().indexOf(ql)!==-1||(m.away_name||"").toLowerCase().indexOf(ql)!==-1;
+        }).slice(0,8);
+        showCalcDropdown(results);
+      });
+    }
+  },300);
+}
+
+function showCalcDropdown(results){
+  var dd=document.getElementById("calc-match-dropdown");
+  if(!results.length){dd.style.display="none";return;}
+  dd.innerHTML=results.map(function(m){
+    var date=m.date_unix?new Date(m.date_unix*1000).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
+    return'<div onclick="selectCalcMatch('+m.id+',\''+m.home_name+' vs '+m.away_name+'\','+m.competition_id+')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.home_name+' vs '+m.away_name+'</div><div style="color:var(--text3);font-size:11px">'+date+"</div></div>";
+  }).join("");
+  dd.style.display="block";
 }
 
 function selectCalcMatch(fixtureId,matchName,leagueId){
