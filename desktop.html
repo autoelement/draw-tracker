@@ -1613,7 +1613,20 @@ function renderCalcResults(results){
 function renderCalcResultsWithDate(results){
   var el=document.getElementById("pred-body");
   if(!results.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
-  var h='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Score</th><th>Verdict</th><th>Odds</th><th>Our%</th><th>Mkt%</th><th>EV</th><th>League Draw%</th><th>H2H Draw%</th><th>BTTS%</th><th></th></tr></thead><tbody>';
+  var h='<div class="table-scroll"><table><thead><tr>'+
+'<th onclick="sortCalcResults(\'date\')" style="cursor:pointer">Date <span id="sort-date">⇅</span></th>'+
+'<th>Match</th>'+
+'<th onclick="sortCalcResults(\'score\')" style="cursor:pointer">Score <span id="sort-score">⇅</span></th>'+
+'<th>Verdict</th>'+
+'<th onclick="sortCalcResults(\'odds\')" style="cursor:pointer">Odds <span id="sort-odds">⇅</span></th>'+
+'<th onclick="sortCalcResults(\'ourProb\')" style="cursor:pointer">Our% <span id="sort-ourProb">⇅</span></th>'+
+'<th onclick="sortCalcResults(\'mktProb\')" style="cursor:pointer">Mkt% <span id="sort-mktProb">⇅</span></th>'+
+'<th onclick="sortCalcResults(\'ev\')" style="cursor:pointer">EV <span id="sort-ev">⇅</span></th>'+
+'<th onclick="sortCalcResults(\'leagueDraw\')" style="cursor:pointer">League Draw% <span id="sort-leagueDraw">⇅</span></th>'+
+'<th onclick="sortCalcResults(\'h2hDraw\')" style="cursor:pointer">H2H Draw% <span id="sort-h2hDraw">⇅</span></th>'+
+'<th onclick="sortCalcResults(\'btts\')" style="cursor:pointer">BTTS% <span id="sort-btts">⇅</span></th>'+
+'<th></th>'+
+'</tr></thead><tbody>';
   results.forEach(function(r){
     var matchName=(r.match.home_name||"")+" vs "+(r.match.away_name||"");
     var color=r.result.score>=8?"var(--green)":r.result.score>=6?"var(--amber)":"var(--red)";
@@ -1642,6 +1655,32 @@ function renderCalcResultsWithDate(results){
   });
   h+="</tbody></table></div>";
   el.innerHTML=h;
+}
+var _sortField=null;
+var _sortDir=1;
+function sortCalcResults(field){
+  if(_sortField===field){_sortDir*=-1;}
+  else{_sortField=field;_sortDir=-1;}
+  document.querySelectorAll("[id^='sort-']").forEach(function(el){el.textContent="⇅";});
+  var el=document.getElementById("sort-"+field);
+  if(el)el.textContent=_sortDir===-1?"↓":"↑";
+  if(!window._lastCalcResults)return;
+  window._lastCalcResults.sort(function(a,b){
+    var av,bv;
+    if(field==="date")   {av=a.match._kickoff||"";bv=b.match._kickoff||"";}
+    else if(field==="score")    {av=a.result.score;bv=b.result.score;}
+    else if(field==="odds")     {av=a.data.odds;bv=b.data.odds;}
+    else if(field==="ourProb")  {av=a.result.ourProb;bv=b.result.ourProb;}
+    else if(field==="mktProb")  {av=a.result.mktProb;bv=b.result.mktProb;}
+    else if(field==="ev")       {av=a.result.ev;bv=b.result.ev;}
+    else if(field==="leagueDraw"){av=a.data.league_draw_rate;bv=b.data.league_draw_rate;}
+    else if(field==="h2hDraw")  {av=a.data.h2h_draw_rate;bv=b.data.h2h_draw_rate;}
+    else if(field==="btts")     {av=a.data.btts_pct;bv=b.data.btts_pct;}
+    if(av<bv)return _sortDir;
+    if(av>bv)return -_sortDir;
+    return 0;
+  });
+  renderCalcResultsWithDate(window._lastCalcResults);
 }
 function toggleCalcDetails(id){
   var el=document.getElementById(id);
