@@ -1563,6 +1563,7 @@ function calcAuto(){
         .then(function(ld){
           leagueCache[leagueId]=ld.data||{};
           m._leagueData=leagueCache[leagueId];
+          m.league_name=leagueCache[leagueId].english_name||leagueCache[leagueId].name||"";
           processMatch(leagueCache[leagueId]);
         })
         .catch(function(){
@@ -1604,7 +1605,7 @@ function renderCalcResults(results){
   results.forEach(function(r){
     var color=r.result.score>=8?"var(--green)":r.result.score>=6?"var(--amber)":"var(--red)";
     var matchName=(r.match.home_name||"")+" vs "+(r.match.away_name||"");
-    var detailsId="details-"+r.match.id; var evColor=r.result.ev>0?"var(--green)":r.result.ev<0?"var(--red)":"var(--text2)"; h+="<tr>"+ "<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"</td>"+ "<td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/10</td>"+ "<td>"+r.result.verdict+"</td>"+ "<td class='odds-badge'>"+r.data.odds+"</td>"+ "<td style='font-family:Space Mono;color:var(--blue)'>"+r.result.ourProb+"%</td>"+ "<td style='font-family:Space Mono;color:var(--text2)'>"+r.result.mktProb+"%</td>"+ "<td style='font-family:Space Mono;font-weight:700;color:"+evColor+"'>"+(r.result.ev>0?"+":"")+r.result.ev+"</td>"+ "<td>"+r.data.league_draw_rate+"%</td>"+ "<td>"+r.data.h2h_draw_rate+"%</td>"+ "<td>"+r.data.btts_pct+"%</td>"+ "<td class='mono'>"+r.data.ppg_home+"</td>"+ "<td class='mono'>"+r.data.ppg_away+"</td>"+ "<td style='white-space:nowrap'>"+ "<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button> "+ "<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+ "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+")'>+ Bet</button>"+ "</td>"+ "</tr>"; h+="<tr id='"+detailsId+"' style='display:none'><td colspan='9' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
+    var detailsId="details-"+r.match.id; var evColor=r.result.ev>0?"var(--green)":r.result.ev<0?"var(--red)":"var(--text2)"; h+="<tr>"+ "<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"</td>"+ "<td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/10</td>"+ "<td>"+r.result.verdict+"</td>"+ "<td class='odds-badge'>"+r.data.odds+"</td>"+ "<td style='font-family:Space Mono;color:var(--blue)'>"+r.result.ourProb+"%</td>"+ "<td style='font-family:Space Mono;color:var(--text2)'>"+r.result.mktProb+"%</td>"+ "<td style='font-family:Space Mono;font-weight:700;color:"+evColor+"'>"+(r.result.ev>0?"+":"")+r.result.ev+"</td>"+ "<td>"+r.data.league_draw_rate+"%</td>"+ "<td>"+r.data.h2h_draw_rate+"%</td>"+ "<td>"+r.data.btts_pct+"%</td>"+ "<td class='mono'>"+r.data.ppg_home+"</td>"+ "<td class='mono'>"+r.data.ppg_away+"</td>"+ "<td style='white-space:nowrap'>"+ "<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button> "+ "<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+ "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+( r.match.league_name||"")+"\")'>"+"+ Bet</button>"+ "</td>"+ "</tr>"; h+="<tr id='"+detailsId+"' style='display:none'><td colspan='9' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
   });
   h+="</tbody></table></div>";
   el.innerHTML=h;
@@ -1634,7 +1635,7 @@ function renderCalcResultsWithDate(results){
     h+="<td style='white-space:nowrap'>"+
       "<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button> "+
       "<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+
-      "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+")'>+ Bet</button>"+
+      "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+( r.match.league_name||"")+"\")'>"+"+ Bet</button>"+
       "</td>";
     h+="</tr>";
     h+="<tr id='"+detailsId+"' style='display:none'><td colspan='12' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
@@ -1652,13 +1653,14 @@ function calcManualById(fixtureId,matchName,leagueId){
   document.getElementById("calc-manual-btn").disabled=false;
   calcManual();
 }
-function addBetFromMatch(fixtureId,matchName,odds,ourProb){
+function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName){
   openAddBet();
   setTimeout(function(){
     document.getElementById("bet-match").value=matchName;
     document.getElementById("bet-odds").value=odds;
     document.getElementById("bet-sel").value="Draw (X)";
     document.getElementById("bet-fixture-id").value=fixtureId;
+    document.getElementById("bet-league").value=leagueName||"";
     if(ourProb)document.getElementById("bet-myprob").value=ourProb;
     calcBetFields();
   },100);
@@ -1722,6 +1724,8 @@ function saveDrawPrediction(match,data,result){
   sbPost("draw_predictions",{
     match:(match.home_name||"")+" vs "+(match.away_name||""),
     league:String(match.competition_id||""),
+    league_name:match.league_name||match.competition_name||"",     
+    league_name:match.league_name||match.competition_name||"",
     fixture_id:match.id,
     score:result.score,
     verdict:result.verdict,
