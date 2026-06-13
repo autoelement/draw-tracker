@@ -1585,8 +1585,10 @@ function loadDrawPredictions(){
 function clearDrawPredictions(){
   confirmAction("Delete all draw predictions?",function(){
     sbDelete("draw_predictions?id=gt.0").then(function(){
+      window._lastCalcResults=[];
       showToast("Cleared!");
-      loadDrawPredictions();
+      var el=document.getElementById("pred-body");
+      if(el)el.innerHTML='<div class="empty">No predictions yet</div>';
     });
   });
 }
