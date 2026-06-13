@@ -1330,18 +1330,23 @@ function loadCalcThresholds(){
   }catch(e){}
 }
 function calcScore(data,t){
-  var score=0;var skip=false;var reasons=[];
-
-  // საბაზო ფილტრი
-  if(data.league_draw_rate<t.minLeagueDraw){skip=true;reasons.push("❌ League draw rate "+data.league_draw_rate+"% < "+t.minLeagueDraw+"%");}
-  if(data.odds<t.minOdds){skip=true;reasons.push("❌ Odds "+data.odds+" < "+t.minOdds);}
-  if(skip)return{score:0,skip:true,verdict:"🔴 SKIP",reasons:reasons,ourProb:0,mktProb:0,ev:0};
-
-  // A. Draw Pattern (მაქს 4)
   var minDraw=t.minHomeDraw||40;
-  if(data.home_draw_pct>=60){score+=2;reasons.push("✅✅ Home draw "+data.home_draw_pct+"% ≥60% (+2)");}
-  else if(data.home_draw_pct>=minDraw){score+=1;reasons.push("✅ Home draw "+data.home_draw_pct+"% ≥"+minDraw+"% (+1)");}
-  else{reasons.push("❌ Home draw "+data.home_draw_pct+"% <"+minDraw+"% (+0)");}
+  if(data.home_draw_pct>0&&data.home_draw_pct!==data.league_draw_rate){
+    if(data.home_draw_pct>=60){score+=2;reasons.push("✅✅ Home draw "+data.home_draw_pct+"% ≥60% (+2)");}
+    else if(data.home_draw_pct>=minDraw){score+=1;reasons.push("✅ Home draw "+data.home_draw_pct+"% ≥"+minDraw+"% (+1)");}
+    else{reasons.push("❌ Home draw "+data.home_draw_pct+"% <"+minDraw+"% (+0)");}
+  } else {
+    reasons.push("➖ Home draw — no individual data");
+  }
+
+  var minAwayDraw=t.minAwayDraw||40;
+  if(data.away_draw_pct>0&&data.away_draw_pct!==data.league_draw_rate){
+    if(data.away_draw_pct>=60){score+=2;reasons.push("✅✅ Away draw "+data.away_draw_pct+"% ≥60% (+2)");}
+    else if(data.away_draw_pct>=minAwayDraw){score+=1;reasons.push("✅ Away draw "+data.away_draw_pct+"% ≥"+minAwayDraw+"% (+1)");}
+    else{reasons.push("❌ Away draw "+data.away_draw_pct+"% <"+minAwayDraw+"% (+0)");}
+  } else {
+    reasons.push("➖ Away draw — no individual data");
+  }
 
   var minAwayDraw=t.minAwayDraw||40;
   if(data.away_draw_pct>=60){score+=2;reasons.push("✅✅ Away draw "+data.away_draw_pct+"% ≥60% (+2)");}
@@ -1487,8 +1492,8 @@ function calcAuto(){
         }
         var data={
           league_draw_rate:league.drawPercentage||0,
-          home_draw_pct:m.home_draw_percentage||(league.drawPercentage||0),
-          away_draw_pct:m.away_draw_percentage||(league.drawPercentage||0),
+          home_draw_pct:m.home_draw_percentage||0,
+          away_draw_pct:m.away_draw_percentage||0,
           avg_goals_home:league.seasonAVG_home||0,
           avg_goals_away:league.seasonAVG_away||0,
           btts_pct:m.btts_potential||0,
@@ -1606,8 +1611,8 @@ function calcRecalculate(){
     }
     var data={
       league_draw_rate:league.drawPercentage||0,
-      home_draw_pct:m.home_draw_percentage||(league.drawPercentage||0),
-      away_draw_pct:m.away_draw_percentage||(league.drawPercentage||0),
+      home_draw_pct:m.home_draw_percentage||0,
+      away_draw_pct:m.away_draw_percentage||0,
       avg_goals_home:league.seasonAVG_home||0,
       avg_goals_away:league.seasonAVG_away||0,
       btts_pct:m.btts_potential||0,
