@@ -1318,10 +1318,11 @@ function saveCalcThresholds(){
     minHomeDraw:parseFloat(document.getElementById("calc-min-home-draw").value)||40,
     minAwayDraw:parseFloat(document.getElementById("calc-min-away-draw").value)||40,
     maxGoals:parseFloat(document.getElementById("calc-max-goals").value)||2.60,
-    maxPpg:parseFloat(document.getElementById("calc-max-ppg").value)||30
+    maxPpg:parseFloat(document.getElementById("calc-max-ppg").value)||30,
+    maxBtts:parseFloat(document.getElementById("calc-max-btts").value)||50,
+    minH2h:parseFloat(document.getElementById("calc-min-h2h").value)||40
   }));
 }
-
 function loadCalcThresholds(){
   var t=localStorage.getItem("calc_thresholds");
   if(!t)return;
@@ -1333,6 +1334,8 @@ function loadCalcThresholds(){
     if(v.minAwayDraw)document.getElementById("calc-min-away-draw").value=v.minAwayDraw;
     if(v.maxGoals)document.getElementById("calc-max-goals").value=v.maxGoals;
     if(v.maxPpg)document.getElementById("calc-max-ppg").value=v.maxPpg;
+    if(v.maxBtts)document.getElementById("calc-max-btts").value=v.maxBtts;
+    if(v.minH2h)document.getElementById("calc-min-h2h").value=v.minH2h;
   }catch(e){}
 }
 function calcScore(data,t){
@@ -1366,9 +1369,10 @@ function calcScore(data,t){
   else if(avgGoals<=maxGoals){score+=1;reasons.push("✅ Avg goals "+avgGoals.toFixed(2)+" ≤"+maxGoals+" (+1)");}
   else{reasons.push("❌ Avg goals "+avgGoals.toFixed(2)+" >"+maxGoals+" (+0)");}
 
-  if(data.btts_pct<=35){score+=1;reasons.push("✅✅ BTTS "+data.btts_pct+"% ≤35% (+1)");}
-  else if(data.btts_pct<=50){score+=1;reasons.push("✅ BTTS "+data.btts_pct+"% ≤50% (+1)");}
-  else{reasons.push("❌ BTTS "+data.btts_pct+"% >50% (+0)");}
+  var maxBtts=t.maxBtts||50;
+  if(data.btts_pct<=(maxBtts-15)){score+=1;reasons.push("✅✅ BTTS "+data.btts_pct+"% ≤"+(maxBtts-15)+"% (+1)");}
+  else if(data.btts_pct<=maxBtts){score+=1;reasons.push("✅ BTTS "+data.btts_pct+"% ≤"+maxBtts+"% (+1)");}
+  else{reasons.push("❌ BTTS "+data.btts_pct+"% >"+maxBtts+"% (+0)");}
 
   // C. ძალთა ბალანსი (მაქს 2)
   var maxPpg=t.maxPpg||30;
@@ -1379,9 +1383,10 @@ function calcScore(data,t){
     else{score-=1;reasons.push("❌ PPG diff "+ppgDiff.toFixed(1)+"% >"+maxPpg+"% (-1)");}
   }
 
+  var minH2h=t.minH2h||40;
   if(data.h2h_draw_rate>0){
-    if(data.h2h_draw_rate>=50){score+=1;reasons.push("✅✅ H2H draw "+data.h2h_draw_rate+"% ≥50% (+1)");}
-    else if(data.h2h_draw_rate>=40){score+=1;reasons.push("✅ H2H draw "+data.h2h_draw_rate+"% ≥40% (+1)");}
+    if(data.h2h_draw_rate>=(minH2h+10)){score+=1;reasons.push("✅✅ H2H draw "+data.h2h_draw_rate+"% ≥"+(minH2h+10)+"% (+1)");}
+    else if(data.h2h_draw_rate>=minH2h){score+=1;reasons.push("✅ H2H draw "+data.h2h_draw_rate+"% ≥"+minH2h+"% (+1)");}
     else if(data.h2h_draw_rate<25){score-=1;reasons.push("❌ H2H draw "+data.h2h_draw_rate+"% <25% (-1)");}
     else{reasons.push("➖ H2H draw "+data.h2h_draw_rate+"% (neutral)");}
   } else {
