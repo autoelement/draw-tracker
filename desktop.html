@@ -1606,6 +1606,12 @@ function toggleCalcDetails(id){
   var el=document.getElementById(id);
   if(el)el.style.display=el.style.display==="none"?"table-row":"none";
 }
+function calcManualById(fixtureId,matchName,leagueId){
+  _calcFixtureId=fixtureId;
+  document.getElementById("calc-match-search").value=matchName;
+  document.getElementById("calc-manual-btn").disabled=false;
+  calcManual();
+}
 function calcRecalculate(){
   if(!window._todaysMatches||!window._todaysMatches.length){showToast("No data — run Auto-Fetch first",true);return;}
   var hours=parseInt(document.getElementById("calc-time-range").value)||48;
