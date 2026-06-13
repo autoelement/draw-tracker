@@ -1350,7 +1350,7 @@ function calcScore(data,t){
   }
 
   var minAwayDraw=t.minAwayDraw||40;
-  if(data.away_draw_pct>0&&data.away_draw_pct!==data.league_draw_rate){
+  if(data.away_draw_pct>0&&data.away_draw_pct!==data.league_draw_rate&&data.away_draw_pct!==data.home_draw_pct){
     if(data.away_draw_pct>=60){score+=2;reasons.push("✅✅ Away draw "+data.away_draw_pct+"% ≥60% (+2)");}
     else if(data.away_draw_pct>=minAwayDraw){score+=1;reasons.push("✅ Away draw "+data.away_draw_pct+"% ≥"+minAwayDraw+"% (+1)");}
     else{reasons.push("❌ Away draw "+data.away_draw_pct+"% <"+minAwayDraw+"% (+0)");}
