@@ -1547,8 +1547,8 @@ function calcAuto(){
                     var h2h=md.data.h2h.previous_matches_results;
                     r.data.h2h_draw_rate=+(h2h.draw/h2h.totalMatches*100).toFixed(1);
                   }
-                  if(md.data.home_draw_percentage)r.data.home_draw_pct=md.data.home_draw_percentage;
-                  if(md.data.away_draw_percentage)r.data.away_draw_pct=md.data.away_draw_percentage;
+                  if(md.data.home_draw_percentage&&md.data.home_draw_percentage>0)r.data.home_draw_pct=md.data.home_draw_percentage;
+                  if(md.data.away_draw_percentage&&md.data.away_draw_percentage>0)r.data.away_draw_pct=md.data.away_draw_percentage;
                   var newResult=calcScore(r.data,getCalcThresholds());
                   r.result=newResult;
                 }
