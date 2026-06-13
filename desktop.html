@@ -1624,6 +1624,16 @@ function _renderCalcResultsWithDateOnly(results){
   if(el)el.textContent=_sortDir===-1?"↓":"↑";
 }
 
+function fmtDate(ts){
+  if(!ts)return"";
+  var d=new Date(ts);
+  var day=String(d.getDate()).padStart(2,"0");
+  var mon=String(d.getMonth()+1).padStart(2,"0");
+  var yr=String(d.getFullYear()).slice(2);
+  var hr=String(d.getHours()).padStart(2,"0");
+  var min=String(d.getMinutes()).padStart(2,"0");
+  return day+"/"+mon+"/"+yr+"<br>"+hr+":"+min;
+}
 function _buildCalcRows(results){
   var h="";
   results.forEach(function(r){
@@ -1714,8 +1724,8 @@ function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName){
     document.getElementById("bet-sel").value="Draw (X)";
     document.getElementById("bet-fixture-id").value=fixtureId;
     document.getElementById("bet-league").value=leagueName||"";
-    calcBetFields();
     if(ourProb)document.getElementById("bet-myprob").value=ourProb;
+    calcBetFields();
   },100);
 }
 var _starredMatches=JSON.parse(localStorage.getItem("starred_matches")||"[]");
