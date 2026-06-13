@@ -1611,28 +1611,42 @@ function renderCalcResults(results){
   el.innerHTML=h;
 }
 function renderCalcResultsWithDate(results){
+  window._lastCalcResults=results;
   var el=document.getElementById("pred-body");
   if(!results.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
   var h='<div class="table-scroll"><table><thead><tr>'+
-'<th onclick="sortCalcResults(\'date\')" style="cursor:pointer">Date <span id="sort-date">⇅</span></th>'+
-'<th>Match</th>'+
-'<th onclick="sortCalcResults(\'score\')" style="cursor:pointer">Score <span id="sort-score">⇅</span></th>'+
-'<th>Verdict</th>'+
-'<th onclick="sortCalcResults(\'odds\')" style="cursor:pointer">Odds <span id="sort-odds">⇅</span></th>'+
-'<th onclick="sortCalcResults(\'ourProb\')" style="cursor:pointer">Our% <span id="sort-ourProb">⇅</span></th>'+
-'<th onclick="sortCalcResults(\'mktProb\')" style="cursor:pointer">Mkt% <span id="sort-mktProb">⇅</span></th>'+
-'<th onclick="sortCalcResults(\'ev\')" style="cursor:pointer">EV <span id="sort-ev">⇅</span></th>'+
-'<th onclick="sortCalcResults(\'leagueDraw\')" style="cursor:pointer">League Draw% <span id="sort-leagueDraw">⇅</span></th>'+
-'<th onclick="sortCalcResults(\'h2hDraw\')" style="cursor:pointer">H2H Draw% <span id="sort-h2hDraw">⇅</span></th>'+
-'<th onclick="sortCalcResults(\'btts\')" style="cursor:pointer">BTTS% <span id="sort-btts">⇅</span></th>'+
-'<th></th>'+
-'</tr></thead><tbody>';
+  '<th onclick="sortCalcResults(\'date\')" style="cursor:pointer">Date <span id="sort-date">⇅</span></th>'+
+  '<th>Match</th>'+
+  '<th onclick="sortCalcResults(\'score\')" style="cursor:pointer">Score <span id="sort-score">⇅</span></th>'+
+  '<th>Verdict</th>'+
+  '<th onclick="sortCalcResults(\'odds\')" style="cursor:pointer">Odds <span id="sort-odds">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'ourProb\')" style="cursor:pointer">Our% <span id="sort-ourProb">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'mktProb\')" style="cursor:pointer">Mkt% <span id="sort-mktProb">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'ev\')" style="cursor:pointer">EV <span id="sort-ev">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'leagueDraw\')" style="cursor:pointer">League Draw% <span id="sort-leagueDraw">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'h2hDraw\')" style="cursor:pointer">H2H Draw% <span id="sort-h2hDraw">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'btts\')" style="cursor:pointer">BTTS% <span id="sort-btts">⇅</span></th>'+
+  '<th></th>'+
+  '</tr></thead><tbody>';
+  el.innerHTML=h+_buildCalcRows(results)+'</tbody></table></div>';
+}
+
+function _renderCalcResultsWithDateOnly(results){
+  var tbody=document.querySelector("#pred-body tbody");
+  if(!tbody)return renderCalcResultsWithDate(results);
+  tbody.innerHTML=_buildCalcRows(results);
+  var el=document.getElementById("sort-"+_sortField);
+  if(el)el.textContent=_sortDir===-1?"↓":"↑";
+}
+
+function _buildCalcRows(results){
+  var h="";
   results.forEach(function(r){
     var matchName=(r.match.home_name||"")+" vs "+(r.match.away_name||"");
     var color=r.result.score>=8?"var(--green)":r.result.score>=6?"var(--amber)":"var(--red)";
     var evColor=r.result.ev>0?"var(--green)":r.result.ev<0?"var(--red)":"var(--text2)";
     var detailsId="details-saved-"+r.match.id;
-    var date=r.match._kickoff?(new Date(r.match._kickoff)).toLocaleString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):r.match._savedAt?(new Date(r.match._savedAt)).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit"}):"";
+    var date=r.match._kickoff?(new Date(r.match._kickoff)).toLocaleString("en-GB",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"}):r.match._savedAt?(new Date(r.match._savedAt)).toLocaleString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
     h+="<tr>";
     h+="<td class='mono' style='font-size:11px;color:var(--text3)'>"+date+"</td>";
     h+="<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"</td>";
@@ -1653,8 +1667,7 @@ function renderCalcResultsWithDate(results){
     h+="</tr>";
     h+="<tr id='"+detailsId+"' style='display:none'><td colspan='12' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
   });
-  h+="</tbody></table></div>";
-  el.innerHTML=h;
+  return h;
 }
 var _sortField=null;
 var _sortDir=1;
@@ -1680,7 +1693,7 @@ function sortCalcResults(field){
     if(av>bv)return -_sortDir;
     return 0;
   });
-  renderCalcResultsWithDate(window._lastCalcResults);
+  _renderCalcResultsWithDateOnly(window._lastCalcResults);
 }
 function toggleCalcDetails(id){
   var el=document.getElementById(id);
