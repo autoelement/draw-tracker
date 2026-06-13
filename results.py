@@ -3,17 +3,14 @@ from datetime import date,timezone,timedelta
 
 SURL=os.environ["SUPABASE_URL"]
 SKEY=os.environ["SUPABASE_KEY"]
-APIKEY=os.environ["APISPORTS_KEY"]
+FOOTYSTATS_KEY=os.environ["FOOTYSTATS_KEY"]
 
-HEADERS={"x-apisports-key":APIKEY}
 SH={"apikey":SKEY,"Authorization":f"Bearer {SKEY}","Content-Type":"application/json"}
-TZ=timezone(timedelta(hours=4))
 TODAY=date.today().strftime("%Y-%m-%d")
-TODAY_DISPLAY=date.today().strftime("%d/%m/%Y")
 
 print(f"Checking results: {TODAY}")
 
-# 1. Get today's pending predictions (matches table)
+# 1. Get pending predictions
 r=requests.get(f"{SURL}/rest/v1/matches?date=eq.{TODAY}&outcome=eq.pending&select=*",headers=SH)
 pred_matches=r.json() if isinstance(r.json(),list) else []
 print(f"  Pending predictions: {len(pred_matches)}")
@@ -23,7 +20,7 @@ r=requests.get(f"{SURL}/rest/v1/bets?status=eq.pending&fixture_id=not.is.null&se
 pending_bets=r.json() if isinstance(r.json(),list) else []
 print(f"  Pending bets with fixture_id: {len(pending_bets)}")
 
-# Collect all fixture IDs to check
+# Collect fixture IDs
 fixture_ids=set()
 for m in pred_matches:
     if m.get("fixture_id"): fixture_ids.add(m["fixture_id"])
@@ -32,17 +29,17 @@ for b in pending_bets:
 
 print(f"  Total fixtures to check: {len(fixture_ids)}")
 
-# 3. Fetch results from API-Sports
+# 3. Fetch results from FootyStats
 results={}
-for fid in list(fixture_ids)[:30]:  # max 30 fixtures
-    r=requests.get(f"https://v3.football.api-sports.io/fixtures?id={fid}",headers=HEADERS)
-    data=r.json().get("response",[])
-    if data:
-        f=data[0]
-        status=f["fixture"]["status"]["short"]
-        home_goals=f["score"]["fulltime"]["home"]
-        away_goals=f["score"]["fulltime"]["away"]
-        if status in ["FT","AET","PEN"] and home_goals is not None and away_goals is not None:
+for fid in list(fixture_ids)[:30]:
+    r=requests.get(f"https://api.football-data-api.com/match?key={FOOTYSTATS_KEY}&match_id={fid}")
+    data=r.json()
+    if data.get("success") and data.get("data"):
+        m=data["data"]
+        status=m.get("status","")
+        home_goals=m.get("homeGoalCount")
+        away_goals=m.get("awayGoalCount")
+        if status=="complete" and home_goals is not None and away_goals is not None:
             is_draw=(home_goals==away_goals)
             result_str=f"{home_goals}-{away_goals}"
             results[fid]={"status":status,"result":result_str,"is_draw":is_draw,"finished":True}
@@ -50,9 +47,7 @@ for fid in list(fixture_ids)[:30]:  # max 30 fixtures
         else:
             results[fid]={"status":status,"finished":False}
 
-# 4. Update predictions (matches table)
-wins=0
-losses=0
+# 4. Update predictions
 for m in pred_matches:
     fid=m.get("fixture_id")
     if not fid or fid not in results: continue
@@ -61,18 +56,14 @@ for m in pred_matches:
     outcome="win" if res["is_draw"] else "loss"
     requests.patch(f"{SURL}/rest/v1/matches?id=eq.{m['id']}",headers=SH,
         json={"result":res["result"],"outcome":outcome})
-    if outcome=="win": wins+=1
-    else: losses+=1
 
-# 5. Update bets (bets table)
-bets_updated=0
+# 5. Update bets
 for b in pending_bets:
     fid=b.get("fixture_id")
     if not fid or fid not in results: continue
     res=results[fid]
     if not res["finished"]: continue
     sel=b.get("selection","")
-    # Determine win/loss based on selection
     if "Draw" in sel or "(X)" in sel:
         won=res["is_draw"]
     elif "Home" in sel or "(1)" in sel:
@@ -85,19 +76,16 @@ for b in pending_bets:
         won=res["is_draw"]
     outcome="win" if won else "loss"
     payout=round(b["amount"]*b["odds"],2) if won and b.get("odds") and b.get("amount") else 0
-    # skip if balance already applied (idempotent)
     already=b.get("balance_applied")
     requests.patch(f"{SURL}/rest/v1/bets?id=eq.{b['id']}",headers=SH,
         json={"status":outcome,"payout":payout,"notes":f"auto:FT:{res['result']}","balance_applied":True})
     bk=b.get("bookmaker")
     amt=b.get("amount") or 0
     if not already and bk and bk!="Stake":
-        # settled effect: win=+profit, loss=-stake
         eff=(payout-amt) if won else (-amt)
         if eff:
             bal=requests.get(f"{SURL}/rest/v1/balances?bookmaker=eq.{bk}&select=balance",headers=SH).json()
             if bal:
                 nb=(bal[0].get("balance") or 0)+eff
                 requests.patch(f"{SURL}/rest/v1/balances?bookmaker=eq.{bk}",headers=SH,json={"balance":nb})
-    bets_updated+=1
     print(f"  Bet {b['id']}: {b.get('match','')} → {outcome}")
