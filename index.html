@@ -300,10 +300,62 @@ canvas{width:100%!important}
 
 <!-- PREDICTIONS -->
 <div class="page" id="page-predictions">
-  <div class="section-hd"><div class="section-title">Draw Predictions</div><button class="btn btn-ghost btn-sm" onclick="loadPredictions()">Refresh</button></div>
-  <div id="pred-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
+  <div class="mart-grid" style="margin-bottom:20px">
+    <div class="mart-card">
+      <div class="chart-title">Draw Selection Calculator</div>
+      <div class="fg">
+        <label class="fl">Match Search</label>
+        <input type="text" class="fi" id="calc-match-search" placeholder="e.g. Arsenal vs Chelsea" oninput="searchCalcMatch(this.value)" autocomplete="off">
+        <div id="calc-match-dropdown" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;margin-top:-1px;position:relative;z-index:50"></div>
+      </div>
+      <div id="calc-match-info" style="display:none">
+        <div class="series-info" id="calc-match-info-text"></div>
+      </div>
+      <div class="fg">
+        <label class="fl">Time Range</label>
+        <select class="fs" id="calc-time-range">
+          <option value="24">Next 24 hours</option>
+          <option value="48" selected>Next 48 hours</option>
+          <option value="72">Next 72 hours</option>
+        </select>
+      </div>
+      <div class="fr" style="margin-top:8px">
+        <button class="btn btn-ghost" onclick="calcManual()" id="calc-manual-btn" disabled>Calculate Selected</button>
+        <button class="btn btn-green" onclick="calcAuto()">Auto-Fetch & Calculate</button>
+        <button class="btn btn-ghost" id="calc-recalc-btn" onclick="calcRecalculate()" style="display:none">⟳ Recalculate</button>
+      </div>
+    </div>
+    <div class="mart-card">
+      <div class="chart-title">Thresholds</div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05" oninput="saveCalcThresholds()"></div>
+        <div class="fg"><label class="fl">Min League Draw %</label><input type="number" class="fi" id="calc-min-league-draw" value="25" step="1" oninput="saveCalcThresholds()"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Min Home Draw % (5)</label><input type="number" class="fi" id="calc-min-home-draw" value="40" step="5" oninput="saveCalcThresholds()"></div>
+        <div class="fg"><label class="fl">Min Away Draw % (5)</label><input type="number" class="fi" id="calc-min-away-draw" value="40" step="5" oninput="saveCalcThresholds()"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Avg Goals Max</label><input type="number" class="fi" id="calc-max-goals" value="2.60" step="0.1" oninput="saveCalcThresholds()"></div>
+        <div class="fg"><label class="fl">Max PPG Diff %</label><input type="number" class="fi" id="calc-max-ppg" value="30" step="5" oninput="saveCalcThresholds()"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Max BTTS %</label><input type="number" class="fi" id="calc-max-btts" value="50" step="5" oninput="saveCalcThresholds()"></div>
+        <div class="fg"><label class="fl">Min H2H Draw %</label><input type="number" class="fi" id="calc-min-h2h" value="40" step="5" oninput="saveCalcThresholds()"></div>
+      </div>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-hd">
+      <div class="table-title">Draw Predictions</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost" onclick="loadDrawPredictions()">Refresh</button>
+        <button class="btn btn-red" onclick="clearDrawPredictions()">Clear</button>
+      </div>
+    </div>
+    <div id="pred-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
+  </div>
 </div>
-
 <!-- MY BETS -->
 <div class="page" id="page-bets">
   <div class="filters">
@@ -394,6 +446,7 @@ canvas{width:100%!important}
     <div class="fg"><label class="fl">Profit Factor Min</label><input type="number" class="fi" id="set-pf" placeholder="1.2" step="0.1" oninput="onThreshChange()"></div>
     <div class="fg"><label class="fl">Avg Odds Min</label><input type="number" class="fi" id="set-odds" placeholder="2.0" step="0.1" oninput="onThreshChange()"></div>
     <div class="fg"><label class="fl">Avg Steps Max</label><input type="number" class="fi" id="set-steps" placeholder="5" step="1" oninput="onThreshChange()"></div>
+    <div class="fg"><label class="fl">Avg Edge Min (%)</label><input type="number" class="fi" id="set-edge-thresh" placeholder="10" step="0.1" oninput="onThreshChange()"></div>
     <div class="fg"><label class="fl">Avg Edge Min (%)</label><input type="number" class="fi" id="set-edge-thresh" placeholder="10" step="0.1" oninput="onThreshChange()"></div>
     <div id="thresholds-preview" style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);margin-bottom:16px"></div>
     <button class="btn btn-green" style="width:100%;opacity:.4;cursor:not-allowed" id="save-thresh-btn" disabled onclick="saveSettings()">Save</button>
@@ -771,6 +824,7 @@ function updateSettingsPreview(){
   document.getElementById("set-odds").value=settings.odds_threshold||2.0;
   document.getElementById("set-steps").value=settings.steps_threshold||5;
   document.getElementById("set-edge-thresh").value=settings.edge_threshold||10;
+  document.getElementById("set-edge-thresh").value=settings.edge_threshold||10;
   var tp=document.getElementById("thresholds-preview");
 if(tp)tp.innerHTML="PF Min: <strong>"+(settings.pf_threshold||1.2)+"</strong> | Odds Min: <strong>"+(settings.odds_threshold||2.0)+"</strong> | Steps Max: <strong>"+(settings.steps_threshold||5)+"</strong> | Edge Min: <strong>"+(settings.edge_threshold||10)+"%</strong>";
   var br=bankroll||0;
@@ -802,7 +856,7 @@ function showPage(name,el){
   if(el)el.classList.add("active");
   closeSidebar();
   if(name==="dashboard")loadDashboard();
-  if(name==="predictions")loadPredictions();
+  if (name === "predictions") { loadPredictions(); loadCalcThresholds(); loadDrawPredictions(); }
   if(name==="bets")loadBets();
   if(name==="balances")loadBalances();
   if(name==="martingale"){calcMartingale();loadMartSeries().then(function(){loadMartingaleHistory();});document.getElementById("calc-fab").style.display="flex";} else{var cf=document.getElementById("calc-fab");if(cf)cf.style.display="none";}
@@ -899,17 +953,6 @@ if(oddsCard){
   } else {
     oddsCard.style.border="1px solid var(--border)";
     oddsCard.title="";
-  }
-}
-    var edgeThreshold=parseFloat(settings.edge_threshold)||10;
-var edgeCard=document.getElementById("s-edge").closest(".stat-card");
-if(edgeCard){
-  if(parseFloat(avgE)<edgeThreshold){
-    edgeCard.style.border="1px solid var(--red)";
-    edgeCard.title="⚠️ Avg Edge "+avgE+"% is below threshold "+edgeThreshold+"%";
-  } else {
-    edgeCard.style.border="1px solid var(--border)";
-    edgeCard.title="";
   }
 }
     if(dbType==="trixie"||dbType==="patent"){var tx=settled.filter(function(b){return b.bet_type===dbType;});var full=tx.filter(function(b){return b.status==="win";}).length;var dead=tx.filter(function(b){return b.status==="loss";}).length;var part=tx.length-full-dead;var pct=function(n){return tx.length?(n/tx.length*100).toFixed(0)+"%":"0%";};document.getElementById("t-full").textContent=pct(full);document.getElementById("t-partial").textContent=pct(part);document.getElementById("t-dead").textContent=pct(dead);}
@@ -1111,7 +1154,573 @@ function loadPredictions(){
     el.innerHTML=h;
   });
 }
+var _calcFixtureId=null;
+var _calcMatchTimeout=null;
+var _starredMatches=JSON.parse(localStorage.getItem("starred_matches")||"[]");
+var _edgeFilter=localStorage.getItem("edge_filter")||"all";
+var _sortField=null;
+var _sortDir=1;
 
+function isStarred(fixtureId){return _starredMatches.indexOf(fixtureId)!==-1;}
+
+function toggleStar(fixtureId){
+  var idx=_starredMatches.indexOf(fixtureId);
+  if(idx===-1){_starredMatches.push(fixtureId);}
+  else{_starredMatches.splice(idx,1);}
+  localStorage.setItem("starred_matches",JSON.stringify(_starredMatches));
+  if(window._lastCalcResults)renderCalcResultsWithDate(window._lastCalcResults);
+}
+
+function getCalcThresholds(){
+  return{
+    minOdds:parseFloat(document.getElementById("calc-min-odds").value)||2.80,
+    minLeagueDraw:parseFloat(document.getElementById("calc-min-league-draw").value)||25,
+    minHomeDraw:parseFloat(document.getElementById("calc-min-home-draw").value)||40,
+    minAwayDraw:parseFloat(document.getElementById("calc-min-away-draw").value)||40,
+    maxGoals:parseFloat(document.getElementById("calc-max-goals").value)||2.60,
+    maxPpg:parseFloat(document.getElementById("calc-max-ppg").value)||30,
+    maxBtts:parseFloat(document.getElementById("calc-max-btts").value)||50,
+    minH2h:parseFloat(document.getElementById("calc-min-h2h").value)||40
+  };
+}
+
+function saveCalcThresholds(){
+  localStorage.setItem("calc_thresholds",JSON.stringify({
+    minOdds:parseFloat(document.getElementById("calc-min-odds").value)||2.80,
+    minLeagueDraw:parseFloat(document.getElementById("calc-min-league-draw").value)||25,
+    minHomeDraw:parseFloat(document.getElementById("calc-min-home-draw").value)||40,
+    minAwayDraw:parseFloat(document.getElementById("calc-min-away-draw").value)||40,
+    maxGoals:parseFloat(document.getElementById("calc-max-goals").value)||2.60,
+    maxPpg:parseFloat(document.getElementById("calc-max-ppg").value)||30,
+    maxBtts:parseFloat(document.getElementById("calc-max-btts").value)||50,
+    minH2h:parseFloat(document.getElementById("calc-min-h2h").value)||40
+  }));
+}
+
+function loadCalcThresholds(){
+  var t=localStorage.getItem("calc_thresholds");
+  if(!t)return;
+  try{
+    var v=JSON.parse(t);
+    if(v.minOdds)document.getElementById("calc-min-odds").value=v.minOdds;
+    if(v.minLeagueDraw)document.getElementById("calc-min-league-draw").value=v.minLeagueDraw;
+    if(v.minHomeDraw)document.getElementById("calc-min-home-draw").value=v.minHomeDraw;
+    if(v.minAwayDraw)document.getElementById("calc-min-away-draw").value=v.minAwayDraw;
+    if(v.maxGoals)document.getElementById("calc-max-goals").value=v.maxGoals;
+    if(v.maxPpg)document.getElementById("calc-max-ppg").value=v.maxPpg;
+    if(v.maxBtts)document.getElementById("calc-max-btts").value=v.maxBtts;
+    if(v.minH2h)document.getElementById("calc-min-h2h").value=v.minH2h;
+  }catch(e){}
+}
+
+function searchCalcMatch(q){
+  var dd=document.getElementById("calc-match-dropdown");
+  if(!q||q.length<2){dd.style.display="none";return;}
+  clearTimeout(_calcMatchTimeout);
+  _calcMatchTimeout=setTimeout(function(){
+    var ql=q.toLowerCase();
+    var results=[];
+    if(window._todaysMatches&&window._todaysMatches.length){
+      results=window._todaysMatches.filter(function(m){
+        return(m.home_name||"").toLowerCase().indexOf(ql)!==-1||(m.away_name||"").toLowerCase().indexOf(ql)!==-1;
+      }).slice(0,8);
+    }
+    if(!results.length){dd.style.display="none";return;}
+    dd.innerHTML=results.map(function(m){
+      var kd=m.date_unix?new Date(m.date_unix*1000):"";
+      var ko=kd?(String(kd.getDate()).padStart(2,"0")+"/"+String(kd.getMonth()+1).padStart(2,"0")+" "+String(kd.getHours()).padStart(2,"0")+":"+String(kd.getMinutes()).padStart(2,"0")).replace(/"/g,""):"";
+      return'<div onclick="selectCalcMatch('+m.id+',\''+m.home_name+' vs '+m.away_name+'\','+m.competition_id+')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.home_name+' vs '+m.away_name+'</div><div style="color:var(--text3);font-size:11px">'+ko+"</div></div>";
+    }).join("");
+    dd.style.display="block";
+  },400);
+}
+
+function selectCalcMatch(fixtureId,matchName,leagueId){
+  _calcFixtureId=fixtureId;
+  document.getElementById("calc-match-search").value=matchName;
+  document.getElementById("calc-match-dropdown").style.display="none";
+  document.getElementById("calc-match-info").style.display="block";
+  document.getElementById("calc-match-info-text").innerHTML="<strong>"+matchName+"</strong> — Loading stats...";
+  document.getElementById("calc-manual-btn").disabled=false;
+}
+
+function calcScore(data,t){
+  var score=0;var skip=false;var reasons=[];
+  if(data.league_draw_rate<t.minLeagueDraw){skip=true;reasons.push("❌ League draw rate "+data.league_draw_rate+"% < "+t.minLeagueDraw+"%");}
+  if(data.odds<t.minOdds){skip=true;reasons.push("❌ Odds "+data.odds+" < "+t.minOdds);}
+  if(skip)return{score:0,skip:true,verdict:"🔴 SKIP",reasons:reasons,ourProb:0,mktProb:0,ev:0};
+  var minDraw=t.minHomeDraw||40;
+  if(data.home_draw_pct>0&&data.home_draw_pct!==data.league_draw_rate){
+    if(data.home_draw_pct>=60){score+=2;reasons.push("✅✅ Home draw "+data.home_draw_pct+"% ≥60% (+2)");}
+    else if(data.home_draw_pct>=minDraw){score+=1;reasons.push("✅ Home draw "+data.home_draw_pct+"% ≥"+minDraw+"% (+1)");}
+    else{reasons.push("❌ Home draw "+data.home_draw_pct+"% <"+minDraw+"% (+0)");}
+  } else{reasons.push("➖ Home draw — no individual data");}
+  var minAwayDraw=t.minAwayDraw||40;
+  if(data.away_draw_pct>0&&data.away_draw_pct!==data.league_draw_rate){
+    if(data.away_draw_pct>=60){score+=2;reasons.push("✅✅ Away draw "+data.away_draw_pct+"% ≥60% (+2)");}
+    else if(data.away_draw_pct>=minAwayDraw){score+=1;reasons.push("✅ Away draw "+data.away_draw_pct+"% ≥"+minAwayDraw+"% (+1)");}
+    else{reasons.push("❌ Away draw "+data.away_draw_pct+"% <"+minAwayDraw+"% (+0)");}
+  } else{reasons.push("➖ Away draw — no individual data");}
+  var avgGoals=(data.avg_goals_home+data.avg_goals_away)/2;
+  var maxGoals=t.maxGoals||2.60;
+  if(avgGoals<=2.00){score+=2;reasons.push("✅✅ Avg goals "+avgGoals.toFixed(2)+" ≤2.00 (+2)");}
+  else if(avgGoals<=maxGoals){score+=1;reasons.push("✅ Avg goals "+avgGoals.toFixed(2)+" ≤"+maxGoals+" (+1)");}
+  else{reasons.push("❌ Avg goals "+avgGoals.toFixed(2)+" >"+maxGoals+" (+0)");}
+  var maxBtts=t.maxBtts||50;
+  if(data.btts_pct<=(maxBtts-15)){score+=1;reasons.push("✅✅ BTTS "+data.btts_pct+"% ≤"+(maxBtts-15)+"% (+1)");}
+  else if(data.btts_pct<=maxBtts){score+=1;reasons.push("✅ BTTS "+data.btts_pct+"% ≤"+maxBtts+"% (+1)");}
+  else{reasons.push("❌ BTTS "+data.btts_pct+"% >"+maxBtts+"% (+0)");}
+  var maxPpg=t.maxPpg||30;
+  var ppgDiff=data.ppg_home&&data.ppg_away?+(Math.abs(data.ppg_home-data.ppg_away)/Math.max(data.ppg_home,data.ppg_away)*100).toFixed(1):null;
+  if(ppgDiff!==null){
+    if(ppgDiff<=10){score+=1;reasons.push("✅✅ PPG diff "+ppgDiff.toFixed(1)+"% ≤10% (+1)");}
+    else if(ppgDiff<=maxPpg){score+=1;reasons.push("✅ PPG diff "+ppgDiff.toFixed(1)+"% ≤"+maxPpg+"% (+1)");}
+    else{score-=1;reasons.push("❌ PPG diff "+ppgDiff.toFixed(1)+"% >"+maxPpg+"% (-1)");}
+  }
+  var minH2h=t.minH2h||40;
+  if(data.h2h_draw_rate>0){
+    if(data.h2h_draw_rate>=(minH2h+10)){score+=1;reasons.push("✅✅ H2H draw "+data.h2h_draw_rate+"% ≥"+(minH2h+10)+"% (+1)");}
+    else if(data.h2h_draw_rate>=minH2h){score+=1;reasons.push("✅ H2H draw "+data.h2h_draw_rate+"% ≥"+minH2h+"% (+1)");}
+    else if(data.h2h_draw_rate<25){score-=1;reasons.push("❌ H2H draw "+data.h2h_draw_rate+"% <25% (-1)");}
+    else{reasons.push("➖ H2H draw "+data.h2h_draw_rate+"% (neutral)");}
+  } else{reasons.push("➖ H2H draw — no data");}
+  if(data.sbo_odds&&data.odds){
+    if(data.sbo_odds>data.odds){score+=1;reasons.push("✅ Smart money: Sbo("+data.sbo_odds+") > bet365("+data.odds+") (+1)");}
+    else{score-=1;reasons.push("❌ Smart money: Sbo("+data.sbo_odds+") < bet365("+data.odds+") (-1)");}
+  } else{reasons.push("➖ Smart money — no data");}
+  var leagueW=0.30,homeW=0.25,awayW=0.25,h2hW=0.20;
+  var ourProb=0,probDivider=0;
+  if(data.league_draw_rate>0){ourProb+=data.league_draw_rate*leagueW;probDivider+=leagueW;}
+  if(data.home_draw_pct>0){ourProb+=data.home_draw_pct*homeW;probDivider+=homeW;}
+  if(data.away_draw_pct>0){ourProb+=data.away_draw_pct*awayW;probDivider+=awayW;}
+  if(data.h2h_draw_rate>0){ourProb+=data.h2h_draw_rate*h2hW;probDivider+=h2hW;}
+  if(probDivider>0)ourProb=ourProb/probDivider;
+  ourProb=+ourProb.toFixed(1);
+  var mktProb=data.odds>0?+(100/data.odds).toFixed(1):0;
+  var ev=data.odds>0?+((ourProb/100*data.odds)-1).toFixed(3):0;
+  var verdict=score>=8?"✅✅✅ STRONG BET":score>=6?"✅✅ BET":score>=4?"⚠️ CONSIDER":score>=2?"⚠️ SKIP":"🔴 SKIP";
+  return{score:score,skip:false,verdict:verdict,reasons:reasons,ourProb:ourProb,mktProb:mktProb,ev:ev};
+}
+
+function calcManual(){
+  if(!_calcFixtureId){showToast("Select a match first",true);return;}
+  var btn=document.getElementById("calc-manual-btn");
+  btn.textContent="Loading...";btn.disabled=true;
+  var matchData=null;
+  fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+_calcFixtureId,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(!d.data){showToast("Match data not found",true);btn.textContent="Calculate Selected";btn.disabled=false;return;}
+    matchData=d.data;
+    return fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=league-season&league_id="+matchData.competition_id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});
+  })
+  .then(function(r){return r.json();})
+  .then(function(ld){
+    var league=ld.data||{};
+    var m=matchData;
+    var h2hDraw=0;
+    if(m.h2h&&m.h2h.previous_matches_results&&m.h2h.previous_matches_results.totalMatches>0){
+      h2hDraw=+(m.h2h.previous_matches_results.draw/m.h2h.previous_matches_results.totalMatches*100).toFixed(1);
+    }
+    var sboOdds=0;
+    if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]&&m.odds_comparison["FT Result"]["Draw"]["Sbo"]){
+      sboOdds=parseFloat(m.odds_comparison["FT Result"]["Draw"]["Sbo"]);
+    }
+    var data={
+      league_draw_rate:league.drawPercentage||0,
+      home_draw_pct:m.home_draw_percentage||0,
+      away_draw_pct:m.away_draw_percentage||0,
+      avg_goals_home:league.seasonAVG_home||0,
+      avg_goals_away:league.seasonAVG_away||0,
+      btts_pct:m.btts_potential||0,
+      ppg_home:m.home_ppg||0,
+      ppg_away:m.away_ppg||0,
+      h2h_draw_rate:h2hDraw,
+      h2h_avg_goals:m.h2h&&m.h2h.betting_stats?m.h2h.betting_stats.avg_goals:0,
+      math_advantage:m.avg_potential||0,
+      odds:m.odds_ft_x||0,
+      sbo_odds:sboOdds
+    };
+    var t=getCalcThresholds();
+    var result=calcScore(data,t);
+    var matchName=(m.home_name||"Home")+" vs "+(m.away_name||"Away");
+    showCalcResult(matchName,data,result);
+    saveDrawPrediction(m,data,result);
+    btn.textContent="Calculate Selected";btn.disabled=false;
+  })
+  .catch(function(e){showToast("Error: "+e.message,true);btn.textContent="Calculate Selected";btn.disabled=false;});
+}
+function calcAuto(){
+  var hours=parseInt(document.getElementById("calc-time-range").value)||48;
+  var now=Math.floor(Date.now()/1000);
+  var until=now+hours*3600;
+  showToast("Fetching matches...");
+  var el=document.getElementById("pred-body");
+  el.innerHTML='<div class="loading"><div class="sp"></div>Fetching matches...</div>';
+  fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    window._todaysMatches=d.data||[];
+    var matches=window._todaysMatches.filter(function(m){return m.date_unix<=until&&m.odds_ft_x>=(parseFloat(document.getElementById("calc-min-odds").value)||2.80);});
+    el.innerHTML='<div class="loading"><div class="sp"></div>Calculating '+matches.length+' matches...</div>';
+    if(!matches.length){el.innerHTML='<div class="empty">No qualifying matches found</div>';return;}
+    var leagueCache={};
+    var results=[];
+    var done=0;
+    matches.forEach(function(m){
+      var leagueId=m.competition_id;
+      function processMatch(league){
+        var h2hDraw=0;
+        if(m.h2h&&m.h2h.previous_matches_results&&m.h2h.previous_matches_results.totalMatches>0){
+          h2hDraw=+(m.h2h.previous_matches_results.draw/m.h2h.previous_matches_results.totalMatches*100).toFixed(1);
+        }
+        var sboOdds=0;
+        if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]&&m.odds_comparison["FT Result"]["Draw"]["Sbo"]){
+          sboOdds=parseFloat(m.odds_comparison["FT Result"]["Draw"]["Sbo"]);
+        }
+        m._kickoff=m.date_unix?new Date(m.date_unix*1000).toISOString():null;
+        m._leagueData=leagueCache[leagueId];
+        var data={
+          league_draw_rate:league.drawPercentage||0,
+          home_draw_pct:m.home_draw_percentage||0,
+          away_draw_pct:m.away_draw_percentage||0,
+          avg_goals_home:league.seasonAVG_home||0,
+          avg_goals_away:league.seasonAVG_away||0,
+          btts_pct:m.btts_potential||0,
+          ppg_home:m.home_ppg||0,
+          ppg_away:m.away_ppg||0,
+          h2h_draw_rate:h2hDraw,
+          h2h_avg_goals:m.h2h&&m.h2h.betting_stats?m.h2h.betting_stats.avg_goals:0,
+          math_advantage:m.avg_potential||0,
+          odds:m.odds_ft_x||0,
+          sbo_odds:sboOdds
+        };
+        var result=calcScore(data,getCalcThresholds());
+        if(!result.skip&&result.score>=4){
+          results.push({match:m,data:data,result:result});
+          saveDrawPrediction(m,data,result);
+        }
+        done++;
+        if(done===matches.length){
+          results.sort(function(a,b){return b.result.score-a.result.score;});
+          renderCalcResults(results);
+          var rb=document.getElementById("calc-recalc-btn");if(rb)rb.style.display="";
+          var topMatches=results.filter(function(r){return r.result.score>=4;});
+          if(topMatches.length){
+            var h2hDone=0;
+            topMatches.forEach(function(r){
+              fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+r.match.id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+              .then(function(res){return res.json();})
+              .then(function(md){
+                if(md.data){
+                  if(md.data.h2h&&md.data.h2h.previous_matches_results&&md.data.h2h.previous_matches_results.totalMatches>0){
+                    var h2h=md.data.h2h.previous_matches_results;
+                    r.data.h2h_draw_rate=+(h2h.draw/h2h.totalMatches*100).toFixed(1);
+                  }
+                  if(md.data.home_draw_percentage)r.data.home_draw_pct=md.data.home_draw_percentage;
+                  if(md.data.away_draw_percentage)r.data.away_draw_pct=md.data.away_draw_percentage;
+                  var newResult=calcScore(r.data,getCalcThresholds());
+                  r.result=newResult;
+                }
+                h2hDone++;
+                if(h2hDone===topMatches.length){
+                  results.sort(function(a,b){return b.result.score-a.result.score;});
+                  renderCalcResults(results);
+                }
+              }).catch(function(){h2hDone++;if(h2hDone===topMatches.length){renderCalcResults(results);}});
+            });
+          }
+        }
+      }
+      if(leagueCache[leagueId]){
+        processMatch(leagueCache[leagueId]);
+      } else {
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=league-season&league_id="+leagueId,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+        .then(function(r){return r.json();})
+        .then(function(ld){
+          leagueCache[leagueId]=ld.data||{};
+          m.league_name=leagueCache[leagueId].english_name||leagueCache[leagueId].name||"";
+          processMatch(leagueCache[leagueId]);
+        })
+        .catch(function(){
+          leagueCache[leagueId]={};
+          done++;
+          if(done===matches.length){
+            results.sort(function(a,b){return b.result.score-a.result.score;});
+            renderCalcResults(results);
+          }
+        });
+      }
+    });
+  });
+}
+
+function calcRecalculate(){
+  if(!window._todaysMatches||!window._todaysMatches.length){showToast("No data — run Auto-Fetch first",true);return;}
+  var hours=parseInt(document.getElementById("calc-time-range").value)||48;
+  var now=Math.floor(Date.now()/1000);
+  var until=now+hours*3600;
+  var matches=window._todaysMatches.filter(function(m){return m.date_unix<=until&&m.odds_ft_x>=(parseFloat(document.getElementById("calc-min-odds").value)||2.80);});
+  var results=[];
+  matches.forEach(function(m){
+    if(!m._leagueData)return;
+    var league=m._leagueData;
+    var h2hDraw=0;
+    if(m.h2h&&m.h2h.previous_matches_results&&m.h2h.previous_matches_results.totalMatches>0){
+      h2hDraw=+(m.h2h.previous_matches_results.draw/m.h2h.previous_matches_results.totalMatches*100).toFixed(1);
+    }
+    var sboOdds=0;
+    if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]&&m.odds_comparison["FT Result"]["Draw"]["Sbo"]){
+      sboOdds=parseFloat(m.odds_comparison["FT Result"]["Draw"]["Sbo"]);
+    }
+    m._kickoff=m.date_unix?new Date(m.date_unix*1000).toISOString():null;
+    var data={
+      league_draw_rate:league.drawPercentage||0,
+      home_draw_pct:m.home_draw_percentage||0,
+      away_draw_pct:m.away_draw_percentage||0,
+      avg_goals_home:league.seasonAVG_home||0,
+      avg_goals_away:league.seasonAVG_away||0,
+      btts_pct:m.btts_potential||0,
+      ppg_home:m.home_ppg||0,
+      ppg_away:m.away_ppg||0,
+      h2h_draw_rate:h2hDraw,
+      h2h_avg_goals:m.h2h&&m.h2h.betting_stats?m.h2h.betting_stats.avg_goals:0,
+      math_advantage:m.avg_potential||0,
+      odds:m.odds_ft_x||0,
+      sbo_odds:sboOdds
+    };
+    var result=calcScore(data,getCalcThresholds());
+    if(!result.skip&&result.score>=4){
+      results.push({match:m,data:data,result:result});
+    }
+  });
+  results.sort(function(a,b){return b.result.score-a.result.score;});
+  renderCalcResults(results);
+  showToast("Recalculated with new thresholds!");
+}
+function showCalcResult(matchName,data,result){
+  var el=document.getElementById("pred-body");
+  var color=result.score>=8?"var(--green)":result.score>=6?"var(--amber)":"var(--red)";
+  var h='<div class="chart-card" style="margin-bottom:16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-size:16px;font-weight:700;color:var(--text)">'+matchName+'</div><div style="font-family:\'Space Mono\',monospace;font-size:24px;font-weight:700;color:'+color+'">'+result.score+'/10</div></div>';
+  h+='<div style="font-size:18px;margin-bottom:12px">'+result.verdict+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  result.reasons.forEach(function(r){h+='<div style="font-size:12px;color:var(--text2);background:var(--bg3);padding:6px 10px;border-radius:6px">'+r+'</div>';});
+  h+='</div></div>';
+  el.innerHTML=h;
+}
+
+function saveDrawPrediction(match,data,result){
+  sbGet("draw_predictions?fixture_id=eq."+match.id+"&created_at=gte."+(new Date().toISOString().slice(0,10))).then(function(ex){
+    if(ex.length)return;
+    sbPost("draw_predictions",{
+      match:(match.home_name||"")+" vs "+(match.away_name||""),
+      league:String(match.competition_id||""),
+      kickoff:match.date_unix?new Date(match.date_unix*1000).toISOString():null,
+      league_name:match.league_name||match.competition_name||"",
+      fixture_id:match.id,
+      score:result.score,
+      verdict:result.verdict,
+      odds:data.odds,
+      league_draw_rate:data.league_draw_rate,
+      home_draw_pct:data.home_draw_pct,
+      away_draw_pct:data.away_draw_pct,
+      avg_goals:(data.avg_goals_home+data.avg_goals_away)/2,
+      btts_pct:data.btts_pct,
+      ppg_diff:data.ppg_home&&data.ppg_away?+(Math.abs(data.ppg_home-data.ppg_away)/Math.max(data.ppg_home,data.ppg_away)*100).toFixed(1):null,
+      h2h_draw_rate:data.h2h_draw_rate,
+      math_advantage:data.math_advantage,
+      sbo_odds:data.sbo_odds,
+      our_prob:result.ourProb||0,
+      ev:result.ev||0,
+      details:JSON.stringify(result.reasons)
+    }).catch(function(){});
+  });
+}
+
+function loadDrawPredictions(){
+  var el=document.getElementById("pred-body");
+  el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
+  sbGet("draw_predictions?select=*&order=kickoff.desc&limit=100").then(function(d){
+    if(!d.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
+    var results=d.map(function(p){
+      return{
+        match:{
+          id:p.fixture_id,
+          home_name:p.match.split(" vs ")[0]||"",
+          away_name:p.match.split(" vs ")[1]||"",
+          competition_id:p.league,
+          league_name:p.league_name||"",
+          _savedAt:p.created_at,
+          _kickoff:p.kickoff
+        },
+        data:{
+          odds:p.odds,
+          league_draw_rate:p.league_draw_rate,
+          home_draw_pct:p.home_draw_pct||0,
+          away_draw_pct:p.away_draw_pct||0,
+          avg_goals_home:p.avg_goals||0,
+          avg_goals_away:p.avg_goals||0,
+          btts_pct:p.btts_pct||0,
+          ppg_home:0,
+          ppg_away:0,
+          h2h_draw_rate:p.h2h_draw_rate||0
+        },
+        result:{
+          score:p.score,
+          verdict:p.verdict,
+          ourProb:p.our_prob||0,
+          mktProb:p.odds>0?+(100/p.odds).toFixed(1):0,
+          ev:p.ev||0,
+          reasons:p.details?JSON.parse(p.details):[]
+        }
+      };
+    });
+    window._lastCalcResults=results;
+    renderCalcResultsWithDate(results);
+  });
+}
+
+function clearDrawPredictions(){
+  confirmAction("Delete all draw predictions?",function(){
+    sbDelete("draw_predictions?id=gt.0").then(function(){
+      showToast("Cleared!");
+      loadDrawPredictions();
+    });
+  });
+}
+
+function toggleCalcDetails(id){
+  var el=document.getElementById(id);
+  if(el)el.style.display=el.style.display==="none"?"table-row":"none";
+}
+
+function calcManualById(fixtureId,matchName,leagueId){
+  _calcFixtureId=fixtureId;
+  document.getElementById("calc-match-search").value=matchName;
+  document.getElementById("calc-manual-btn").disabled=false;
+  calcManual();
+}
+
+function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName){
+  openAddBet();
+  setTimeout(function(){
+    document.getElementById("bet-match").value=matchName;
+    document.getElementById("bet-odds").value=odds;
+    document.getElementById("bet-sel").value="Draw (X)";
+    document.getElementById("bet-fixture-id").value=fixtureId;
+    document.getElementById("bet-league").value=leagueName||"";
+    if(ourProb)document.getElementById("bet-myprob").value=ourProb;
+    calcBetFields();
+  },100);
+}
+function fmtDate(ts){
+  if(!ts)return"";
+  var d=new Date(ts);
+  var day=String(d.getDate()).padStart(2,"0");
+  var mon=String(d.getMonth()+1).padStart(2,"0");
+  var yr=String(d.getFullYear()).slice(2);
+  var hr=String(d.getHours()).padStart(2,"0");
+  var min=String(d.getMinutes()).padStart(2,"0");
+  return day+"/"+mon+"/"+yr+"<br>"+hr+":"+min;
+}
+
+function renderCalcResults(results){
+  window._lastCalcResults=results;
+  renderCalcResultsWithDate(results);
+}
+
+function renderCalcResultsWithDate(results){
+  window._lastCalcResults=results;
+  var el=document.getElementById("pred-body");
+  if(!results.length){el.innerHTML='<div class="empty">No qualifying matches found</div>';return;}
+  var h='<div class="table-scroll"><table><thead><tr>'+
+  '<th onclick="sortCalcResults(\'date\')" style="cursor:pointer;white-space:nowrap">Date <span id="sort-date">⇅</span></th>'+
+  '<th>Match</th>'+
+  '<th onclick="sortCalcResults(\'score\')" style="cursor:pointer;white-space:nowrap">Score <span id="sort-score">⇅</span></th>'+
+  '<th>Verdict</th>'+
+  '<th onclick="sortCalcResults(\'odds\')" style="cursor:pointer;white-space:nowrap">Odds <span id="sort-odds">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'ourProb\')" style="cursor:pointer;white-space:nowrap">My Prob% <span id="sort-ourProb">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'mktProb\')" style="cursor:pointer;white-space:nowrap">Mkt% <span id="sort-mktProb">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'ev\')" style="cursor:pointer;white-space:nowrap">EV <span id="sort-ev">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'leagueDraw\')" style="cursor:pointer;white-space:nowrap">League Draw% <span id="sort-leagueDraw">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'h2hDraw\')" style="cursor:pointer;white-space:nowrap">H2H Draw% <span id="sort-h2hDraw">⇅</span></th>'+
+  '<th onclick="sortCalcResults(\'btts\')" style="cursor:pointer;white-space:nowrap">BTTS% <span id="sort-btts">⇅</span></th>'+
+  '<th></th>'+
+  '</tr></thead><tbody>';
+  el.innerHTML=h+_buildCalcRows(results)+'</tbody></table></div>';
+}
+
+function _renderCalcResultsWithDateOnly(results){
+  var tbody=document.querySelector("#pred-body tbody");
+  if(!tbody)return renderCalcResultsWithDate(results);
+  tbody.innerHTML=_buildCalcRows(results);
+  var el=document.getElementById("sort-"+_sortField);
+  if(el)el.textContent=_sortDir===-1?"↓":"↑";
+}
+
+function _buildCalcRows(results){
+  var h="";
+  results.forEach(function(r,idx){
+    var matchName=(r.match.home_name||"")+" vs "+(r.match.away_name||"");
+    var color=r.result.score>=8?"var(--green)":r.result.score>=6?"var(--amber)":"var(--red)";
+    var evColor=r.result.ev>0?"var(--green)":r.result.ev<0?"var(--red)":"var(--text2)";
+    var detailsId="details-saved-"+r.match.id+"-"+idx;
+    var date=r.match._kickoff?fmtDate(r.match._kickoff):r.match._savedAt?fmtDate(r.match._savedAt):"";
+    h+="<tr>";
+    h+="<td class='mono' style='font-size:11px;color:var(--text3)'>"+date+"</td>";
+    h+="<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"</td>";
+    h+="<td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/10</td>";
+    h+="<td>"+r.result.verdict+"</td>";
+    h+="<td class='odds-badge'>"+r.data.odds+"</td>";
+    h+="<td style='font-family:Space Mono;color:var(--blue)'>"+r.result.ourProb+"%</td>";
+    h+="<td style='font-family:Space Mono;color:var(--text2)'>"+r.result.mktProb+"%</td>";
+    h+="<td style='font-family:Space Mono;font-weight:700;color:"+evColor+"'>"+(r.result.ev>0?"+":"")+r.result.ev+"</td>";
+    h+="<td>"+r.data.league_draw_rate+"%</td>";
+    h+="<td>"+r.data.h2h_draw_rate+"%</td>";
+    h+="<td>"+r.data.btts_pct+"%</td>";
+    h+="<td style='white-space:nowrap'>"+
+      "<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button> "+
+      "<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+
+      "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+( r.match.league_name||"")+"\")'>"+"+ Bet</button>"+
+      "</td>";
+    h+="</tr>";
+    h+="<tr id='"+detailsId+"' style='display:none'><td colspan='12' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
+  });
+  return h;
+}
+
+function sortCalcResults(field){
+  if(_sortField===field){
+    if(_sortDir===-1){_sortDir=1;}
+    else{
+      _sortField=null;_sortDir=1;
+      document.querySelectorAll("[id^='sort-']").forEach(function(el){el.textContent="⇅";});
+      window._lastCalcResults.sort(function(a,b){return b.result.score-a.result.score;});
+      _renderCalcResultsWithDateOnly(window._lastCalcResults);
+      return;
+    }
+  } else{_sortField=field;_sortDir=-1;}
+  document.querySelectorAll("[id^='sort-']").forEach(function(el){el.textContent="⇅";});
+  var sortEl=document.getElementById("sort-"+field);
+  if(sortEl)sortEl.textContent=_sortDir===-1?"↓":"↑";
+  if(!window._lastCalcResults)return;
+  window._lastCalcResults.sort(function(a,b){
+    var av,bv;
+    if(field==="date"){av=a.match._kickoff||"";bv=b.match._kickoff||"";}
+    else if(field==="score"){av=a.result.score;bv=b.result.score;}
+    else if(field==="odds"){av=a.data.odds;bv=b.data.odds;}
+    else if(field==="ourProb"){av=a.result.ourProb;bv=b.result.ourProb;}
+    else if(field==="mktProb"){av=a.result.mktProb;bv=b.result.mktProb;}
+    else if(field==="ev"){av=a.result.ev;bv=b.result.ev;}
+    else if(field==="leagueDraw"){av=a.data.league_draw_rate;bv=b.data.league_draw_rate;}
+    else if(field==="h2hDraw"){av=a.data.h2h_draw_rate;bv=b.data.h2h_draw_rate;}
+    else if(field==="btts"){av=a.data.btts_pct;bv=b.data.btts_pct;}
+    if(av<bv)return _sortDir;
+    if(av>bv)return -_sortDir;
+    return 0;
+  });
+  _renderCalcResultsWithDateOnly(window._lastCalcResults);
+}
 function saveInline(id,src,field,val,extraId){
   var patch={};patch[field]=val;
   if(src==="manual"){
@@ -1676,9 +2285,21 @@ var matchSearchTimeout=null;
 var upcomingMatches=[];
 
 function loadUpcomingMatches(){
-  sbGet("upcoming_matches?select=*&order=kickoff.asc&limit=500").then(function(rows){
-    upcomingMatches=rows;
-  });
+  fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    upcomingMatches=(d.data||[]).map(function(m){
+      return{
+        home:m.home_name,
+        away:m.away_name,
+        league:"",
+        competition_id:m.competition_id,
+        fixture_id:m.id,
+        kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():""
+      };
+    });
+    console.log("Loaded "+upcomingMatches.length+" upcoming matches");
+  }).catch(function(){});
 }
 
 function searchMatches(q){
@@ -1688,12 +2309,15 @@ function searchMatches(q){
   matchSearchTimeout=setTimeout(function(){
     var ql=q.toLowerCase();
     var results=upcomingMatches.filter(function(m){
-      return (m.home||"").toLowerCase().indexOf(ql)!==-1||(m.away||"").toLowerCase().indexOf(ql)!==-1;
-    }).slice(0,6);
+      return(m.home||"").toLowerCase().indexOf(ql)!==-1||(m.away||"").toLowerCase().indexOf(ql)!==-1;
+    }).slice(0,8);
     if(!results.length){dd.style.display="none";return;}
     dd.innerHTML=results.map(function(m){
-      var ko=m.kickoff?new Date(m.kickoff).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
-      return'<div onclick="selectMatch(this)" data-home="'+m.home+'" data-away="'+m.away+'" data-league="'+(m.league||"")+'" data-fixture="'+(m.fixture_id||"")+'" data-ko="'+ko+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px"><div style="font-weight:600;color:var(--text)">'+m.home+" vs "+m.away+"</div><div style='color:var(--text3);font-size:11px'>"+(m.league||"")+" · "+ko+"</div></div>";
+      var kd=m.kickoff?new Date(m.kickoff):"";
+      var ko=kd?(String(kd.getDate()).padStart(2,"0")+"/"+String(kd.getMonth()+1).padStart(2,"0")+" "+String(kd.getHours()).padStart(2,"0")+":"+String(kd.getMinutes()).padStart(2,"0")).replace(/"/g,""):"";
+      var safeHome=(m.home||"").replace(/"/g,"&quot;");
+      var safeAway=(m.away||"").replace(/"/g,"&quot;");
+      return "<div onclick='selectMatch(this)' data-home='"+safeHome+"' data-away='"+safeAway+"' data-league='"+(m.league||"")+"' data-fixture='"+(m.fixture_id||"")+"' data-ko='"+ko+"' style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px'><div style='font-weight:600;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div><div style='color:var(--text3);font-size:11px'>"+ko+"</div></div>";
     }).join("");
     dd.style.display="block";
   },300);
@@ -1707,6 +2331,7 @@ function selectMatch(el){
 }
 (function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}})();
 checkAuth();
+loadCalcThresholds();
 calcMartingale();
 </script>
 </body>
