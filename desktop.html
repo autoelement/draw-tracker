@@ -1296,14 +1296,10 @@ function selectCalcMatch(fixtureId,matchName,leagueId){
 
 function getCalcThresholds(){
   return {
-    minOdds: parseFloat(document.getElementById("calc-min-odds").value)||2.80,
-    minLeagueDraw: parseFloat(document.getElementById("calc-min-league-draw").value)||25,
-    minHomeDraw: parseFloat(document.getElementById("calc-min-home-draw").value)||40,
-    minAwayDraw: parseFloat(document.getElementById("calc-min-away-draw").value)||40,
-    maxGoals: parseFloat(document.getElementById("calc-max-goals").value)||2.60,
-    maxPpg: parseFloat(document.getElementById("calc-max-ppg").value)||30,
-    maxBtts: parseFloat(document.getElementById("calc-max-btts").value)||50,
-    minH2h: parseFloat(document.getElementById("calc-min-h2h").value)||40
+    minOdds: parseFloat((document.getElementById("calc-min-odds")||{}).value)||2.80,
+    minHomeDraw: parseFloat((document.getElementById("calc-min-home-draw")||{}).value)||35,
+    minScore: parseFloat((document.getElementById("calc-min-score")||{}).value)||5,
+    minEv: parseFloat((document.getElementById("calc-min-ev")||{}).value)||0
   };
 }
 function saveCalcThresholds(){
