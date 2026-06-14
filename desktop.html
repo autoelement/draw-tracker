@@ -1124,7 +1124,6 @@ function _drawPnlChart(bets) {
   for(var gi=0;gi<=4;gi++){var gv=mn+(rng*gi/4);ctx.fillText("$"+gv.toFixed(0),2,ys(gv)-2);}
   pnlChartData={pts:pts,dates:dates,xs:xs,ys:ys,w:w,h:h,p:p};
 }
-  window._scoreChartData={pts:pts,dates:s.map(function(b){return b.date||"";}),xs:xs,ys:ys,w:w,h:h,p:p};
   function drawScoreChart(bets){
   var c=document.getElementById("scoreChart");if(!c)return;
   var ctx=c.getContext("2d");
