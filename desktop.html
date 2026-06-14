@@ -1158,6 +1158,7 @@ function _drawPnlChart(bets) {
   for(var gi=0;gi<=4;gi++){var gv=mn+(rng*gi/4);ctx.fillText("$"+gv.toFixed(0),2,ys(gv)-2);}
   pnlChartData={pts:pts,dates:dates,xs:xs,ys:ys,w:w,h:h,p:p};
 }
+  window._scoreChartData={pts:pts,dates:s.map(function(b){return b.date||"";}),xs:xs,ys:ys,w:w,h:h,p:p};
   function drawScoreChart(bets){
   var c=document.getElementById("scoreChart");if(!c)return;
   var ctx=c.getContext("2d");
@@ -1181,6 +1182,20 @@ function _drawPnlChart(bets) {
   ctx.fillStyle="#7a9ab5";ctx.font="9px Space Mono";ctx.textAlign="left";
   for(var gi=0;gi<=3;gi++){var gv=mn+(rng*gi/3);ctx.fillText(gv.toFixed(1),2,ys(gv)-2);}
 }
+function scoreChartHover(ev){
+  var d=window._scoreChartData;if(!d)return;
+  var c=document.getElementById("scoreChart");
+  var rect=c.getBoundingClientRect();
+  var cw=c.width/2;
+  var mx=(ev.clientX-rect.left)*(cw/rect.width);
+  var idx=Math.round((mx-d.p)/((cw-d.p*2)/(d.pts.length-1||1)));
+  if(idx<0)idx=0;if(idx>=d.pts.length)idx=d.pts.length-1;
+  var tip=document.getElementById("score-chart-tip");
+  if(!tip){tip=document.createElement("div");tip.id="score-chart-tip";tip.style.cssText="position:fixed;background:var(--bg2);border:1px solid var(--purple);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text);pointer-events:none;z-index:9999;font-family:'Space Mono',monospace";document.body.appendChild(tip);}
+  tip.innerHTML=d.dates[idx]+"<br><span style='color:var(--purple)'>"+(d.pts[idx]>=0?"+":"")+d.pts[idx].toFixed(1)+"</span>";
+  tip.style.left=(ev.clientX+12)+"px";tip.style.top=(ev.clientY-10)+"px";tip.style.display="block";
+}
+function scoreChartLeave(){var tip=document.getElementById("score-chart-tip");if(tip)tip.style.display="none";}
 function pnlHover(ev){
   if(!pnlChartData)return;
   var c=document.getElementById("pnlChart");
@@ -2667,7 +2682,7 @@ function initSettings(){
     if(!rows.length)sbPost("settings",{single_pct:2,trixie_pct:1,patent_pct:0.5});
   }).catch(function(){});
 }
-(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}})();
+(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}var sc=document.getElementById("scoreChart");if(sc){sc.addEventListener("mousemove",scoreChartHover);sc.addEventListener("mouseleave",scoreChartLeave);}})();
 checkAuth();
 initSettings();
 calcMartingale();
