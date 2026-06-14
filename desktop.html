@@ -1026,29 +1026,6 @@ function updateScoreStat(bets){
   var sub=document.getElementById("s-score-sub");
   if(sub)sub.textContent=filtered.length+" scored bets";
 } 
-function drawScoreChart(bets){
-  var c=document.getElementById("scoreChart");if(!c)return;
-  var ctx=c.getContext("2d");
-  var cw=c.parentNode.offsetWidth-32;
-  c.style.width=cw+"px";c.width=cw*2;c.height=320;ctx.scale(2,2);
-  var w=cw,h=160,p=16;ctx.clearRect(0,0,w,h);
-  var s=bets.filter(function(b){return b.calc_score!=null&&(b.status==="win"||b.status==="loss");}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
-  if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No score data",w/2,h/2);return;}
-  var pts=s.map(function(b,i){var slice=s.slice(Math.max(0,i-4),i+1);return slice.reduce(function(sum,x){return sum+x.calc_score;},0)/slice.length;});
-  var mn=Math.min.apply(null,pts),mx=Math.max.apply(null,[11].concat(pts)),rng=mx-mn||1;
-  var xs=function(i){return p+i*(w-p*2)/(pts.length-1||1);};
-  var ys=function(v){return h-p-(v-mn)/rng*(h-p*2);};
-  ctx.strokeStyle="#1a2430";ctx.lineWidth=1;
-  for(var i=0;i<=3;i++){ctx.beginPath();ctx.moveTo(p,p+i*(h-p*2)/3);ctx.lineTo(w-p,p+i*(h-p*2)/3);ctx.stroke();}
-  var lastScore=pts[pts.length-1];
-  var lineColor=lastScore>=7?"#a060ff":lastScore>=5?"#ffa040":"#ff4560";
-  var gradColor=lastScore>=7?"rgba(160,96,255,.25)":lastScore>=5?"rgba(255,160,64,.25)":"rgba(255,69,96,.25)";
-  var g=ctx.createLinearGradient(0,p,0,h-p);g.addColorStop(0,gradColor);g.addColorStop(1,"rgba(0,0,0,0)");
-  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(xs(0),ys(pts[0]));pts.forEach(function(v,i){ctx.lineTo(xs(i),ys(v));});ctx.lineTo(xs(pts.length-1),h-p);ctx.lineTo(xs(0),h-p);ctx.closePath();ctx.fill();
-  ctx.strokeStyle=lineColor;ctx.lineWidth=2;ctx.beginPath();pts.forEach(function(v,i){if(i===0)ctx.moveTo(xs(0),ys(v));else ctx.lineTo(xs(i),ys(v));});ctx.stroke();
-  ctx.fillStyle="#7a9ab5";ctx.font="9px Space Mono";ctx.textAlign="left";
-  for(var gi=0;gi<=3;gi++){var gv=mn+(rng*gi/3);ctx.fillText(gv.toFixed(1),2,ys(gv)-2);}
-}
     var scc=document.getElementById("series-chart-card");
     if (dbType==="martingale") { scc.style.display=""; drawSeriesChart(manual); }
     else { scc.style.display="none"; }
