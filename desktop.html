@@ -1404,9 +1404,10 @@ function calcManual(){
     var homePct=getTeamDrawPct(results[1].data,compId,"home");
     var awayPct=getTeamDrawPct(results[2].data,compId,"away");
     var h2hDraw=0;
-    if(m.h2h&&m.h2h.previous_matches_results&&m.h2h.previous_matches_results.totalMatches>0){
-      h2hDraw=+(m.h2h.previous_matches_results.draw/m.h2h.previous_matches_results.totalMatches*100).toFixed(1);
-    }
+var md=matchDetail||m;
+if(md.h2h&&md.h2h.previous_matches_results&&md.h2h.previous_matches_results.totalMatches>0){
+  h2hDraw=+(md.h2h.previous_matches_results.draw/md.h2h.previous_matches_results.totalMatches*100).toFixed(1);
+}
     var sboOdds=0;var bestOdds=m.odds_ft_x||0;
     if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]){
       var drawOdds=m.odds_comparison["FT Result"]["Draw"];
