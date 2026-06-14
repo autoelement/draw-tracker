@@ -2691,13 +2691,13 @@ function initSettings(){
     else if(t.id==="edgeChart")seriesChartHover(ev);
     else if(t.id==="scoreChart")scoreChartHover(ev);
   });
-  document.addEventListener("mouseleave",function(ev){
+document.addEventListener("mouseout",function(ev){
     var t=ev.target;
     if(t.id==="pnlChart")pnlLeave();
     else if(t.id==="edgeTimeChart")edgeTimeLeave();
     else if(t.id==="edgeChart")seriesChartLeave();
     else if(t.id==="scoreChart")scoreChartLeave();
-  },true);
+  });
 })();
 checkAuth();
 initSettings();
