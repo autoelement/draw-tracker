@@ -1257,19 +1257,6 @@ function loadCalcThresholds(){
   }catch(e){}
 }
 
-function saveCalcThresholds(){
-  localStorage.setItem("calc_thresholds",JSON.stringify({
-    minOdds:parseFloat(document.getElementById("calc-min-odds").value)||2.80,
-    minLeagueDraw:parseFloat(document.getElementById("calc-min-league-draw").value)||25,
-    minHomeDraw:parseFloat(document.getElementById("calc-min-home-draw").value)||40,
-    minAwayDraw:parseFloat(document.getElementById("calc-min-away-draw").value)||40,
-    maxGoals:parseFloat(document.getElementById("calc-max-goals").value)||2.60,
-    maxPpg:parseFloat(document.getElementById("calc-max-ppg").value)||30,
-    maxBtts:parseFloat(document.getElementById("calc-max-btts").value)||50,
-    minH2h:parseFloat(document.getElementById("calc-min-h2h").value)||40
-  }));
-}
-
 function loadCalcThresholds(){
   var t=localStorage.getItem("calc_thresholds");
   if(!t)return;
