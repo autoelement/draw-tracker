@@ -1025,10 +1025,6 @@ function updateScoreStat(bets){
   if(el)el.textContent=avg;
   var sub=document.getElementById("s-score-sub");
   if(sub)sub.textContent=filtered.length+" scored bets";
-  var scc=document.getElementById("series-chart-card");
-    if (dbType==="martingale") { scc.style.display=""; drawSeriesChart(manual); }
-    else { scc.style.display="none"; }
-  });
 }
 function setEdgeFilter(f,el){
   _edgeFilter=f;
