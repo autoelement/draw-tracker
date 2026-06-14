@@ -1459,8 +1459,9 @@ function calcAuto(){
     matches.forEach(function(m){
       var leagueId=m.competition_id;
       var compId=m.competition_id;
-      function processWithTeams(league,homePct,awayPct){
+      function processWithTeams(league,homePct,awayPct,matchDetail){
         var h2hDraw=0;
+        var md=matchDetail||m;
         if(m.h2h&&m.h2h.previous_matches_results&&m.h2h.previous_matches_results.totalMatches>0){
           h2hDraw=+(m.h2h.previous_matches_results.draw/m.h2h.previous_matches_results.totalMatches*100).toFixed(1);
         }
