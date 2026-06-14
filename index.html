@@ -508,6 +508,16 @@ canvas{width:100%!important}
           </select>
         </div>
       </div>
+      <div class="fr3">
+        <div class="fg"><label class="fl">Odds</label><input type="number" class="fi" id="bet-odds" placeholder="3.20" step="0.01" oninput="calcBetFields()"></div>
+        <div class="fg"><label class="fl">Amount ($)</label><input type="number" class="fi" id="bet-amount" placeholder="0" step="0.01" oninput="calcBetFields()"></div>
+        <div class="fg"><label class="fl">Payout ($)</label><input type="number" class="fi" id="bet-payout" placeholder="auto" step="0.01" oninput="payoutManual=true"></div>
+      </div>
+      <div class="fr3">
+        <div class="fg"><label class="fl">My Prob %</label><input type="number" class="fi" id="bet-myprob" placeholder="35" oninput="calcBetFields()"></div>
+        <div class="fg"><label class="fl">Implied %</label><input type="number" class="fi" id="bet-impl" readonly></div>
+        <div class="fg"><label class="fl">Edge %</label><input type="number" class="fi" id="bet-edge" readonly></div>
+      </div>
       <div class="fr">
         <div class="fg"><label class="fl">My Prob %</label><input type="number" class="fi" id="bet-myprob" placeholder="35" oninput="calcBetFields()"></div>
         <div class="fg"><label class="fl">Implied %</label><input type="number" class="fi" id="bet-impl" readonly></div>
