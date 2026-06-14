@@ -519,6 +519,7 @@ canvas{width:100%!important}
         <div class="fg"><label class="fl">Implied %</label><input type="number" class="fi" id="bet-impl" readonly></div>
         <div class="fg"><label class="fl">Edge %</label><input type="number" class="fi" id="bet-edge" readonly></div>
       </div>
+    </div>
     <div id="trixie-fields" style="display:none">
       <div class="fg"><label class="fl">Unit Stake ($)</label><input type="number" class="fi" id="trix-unit" placeholder="auto" step="0.01" oninput="calcTrixie()"></div>
       <div id="trix-legs"></div>
@@ -853,9 +854,7 @@ function showPage(name,el){
   if (name === "predictions") { loadCalcThresholds(); loadDrawPredictions(); }
   if(name==="bets")loadBets();
   if(name==="balances")loadBalances();
-  if(name==="martingale"){calcMartingale();loadMartSeries().then(function(){loadMartingaleHistory();});document.getElementById("calc-fab").style.display="flex";} else{var cf=document.getElementById("calc-fab");if(cf)cf.style.display="none";}
-var fab=document.querySelector(".fab");if(fab)fab.style.display=name==="bets"||name==="dashboard"?"flex":"none";
-  if(name==="settings"){loadSettings();updateSettingsPreview();}
+  if(name==="martingale"){calcMartingale();loadMartSeries().then(function(){loadMartingaleHistory();});document.getElementById("calc-fab").style.display="flex";} else{var cf=document.getElementById("calc-fab");if(cf)cf.style.display="none";}  if(name==="settings"){loadSettings();updateSettingsPreview();}
 }
 
 function setDbType(t,el){
