@@ -1502,20 +1502,22 @@ function calcAuto(){
         }
       }
       function fetchTeamsAndProcess(league){
-        var homeId=m.homeID;var awayId=m.awayID;
-        if(!homeId||!awayId){processWithTeams(league,0,0);return;}
-        var homePromise=teamCache[homeId]?Promise.resolve(teamCache[homeId]):
-          fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=team&team_id="+homeId+"&include=stats",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
-          .then(function(r){return r.json();}).then(function(d){teamCache[homeId]=d.data||[];return teamCache[homeId];}).catch(function(){return[];});
-        var awayPromise=teamCache[awayId]?Promise.resolve(teamCache[awayId]):
-          fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=team&team_id="+awayId+"&include=stats",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
-          .then(function(r){return r.json();}).then(function(d){teamCache[awayId]=d.data||[];return teamCache[awayId];}).catch(function(){return[];});
-        Promise.all([homePromise,awayPromise]).then(function(teams){
-          var homePct=getTeamDrawPct(teams[0],compId,"home");
-          var awayPct=getTeamDrawPct(teams[1],compId,"away");
-          processWithTeams(league,homePct,awayPct);
-        }).catch(function(){processWithTeams(league,0,0);});
-      }
+  var homeId=m.homeID;var awayId=m.awayID;
+  if(!homeId||!awayId){processWithTeams(league,0,0,null);return;}
+  var homePromise=teamCache[homeId]?Promise.resolve(teamCache[homeId]):
+    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=team&team_id="+homeId+"&include=stats",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+    .then(function(r){return r.json();}).then(function(d){teamCache[homeId]=d.data||[];return teamCache[homeId];}).catch(function(){return[];});
+  var awayPromise=teamCache[awayId]?Promise.resolve(teamCache[awayId]):
+    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=team&team_id="+awayId+"&include=stats",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+    .then(function(r){return r.json();}).then(function(d){teamCache[awayId]=d.data||[];return teamCache[awayId];}).catch(function(){return[];});
+  var matchPromise=fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+m.id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+    .then(function(r){return r.json();}).then(function(d){return d.data||null;}).catch(function(){return null;});
+  Promise.all([homePromise,awayPromise,matchPromise]).then(function(res){
+    var homePct=getTeamDrawPct(res[0],compId,"home");
+    var awayPct=getTeamDrawPct(res[1],compId,"away");
+    processWithTeams(league,homePct,awayPct,res[2]);
+  }).catch(function(){processWithTeams(league,0,0,null);});
+}
       if(leagueCache[leagueId]){
         fetchTeamsAndProcess(leagueCache[leagueId]);
       } else {
