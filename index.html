@@ -341,12 +341,13 @@ canvas{width:100%!important}
   </div>
   <div class="table-card">
 <div class="section-hd" style="margin-bottom:12px;margin-top:20px;padding:0 20px">
-      <div class="section-title">Draw Predictions</div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost btn-sm" onclick="loadDrawPredictions()">Refresh</button>
-        <button class="btn btn-red btn-sm" onclick="clearDrawPredictions()">Clear</button>
-      </div>
+    <div class="section-title">Draw Predictions</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" id="star-filter-btn" onclick="toggleStarFilter(this)">☆</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadDrawPredictions()">Refresh</button>
+      <button class="btn btn-red btn-sm" onclick="clearDrawPredictions()">Clear</button>
     </div>
+  </div>
     <div id="pred-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
   </div>
 </div>
@@ -1705,13 +1706,21 @@ function fmtDate(ts){
   var min=String(d.getMinutes()).padStart(2,"0");
   return day+"/"+mon+"/"+yr+"<br>"+hr+":"+min;
 }
-
+var _starFilterOn=false;
+function toggleStarFilter(el){
+  _starFilterOn=!_starFilterOn;
+  el.textContent=_starFilterOn?"⭐":"☆";
+  el.style.background=_starFilterOn?"var(--amber-dim)":"transparent";
+  el.style.color=_starFilterOn?"var(--amber)":"var(--text2)";
+  if(window._lastCalcResults)renderCalcResultsWithDate(window._lastCalcResults);
+}
 function renderCalcResults(results){
   window._lastCalcResults=results;
   renderCalcResultsWithDate(results);
 }
 
 function renderCalcResultsWithDate(results){
+  var results=_starFilterOn?results.filter(function(r){return isStarred(r.match.id);}):results;
   window._lastCalcResults=results;
   var el=document.getElementById("pred-body");
   if(!results.length){el.innerHTML='<div class="empty">No qualifying matches found</div>';return;}
