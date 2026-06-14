@@ -295,7 +295,8 @@ canvas{width:100%!important}
   </div>
   <div class="chart-card"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="140" style="width:100%;display:block;height:140px"></canvas></div>
   <div class="chart-card" id="edge-chart-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="chart-title" style="margin-bottom:0">Avg Edge Over Time</div><div style="display:flex;gap:4px"><button id="edge-filter-all" onclick="setEdgeFilter('all',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--blue-dim);color:var(--blue);font-family:'Outfit',sans-serif">All</button><button id="edge-filter-win" onclick="setEdgeFilter('win',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Win</button><button id="edge-filter-loss" onclick="setEdgeFilter('loss',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Loss</button></div></div><canvas id="edgeTimeChart" height="140" style="width:100%;display:block;height:140px"></canvas></div>
-  <div class="chart-card" id="series-chart-card" style="display:none"><div class="chart-title">Risk vs Return</div><canvas id="edgeChart" height="140" style="width:100%;display:block"></canvas></div>
+<div class="chart-card" id="series-chart-card" style="display:none"><div class="chart-title">Risk vs Return</div><canvas id="edgeChart" height="140" style="width:100%;display:block"></canvas></div>
+<div class="chart-card" id="score-chart-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="section-title" style="margin-bottom:0">Avg Score Over Time</div><div style="display:flex;gap:4px"><button id="score-filter-all" onclick="setScoreFilter('all',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--purple-dim);color:var(--purple);font-family:'Outfit',sans-serif">All</button><button id="score-filter-win" onclick="setScoreFilter('win',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Win</button><button id="score-filter-loss" onclick="setScoreFilter('loss',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Loss</button></div></div><canvas id="scoreChart" height="140" style="width:100%;display:block;height:140px"></canvas></div>
 </div>
 
 <!-- PREDICTIONS -->
@@ -947,6 +948,7 @@ if(oddsCard){
     drawEdgeTimeChart(all);
     updateEdgeStat(all);
     updateScoreStat(all);
+    drawScoreChart(all);
     var scc=document.getElementById("series-chart-card");
     if(dbType==="martingale"){scc.style.display="";drawSeriesChart(manual);}
     else{scc.style.display="none";}
@@ -978,6 +980,63 @@ function updateEdgeStat(bets){
     else{edgeCard.style.border="1px solid var(--border)";edgeCard.title="";}
   }
 }
+  var _scoreFilter="all";
+function setScoreFilter(f,el){
+  _scoreFilter=f;
+  ["score-filter-all","score-filter-win","score-filter-loss"].forEach(function(id){
+    var b=document.getElementById(id);
+    if(!b)return;
+    b.style.background="var(--bg3)";b.style.color="var(--text3)";
+  });
+  el.style.background="var(--purple-dim)";el.style.color="var(--purple)";
+  if(window._lastAllBets){drawScoreChart(window._lastAllBets);updateScoreStat(window._lastAllBets);}
+}
+function updateScoreStat(bets){
+  var scored=bets.filter(function(b){return b.calc_score!=null&&(b.status==="win"||b.status==="loss");});
+  var avg=scored.length?(scored.reduce(function(s,b){return s+b.calc_score;},0)/scored.length).toFixed(1):"-";
+  var el=document.getElementById("s-score");
+  if(el)el.textContent=avg;
+  var sub=document.getElementById("s-score-sub");
+  if(sub)sub.textContent=scored.length+" settled bets";
+}
+function drawScoreChart(bets){
+  window._lastAllBets=bets;
+  var c=document.getElementById("scoreChart");if(!c)return;
+  var ctx=c.getContext("2d");
+  var cw=c.parentNode.offsetWidth-32;
+  c.style.width=cw+"px";c.width=cw*2;c.height=280;ctx.scale(2,2);
+  var w=cw,h=140,p=16;ctx.clearRect(0,0,w,h);
+  var s=bets.filter(function(b){return b.calc_score!=null&&(_scoreFilter==="all"?(b.status==="win"||b.status==="loss"):b.status===_scoreFilter);}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
+  if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No score data",w/2,h/2);return;}
+  var pts=s.map(function(b,i){var slice=s.slice(Math.max(0,i-4),i+1);return slice.reduce(function(sum,x){return sum+x.calc_score;},0)/slice.length;});
+  var mn=Math.min.apply(null,pts),mx=Math.max.apply(null,[11].concat(pts)),rng=mx-mn||1;
+  var xs=function(i){return p+i*(w-p*2)/(pts.length-1||1);};
+  var ys=function(v){return h-p-(v-mn)/rng*(h-p*2);};
+  ctx.strokeStyle="#1a2430";ctx.lineWidth=1;
+  for(var i=0;i<=3;i++){ctx.beginPath();ctx.moveTo(p,p+i*(h-p*2)/3);ctx.lineTo(w-p,p+i*(h-p*2)/3);ctx.stroke();}
+  var lastScore=pts[pts.length-1];
+  var lineColor=lastScore>=7?"#a060ff":lastScore>=5?"#ffa040":"#ff4560";
+  var gradColor=lastScore>=7?"rgba(160,96,255,.25)":lastScore>=5?"rgba(255,160,64,.25)":"rgba(255,69,96,.25)";
+  var g=ctx.createLinearGradient(0,p,0,h-p);g.addColorStop(0,gradColor);g.addColorStop(1,"rgba(0,0,0,0)");
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(xs(0),ys(pts[0]));pts.forEach(function(v,i){ctx.lineTo(xs(i),ys(v));});ctx.lineTo(xs(pts.length-1),h-p);ctx.lineTo(xs(0),h-p);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=lineColor;ctx.lineWidth=2;ctx.beginPath();pts.forEach(function(v,i){if(i===0)ctx.moveTo(xs(0),ys(v));else ctx.lineTo(xs(i),ys(v));});ctx.stroke();
+  ctx.fillStyle="#7a9ab5";ctx.font="9px Space Mono";ctx.textAlign="left";
+  for(var gi=0;gi<=3;gi++){var gv=mn+(rng*gi/3);ctx.fillText(gv.toFixed(1),2,ys(gv)-2);}
+  window._scoreChartData={pts:pts,dates:s.map(function(b){return b.date||"";}),xs:xs,ys:ys,w:w,h:h,p:p};
+}
+function scoreChartHover(ev){
+  var d=window._scoreChartData;if(!d)return;
+  var c=document.getElementById("scoreChart");
+  var rect=c.getBoundingClientRect();
+  var mx=(ev.clientX-rect.left);
+  var idx=Math.round((mx-d.p)/((d.w-d.p*2)/(d.pts.length-1||1)));
+  if(idx<0)idx=0;if(idx>=d.pts.length)idx=d.pts.length-1;
+  var tip=document.getElementById("score-chart-tip");
+  if(!tip){tip=document.createElement("div");tip.id="score-chart-tip";tip.style.cssText="position:fixed;background:var(--bg2);border:1px solid var(--purple);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text);pointer-events:none;z-index:9999;font-family:'Space Mono',monospace";document.body.appendChild(tip);}
+  tip.innerHTML=d.dates[idx]+"<br><span style='color:var(--purple)'>"+d.pts[idx].toFixed(1)+"/11</span>";
+  tip.style.left=(ev.clientX+12)+"px";tip.style.top=(ev.clientY-10)+"px";tip.style.display="block";
+}
+function scoreChartLeave(){var tip=document.getElementById("score-chart-tip");if(tip)tip.style.display="none";}
 function updateScoreStat(bets){
   var scored=bets.filter(function(b){return b.calc_score!=null&&(b.status==="win"||b.status==="loss");});
   var avg=scored.length?(scored.reduce(function(s,b){return s+b.calc_score;},0)/scored.length).toFixed(1):"-";
@@ -2387,7 +2446,7 @@ function selectMatch(el){
   document.getElementById("bet-fixture-id").value=el.getAttribute("data-fixture");
   document.getElementById("match-dropdown").style.display="none";
 }
-(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}})();
+(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}var sc=document.getElementById("scoreChart");if(sc){sc.addEventListener("mousemove",scoreChartHover);sc.addEventListener("mouseleave",scoreChartLeave);}})();
 checkAuth();
 loadCalcThresholds();
 calcMartingale();
