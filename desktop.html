@@ -1404,7 +1404,7 @@ function calcManual(){
     var homePct=getTeamDrawPct(results[1].data,compId,"home");
     var awayPct=getTeamDrawPct(results[2].data,compId,"away");
     var h2hDraw=0;
-var md=matchDetail||m;
+var md=m;
 if(md.h2h&&md.h2h.previous_matches_results&&md.h2h.previous_matches_results.totalMatches>0){
   h2hDraw=+(md.h2h.previous_matches_results.draw/md.h2h.previous_matches_results.totalMatches*100).toFixed(1);
 }
