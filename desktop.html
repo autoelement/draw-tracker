@@ -1759,6 +1759,33 @@ function calcRecalculate(){
   renderCalcResults(results);
   showToast("Recalculated!");
 }
+function saveDrawPrediction(match,data,result){
+  sbGet("draw_predictions?fixture_id=eq."+match.id+"&created_at=gte."+(new Date().toISOString().slice(0,10))).then(function(ex){
+    if(ex.length)return;
+    sbPost("draw_predictions",{
+      match:(match.home_name||"")+" vs "+(match.away_name||""),
+      league:String(match.competition_id||""),
+      kickoff:match.date_unix?new Date(match.date_unix*1000).toISOString():null,
+      league_name:match.league_name||"",
+      fixture_id:match.id,
+      score:result.score,
+      verdict:result.verdict,
+      odds:data.odds,
+      best_odds:data.best_odds||data.odds,
+      league_draw_rate:data.league_draw_rate||0,
+      home_draw_pct:data.home_draw_pct||0,
+      away_draw_pct:data.away_draw_pct||0,
+      avg_goals:data.avg_potential||0,
+      btts_pct:data.btts_pct||0,
+      ppg_diff:data.ppg_home&&data.ppg_away?+(Math.abs(data.ppg_home-data.ppg_away)/Math.max(data.ppg_home,data.ppg_away)*100).toFixed(1):null,
+      h2h_draw_rate:data.h2h_draw_rate||0,
+      sbo_odds:data.sbo_odds||0,
+      our_prob:result.ourProb||0,
+      ev:result.ev||0,
+      details:JSON.stringify(result.reasons)
+    }).catch(function(){});
+  });
+}
 function loadDrawPredictions(){
   var el=document.getElementById("pred-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
