@@ -268,19 +268,21 @@ tr:hover td{background:var(--bg3)}
       </div>
     </div>
     <div class="mart-card">
+ <div class="mart-card">
   <div class="chart-title">Thresholds</div>
   <div class="fr">
     <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05" oninput="saveCalcThresholds()"></div>
-    <div class="fg"><label class="fl">Min Score</label><input type="number" class="fi" id="calc-min-score" value="5" step="1" oninput="saveCalcThresholds()"></div>
+    <div class="fg"><label class="fl">Min Draw Prob %</label><input type="number" class="fi" id="calc-min-draw-prob" value="45" step="5" oninput="saveCalcThresholds()"></div>
   </div>
   <div class="fr">
-    <div class="fg"><label class="fl">Min Draw Prob %</label><input type="number" class="fi" id="calc-min-home-draw" value="35" step="5" oninput="saveCalcThresholds()"></div>
-    <div class="fg"><label class="fl">Min EV</label><input type="number" class="fi" id="calc-min-ev" value="0" step="0.1" oninput="saveCalcThresholds()"></div>
-  </div>
-  <div style="margin-top:8px;padding:10px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--text3)">
-    Score: ✅✅✅ STRONG ≥10 | ✅✅ BET ≥7 | ⚠️ CONSIDER ≥5
-  </div>
+    <div class="fg"><label class="fl">Min Score</label><input type="number" class="fi" id="calc-min-score" value="5" step="1" oninput="saveCalcThresholds()"></div>
+    <div class="fg" style="display:flex;align-items:flex-end">
+      <div style="padding:8px 10px;background:var(--bg3);border-radius:7px;font-size:11px;color:var(--text3);line-height:1.6;width:100%">
+        ≥9 STRONG<br>≥7 BET<br>≥5 CONSIDER
+      </div>
     </div>
+  </div>
+</div>
   </div>
   <div class="table-card">
     <div class="table-hd">
@@ -1297,21 +1299,15 @@ function selectCalcMatch(fixtureId,matchName,leagueId){
 function getCalcThresholds(){
   return {
     minOdds: parseFloat((document.getElementById("calc-min-odds")||{}).value)||2.80,
-    minHomeDraw: parseFloat((document.getElementById("calc-min-home-draw")||{}).value)||35,
-    minScore: parseFloat((document.getElementById("calc-min-score")||{}).value)||5,
-    minEv: parseFloat((document.getElementById("calc-min-ev")||{}).value)||0
+    minDrawProb: parseFloat((document.getElementById("calc-min-draw-prob")||{}).value)||45,
+    minScore: parseFloat((document.getElementById("calc-min-score")||{}).value)||5
   };
 }
 function saveCalcThresholds(){
   localStorage.setItem("calc_thresholds",JSON.stringify({
-    minOdds:parseFloat(document.getElementById("calc-min-odds").value)||2.80,
-    minLeagueDraw:parseFloat(document.getElementById("calc-min-league-draw").value)||25,
-    minHomeDraw:parseFloat(document.getElementById("calc-min-home-draw").value)||40,
-    minAwayDraw:parseFloat(document.getElementById("calc-min-away-draw").value)||40,
-    maxGoals:parseFloat(document.getElementById("calc-max-goals").value)||2.60,
-    maxPpg:parseFloat(document.getElementById("calc-max-ppg").value)||30,
-    maxBtts:parseFloat(document.getElementById("calc-max-btts").value)||50,
-    minH2h:parseFloat(document.getElementById("calc-min-h2h").value)||40
+    minOdds:parseFloat((document.getElementById("calc-min-odds")||{}).value)||2.80,
+    minDrawProb:parseFloat((document.getElementById("calc-min-draw-prob")||{}).value)||45,
+    minScore:parseFloat((document.getElementById("calc-min-score")||{}).value)||5
   }));
 }
 function loadCalcThresholds(){
@@ -1319,14 +1315,9 @@ function loadCalcThresholds(){
   if(!t)return;
   try{
     var v=JSON.parse(t);
-    if(v.minOdds)document.getElementById("calc-min-odds").value=v.minOdds;
-    if(v.minLeagueDraw)document.getElementById("calc-min-league-draw").value=v.minLeagueDraw;
-    if(v.minHomeDraw)document.getElementById("calc-min-home-draw").value=v.minHomeDraw;
-    if(v.minAwayDraw)document.getElementById("calc-min-away-draw").value=v.minAwayDraw;
-    if(v.maxGoals)document.getElementById("calc-max-goals").value=v.maxGoals;
-    if(v.maxPpg)document.getElementById("calc-max-ppg").value=v.maxPpg;
-    if(v.maxBtts)document.getElementById("calc-max-btts").value=v.maxBtts;
-    if(v.minH2h)document.getElementById("calc-min-h2h").value=v.minH2h;
+    if(v.minOdds&&document.getElementById("calc-min-odds"))document.getElementById("calc-min-odds").value=v.minOdds;
+    if(v.minDrawProb&&document.getElementById("calc-min-draw-prob"))document.getElementById("calc-min-draw-prob").value=v.minDrawProb;
+    if(v.minScore&&document.getElementById("calc-min-score"))document.getElementById("calc-min-score").value=v.minScore;
   }catch(e){}
 }
 function calcScore(data,t){
@@ -1375,12 +1366,7 @@ function calcScore(data,t){
     else{reasons.push("❌ Avg goals "+data.avg_potential+" >2.5 (+0)");}
   }else{reasons.push("➖ Avg goals — no data");}
 
-  if(data.sbo_odds&&data.odds){
-    if(data.sbo_odds>=data.odds){score+=1;reasons.push("✅ Smart money: Sbo("+data.sbo_odds+") ≥ bet365("+data.odds+") (+1)");}
-    else{score-=1;reasons.push("❌ Smart money: Sbo("+data.sbo_odds+") < bet365("+data.odds+") (-1)");}
-  }else{reasons.push("➖ Smart money — no data");}
-
-  var verdict=score>=10?"✅✅✅ STRONG BET":score>=7?"✅✅ BET":score>=5?"⚠️ CONSIDER":"🔴 SKIP";
+  var verdict=score>=9?"✅✅✅ STRONG BET":score>=7?"✅✅ BET":score>=5?"⚠️ CONSIDER":"🔴 SKIP";
   return{score:score,skip:false,verdict:verdict,reasons:reasons,ourProb:ourProb,mktProb:mktProb,ev:ev};
 }
 
@@ -1500,9 +1486,12 @@ function calcAuto(){
           best_odds:bestOdds,
           sbo_odds:sboOdds
         };
-        var result=calcScore(data,getCalcThresholds());
-        if(!result.skip&&result.score>=5){
+        var t=getCalcThresholds();
+        var result=calcScore(data,t);
+        if(!result.skip&&result.score>=(t.minScore||5)&&result.ourProb>=(t.minDrawProb||45)){
           results.push({match:m,data:data,result:result});
+          m._homePct=data.home_draw_pct;
+          m._awayPct=data.away_draw_pct;
           saveDrawPrediction(m,data,result);
         }
         done++;
