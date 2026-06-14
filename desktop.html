@@ -1328,10 +1328,10 @@ function calcScore(data,t){
   var ourProb=0;
   if(data.home_draw_pct>0&&data.away_draw_pct>0){
     ourProb=(data.home_draw_pct+data.away_draw_pct)/2;
-  } else if(data.home_draw_pct>0&&data.away_draw_pct===0){
-    ourProb=(data.home_draw_pct+(data.league_draw_rate||0))/2;
-  } else if(data.away_draw_pct>0&&data.home_draw_pct===0){
-    ourProb=(data.away_draw_pct+(data.league_draw_rate||0))/2;
+  } else if(data.home_draw_pct>0){
+    ourProb=data.home_draw_pct/2;
+  } else if(data.away_draw_pct>0){
+    ourProb=data.away_draw_pct/2;
   } else{
     ourProb=data.league_draw_rate||0;
   }
