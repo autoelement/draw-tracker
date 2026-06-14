@@ -1591,7 +1591,7 @@ function saveDrawPrediction(match,data,result){
 function loadDrawPredictions(){
   var el=document.getElementById("pred-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
-  sbGet("draw_predictions?select=*&order=kickoff.desc&limit=100").then(function(d){
+  sbGet("draw_predictions?select=*&order=kickoff.asc&limit=100").then(function(d){
     if(!d.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
     var results=d.map(function(p){
       return{
