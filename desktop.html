@@ -1181,6 +1181,7 @@ function _drawPnlChart(bets) {
   ctx.strokeStyle=lineColor;ctx.lineWidth=2;ctx.beginPath();pts.forEach(function(v,i){if(i===0)ctx.moveTo(xs(0),ys(v));else ctx.lineTo(xs(i),ys(v));});ctx.stroke();
   ctx.fillStyle="#7a9ab5";ctx.font="9px Space Mono";ctx.textAlign="left";
   for(var gi=0;gi<=3;gi++){var gv=mn+(rng*gi/3);ctx.fillText(gv.toFixed(1),2,ys(gv)-2);}
+  window._scoreChartData={pts:pts,dates:s.map(function(b){return b.date||"";}),xs:xs,ys:ys,w:w,h:h,p:p};
 }
 function scoreChartHover(ev){
   var d=window._scoreChartData;if(!d)return;
