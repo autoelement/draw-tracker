@@ -1543,7 +1543,7 @@ function showCalcResult(matchName,data,result){
   var h='<div class="chart-card" style="margin-bottom:16px">';
   h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
   h+='<div style="font-size:16px;font-weight:700;color:var(--text)">'+matchName+'</div>';
-  h+='<div style="font-family:\'Space Mono\',monospace;font-size:24px;font-weight:700;color:'+color+'">'+result.score+'/12</div>';
+  h+='<div style="font-family:\'Space Mono\',monospace;font-size:24px;font-weight:700;color:'+color+'">'+result.score+'/11</div>';
   h+='</div>';
   h+='<div style="font-size:18px;margin-bottom:16px">'+result.verdict+'</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">';
@@ -1620,7 +1620,7 @@ function _buildCalcRows(results){
 var date=r.match._kickoff?fmtDate(r.match._kickoff):r.match._savedAt?fmtDate(r.match._savedAt):"";
     h+="<td class='mono' style='font-size:11px;color:var(--text3)'>"+date+"</td>";
     h+="<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"</td>";
-    h+="<td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/10</td>";
+    h+="<td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/11</td>";
     h+="<td>"+r.result.verdict+"</td>";
     h+="<td class='odds-badge'>"+r.data.odds+"</td>";
     h+="<td style='font-family:Space Mono;color:var(--blue)'>"+r.result.ourProb+"%</td>";
