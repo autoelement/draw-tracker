@@ -237,7 +237,7 @@ tr:hover td{background:var(--bg3)}
   <div id="charts-wrap" style="display:flex;gap:12px;margin-bottom:20px">
     <div class="chart-card" id="pnl-chart-card" style="flex:1;min-width:0"><div class="chart-title">P&L Over Time</div><canvas id="pnlChart" height="160" style="width:100%;display:block;height:160px"></canvas></div>
     <div class="chart-card" id="edge-chart-card" style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="chart-title" style="margin-bottom:0">Avg Edge Over Time</div><div style="display:flex;gap:4px"><button id="edge-filter-all" onclick="setEdgeFilter('all',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--blue-dim);color:var(--blue);font-family:'Outfit',sans-serif">All</button><button id="edge-filter-win" onclick="setEdgeFilter('win',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Win</button><button id="edge-filter-loss" onclick="setEdgeFilter('loss',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Loss</button></div></div><canvas id="edgeTimeChart" height="160" style="width:100%;display:block;height:160px"></canvas></div>
-    <div class="chart-card" id="score-chart-card" style="flex:1;min-width:0"><div class="chart-title">Avg Score Over Time</div><canvas id="scoreChart" height="160" style="width:100%;display:block;height:160px"></canvas></div>
+    <div class="chart-card" id="score-chart-card" style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="chart-title" style="margin-bottom:0">Avg Score Over Time</div><div style="display:flex;gap:4px"><button id="score-filter-all" onclick="setScoreFilter('all',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--purple-dim);color:var(--purple);font-family:'Outfit',sans-serif">All</button><button id="score-filter-win" onclick="setScoreFilter('win',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Win</button><button id="score-filter-loss" onclick="setScoreFilter('loss',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Loss</button></div></div><canvas id="scoreChart" height="160" style="width:100%;display:block;height:160px"></canvas></div>
     <div class="chart-card" id="series-chart-card" style="flex:1;min-width:0;display:none"><div class="chart-title">Risk vs Return</div><canvas id="edgeChart" height="160" style="width:100%;display:block"></canvas></div>
   </div>
 </div>
@@ -591,6 +591,7 @@ var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 var H = {"apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json"};
 var bookmakers = [];
 var dbType = "all";
+var _scoreFilter=localStorage.getItem("score_filter")||"all";
 var _edgeFilter=localStorage.getItem("edge_filter")||"all";
 var payoutManual = false;
 var martSeries = [];
@@ -865,6 +866,10 @@ function loadDashboard() {
 _edgeFilter=savedEdgeFilter;
 var efBtn=document.getElementById("edge-filter-"+savedEdgeFilter);
 if(efBtn){["edge-filter-all","edge-filter-win","edge-filter-loss"].forEach(function(id){var b=document.getElementById(id);if(b){b.style.background="var(--bg3)";b.style.color="var(--text3)";}});efBtn.style.background="var(--blue-dim)";efBtn.style.color="var(--blue)";}
+  var savedScoreFilter=localStorage.getItem("score_filter")||"all";
+_scoreFilter=savedScoreFilter;
+var sfBtn=document.getElementById("score-filter-"+savedScoreFilter);
+if(sfBtn){["score-filter-all","score-filter-win","score-filter-loss"].forEach(function(id){var b=document.getElementById(id);if(b){b.style.background="var(--bg3)";b.style.color="var(--text3)";}});sfBtn.style.background="var(--purple-dim)";sfBtn.style.color="var(--purple)";}
   var bk = document.getElementById("db-bk").value;
   var range = document.getElementById("db-range").value;
   var now = new Date();
@@ -999,8 +1004,30 @@ if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border
     drawPnlChart(all);
     drawEdgeTimeChart(all);
     updateEdgeStat(all);
+    updateScoreStat(all);
     drawScoreChart(all);
-    function drawScoreChart(bets){
+   function setScoreFilter(f,el){
+  _scoreFilter=f;
+  localStorage.setItem("score_filter",f);
+  ["score-filter-all","score-filter-win","score-filter-loss"].forEach(function(id){
+    var b=document.getElementById(id);
+    if(!b)return;
+    b.style.background="var(--bg3)";b.style.color="var(--text3)";
+  });
+  el.style.background="var(--purple-dim)";el.style.color="var(--purple)";
+  if(window._lastScoreBets){drawScoreChart(window._lastScoreBets);updateScoreStat(window._lastScoreBets);}
+}
+
+function updateScoreStat(bets){
+  window._lastScoreBets=bets;
+  var filtered=bets.filter(function(b){return(_scoreFilter==="all"?(b.status==="win"||b.status==="loss"):b.status===_scoreFilter)&&b.calc_score!=null;});
+  var avg=filtered.length?(filtered.reduce(function(s,b){return s+(b.calc_score||0);},0)/filtered.length).toFixed(1):"-";
+  var el=document.getElementById("s-score");
+  if(el)el.textContent=avg;
+  var sub=document.getElementById("s-score-sub");
+  if(sub)sub.textContent=filtered.length+" scored bets";
+} 
+function drawScoreChart(bets){
   var c=document.getElementById("scoreChart");if(!c)return;
   var ctx=c.getContext("2d");
   var cw=c.parentNode.offsetWidth-32;
@@ -1166,7 +1193,7 @@ function _drawPnlChart(bets) {
   var cw=c.parentNode.offsetWidth-32;
   c.style.width=cw+"px";c.width=cw*2;c.height=320;ctx.scale(2,2);
   var w=cw,h=160,p=16;ctx.clearRect(0,0,w,h);
-  var s=bets.filter(function(b){return b.calc_score!=null&&(b.status==="win"||b.status==="loss");}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
+  var s=bets.filter(function(b){return b.calc_score!=null&&(_scoreFilter==="all"?(b.status==="win"||b.status==="loss"):b.status===_scoreFilter);}).sort(function(a,b){return new Date(a.date||0)-new Date(b.date||0);});
   if(!s.length){ctx.fillStyle="#3a5570";ctx.font="12px Outfit";ctx.textAlign="center";ctx.fillText("No score data",w/2,h/2);return;}
   var pts=s.map(function(b,i){var slice=s.slice(Math.max(0,i-4),i+1);return slice.reduce(function(sum,x){return sum+x.calc_score;},0)/slice.length;});
   var mn=Math.min.apply(null,pts),mx=Math.max.apply(null,[11].concat(pts)),rng=mx-mn||1;
