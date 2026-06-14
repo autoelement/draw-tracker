@@ -854,6 +854,7 @@ function showPage(name,el){
   if(name==="bets")loadBets();
   if(name==="balances")loadBalances();
   if(name==="martingale"){calcMartingale();loadMartSeries().then(function(){loadMartingaleHistory();});document.getElementById("calc-fab").style.display="flex";} else{var cf=document.getElementById("calc-fab");if(cf)cf.style.display="none";}
+var fab=document.querySelector(".fab");if(fab)fab.style.display=name==="bets"||name==="dashboard"?"flex":"none";
   if(name==="settings"){loadSettings();updateSettingsPreview();}
 }
 
