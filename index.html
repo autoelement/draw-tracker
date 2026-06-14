@@ -1720,8 +1720,9 @@ function renderCalcResults(results){
 }
 
 function renderCalcResultsWithDate(results){
-  var results=_starFilterOn?results.filter(function(r){return isStarred(r.match.id);}):results;
-  window._lastCalcResults=results;
+  if(results!==window._lastCalcResults)window._lastCalcResults=results;
+  var filtered=_starFilterOn?results.filter(function(r){return isStarred(r.match.id);}):results;
+  var results=filtered;
   var el=document.getElementById("pred-body");
   if(!results.length){el.innerHTML='<div class="empty">No qualifying matches found</div>';return;}
   if(window.innerWidth<768){
