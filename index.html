@@ -1257,22 +1257,6 @@ function loadCalcThresholds(){
   }catch(e){}
 }
 
-function loadCalcThresholds(){
-  var t=localStorage.getItem("calc_thresholds");
-  if(!t)return;
-  try{
-    var v=JSON.parse(t);
-    if(v.minOdds)document.getElementById("calc-min-odds").value=v.minOdds;
-    if(v.minLeagueDraw)document.getElementById("calc-min-league-draw").value=v.minLeagueDraw;
-    if(v.minHomeDraw)document.getElementById("calc-min-home-draw").value=v.minHomeDraw;
-    if(v.minAwayDraw)document.getElementById("calc-min-away-draw").value=v.minAwayDraw;
-    if(v.maxGoals)document.getElementById("calc-max-goals").value=v.maxGoals;
-    if(v.maxPpg)document.getElementById("calc-max-ppg").value=v.maxPpg;
-    if(v.maxBtts)document.getElementById("calc-max-btts").value=v.maxBtts;
-    if(v.minH2h)document.getElementById("calc-min-h2h").value=v.minH2h;
-  }catch(e){}
-}
-
 function searchCalcMatch(q){
   var dd=document.getElementById("calc-match-dropdown");
   if(!q||q.length<2){dd.style.display="none";return;}
