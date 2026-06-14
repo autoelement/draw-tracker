@@ -2398,6 +2398,7 @@ function loadUpcomingMatches(){
   fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
   .then(function(r){return r.json();})
   .then(function(d){
+    window._todaysMatches=d.data||[];
     upcomingMatches=(d.data||[]).map(function(m){
       return{
         home:m.home_name,
