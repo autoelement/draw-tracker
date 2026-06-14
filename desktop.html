@@ -281,6 +281,7 @@ tr:hover td{background:var(--bg3)}
     <div class="table-hd">
       <div class="table-title">Draw Predictions</div>
       <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" id="star-filter-btn" onclick="toggleStarFilter(this)">☆</button>
         <button class="btn btn-ghost" onclick="loadDrawPredictions()">Refresh</button>
         <button class="btn btn-red" onclick="clearDrawPredictions()">Clear</button>
       </div>
@@ -1599,8 +1600,18 @@ function renderCalcResults(results){
   window._lastCalcResults=results;
   renderCalcResultsWithDate(results);
 }
+  var _starFilterOn=false;
+function toggleStarFilter(el){
+  _starFilterOn=!_starFilterOn;
+  el.textContent=_starFilterOn?"⭐":"☆";
+  el.style.background=_starFilterOn?"var(--amber-dim)":"transparent";
+  el.style.color=_starFilterOn?"var(--amber)":"var(--text2)";
+  if(window._lastCalcResults)renderCalcResultsWithDate(window._lastCalcResults);
+}
 function renderCalcResultsWithDate(results){
-  window._lastCalcResults=results;
+  if(results!==window._lastCalcResults)window._lastCalcResults=results;
+  var filtered=_starFilterOn?results.filter(function(r){return isStarred(r.match.id);}):results;
+  var results=filtered;
   var el=document.getElementById("pred-body");
   if(!results.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
   var h='<div class="table-scroll"><table><thead><tr>'+
@@ -1819,7 +1830,7 @@ function saveDrawPrediction(match,data,result){
 function loadDrawPredictions(){
   var el=document.getElementById("pred-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
-  sbGet("draw_predictions?select=*&order=kickoff.desc&limit=100").then(function(d){
+  sbGet("draw_predictions?select=*&order=kickoff.asc&limit=100").then(function(d){
     if(!d.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
     var results=d.map(function(p){
       return{
