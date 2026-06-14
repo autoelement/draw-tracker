@@ -1380,8 +1380,6 @@ function getTeamDrawPct(teamData,competitionId,type){
     var pct=type==="home"?season.stats.drawPercentage_home:season.stats.drawPercentage_away;
     return pct||0;
   }
-  var valid=(teamData||[]).filter(function(s){return s.stats&&s.stats.seasonMatchesPlayed_overall>=5&&s.stats.drawPercentage_overall>0;});
-  if(valid.length){return valid[0].stats.drawPercentage_overall;}
   return 0;
 }
 function calcManual(){
