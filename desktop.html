@@ -1006,8 +1006,9 @@ if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border
     updateEdgeStat(all);
     updateScoreStat(all);
     drawScoreChart(all);
-   function setScoreFilter(f,el){
-  _scoreFilter=f;
+  });
+}
+function setScoreFilter(f,el){  _scoreFilter=f;
   localStorage.setItem("score_filter",f);
   ["score-filter-all","score-filter-win","score-filter-loss"].forEach(function(id){
     var b=document.getElementById(id);
