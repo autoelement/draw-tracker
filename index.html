@@ -302,7 +302,7 @@ canvas{width:100%!important}
 <div class="page" id="page-predictions">
   <div class="mart-grid" style="margin-bottom:20px;gap:16px">
     <div class="mart-card" style="padding:20px">
-      <div class="chart-title">Draw Selection Calculator</div>
+      <div class="section-title" style="margin-bottom:14px">Draw Selection Calculator</div>
       <div class="fg">
         <label class="fl">Match Search</label>
         <input type="text" class="fi" id="calc-match-search" placeholder="e.g. Arsenal vs Chelsea" oninput="searchCalcMatch(this.value)" autocomplete="off">
@@ -328,7 +328,7 @@ canvas{width:100%!important}
       </div>
     </div>
     <div class="mart-card" style="padding:20px">
-      <div class="chart-title">Thresholds</div>
+      <div class="section-title" style="margin-bottom:14px">Draw Selection Calculator</div>
       <div class="fr">
         <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05" oninput="saveCalcThresholds()"></div>
         <div class="fg"><label class="fl">Min Draw Prob %</label><input type="number" class="fi" id="calc-min-draw-prob" value="45" step="5" oninput="saveCalcThresholds()"></div>
@@ -337,7 +337,7 @@ canvas{width:100%!important}
     </div>
   </div>
   <div class="table-card">
-    <div class="section-hd" style="margin-bottom:12px">
+<div class="section-hd" style="margin-bottom:12px;margin-top:20px">
       <div class="section-title">Draw Predictions</div>
       <div style="display:flex;gap:6px">
         <button class="btn btn-ghost btn-sm" onclick="loadDrawPredictions()">Refresh</button>
