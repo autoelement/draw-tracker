@@ -276,7 +276,7 @@ canvas{width:100%!important}
     <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div><div class="stat-sub" id="s-edge-sub">All bets</div></div>
     <div class="stat-card" onclick="showPage('balances',document.getElementById('nav-balances'));" style="cursor:pointer"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div></div>
     <div class="stat-card" onclick="document.getElementById('b-status').value='pending';showPage('bets',document.getElementById('nav-bets'));" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Odds</div><div class="stat-val amber" id="s-odds">0.00</div></div>     <div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val" id="s-pf">0.00</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Odds</div><div class="stat-val amber" id="s-odds">0.00</div></div><div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val" id="s-pf">0.00</div></div><div class="stat-card"><div class="stat-label">Avg Score</div><div class="stat-val purple" id="s-score">-</div><div class="stat-sub" id="s-score-sub">Calc score</div></div>
   </div>
   <div id="trixie-section" style="display:none">
     <div class="stats-2" style="margin-bottom:14px">
@@ -946,6 +946,7 @@ if(oddsCard){
     drawPnlChart(all);
     drawEdgeTimeChart(all);
     updateEdgeStat(all);
+    updateScoreStat(all);
     var scc=document.getElementById("series-chart-card");
     if(dbType==="martingale"){scc.style.display="";drawSeriesChart(manual);}
     else{scc.style.display="none";}
@@ -976,6 +977,14 @@ function updateEdgeStat(bets){
     if(parseFloat(avg)<edgeThreshold){edgeCard.style.border="1px solid var(--red)";edgeCard.title="⚠️ Avg Edge "+avg+"% is below threshold "+edgeThreshold+"%";}
     else{edgeCard.style.border="1px solid var(--border)";edgeCard.title="";}
   }
+}
+function updateScoreStat(bets){
+  var scored=bets.filter(function(b){return b.calc_score!=null&&(b.status==="win"||b.status==="loss");});
+  var avg=scored.length?(scored.reduce(function(s,b){return s+b.calc_score;},0)/scored.length).toFixed(1):"-";
+  var el=document.getElementById("s-score");
+  if(el)el.textContent=avg;
+  var sub=document.getElementById("s-score-sub");
+  if(sub)sub.textContent=scored.length+" settled bets";
 }
 function drawEdgeTimeChart(bets){
   window._lastEdgeBets=bets;
