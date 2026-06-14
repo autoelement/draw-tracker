@@ -1001,6 +1001,9 @@ if(stepsCard){   if(parseFloat(avgS)>stepsThreshold){     stepsCard.style.border
     updateEdgeStat(all);
     updateScoreStat(all);
     drawScoreChart(all);
+    var scc=document.getElementById("series-chart-card");
+    if (dbType==="martingale") { scc.style.display=""; drawSeriesChart(manual); }
+    else { scc.style.display="none"; }
   });
 }
 function setScoreFilter(f,el){  _scoreFilter=f;
