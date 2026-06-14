@@ -2598,6 +2598,7 @@ function selectMatch(el){
 
 // Settings table init
 function initSettings(){
+  if(!authToken)return;
   sbGet("settings?select=id&limit=1").then(function(rows){
     if(!rows.length)sbPost("settings",{single_pct:2,trixie_pct:1,patent_pct:0.5});
   }).catch(function(){});
