@@ -327,13 +327,13 @@ canvas{width:100%!important}
         </div>
       </div>
     </div>
- <div class="mart-card" style="padding:20px">
+    <div class="mart-card" style="padding:20px">
       <div class="chart-title">Thresholds</div>
-      <div class="fr3">
+      <div class="fr">
         <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05" oninput="saveCalcThresholds()"></div>
         <div class="fg"><label class="fl">Min Draw Prob %</label><input type="number" class="fi" id="calc-min-draw-prob" value="45" step="5" oninput="saveCalcThresholds()"></div>
-        <div class="fg"><label class="fl">Min Score</label><input type="number" class="fi" id="calc-min-score" value="5" step="1" oninput="saveCalcThresholds()"></div>
       </div>
+      <div class="fg"><label class="fl">Min Score</label><input type="number" class="fi" id="calc-min-score" value="5" step="1" oninput="saveCalcThresholds()"></div>
     </div>
   </div>
   <div class="table-card">
@@ -505,12 +505,7 @@ canvas{width:100%!important}
           </select>
         </div>
       </div>
-      <div class="fr3">
-        <div class="fg"><label class="fl">Odds</label><input type="number" class="fi" id="bet-odds" placeholder="3.20" step="0.01" oninput="calcBetFields()"></div>
-        <div class="fg"><label class="fl">Amount ($)</label><input type="number" class="fi" id="bet-amount" placeholder="0" step="0.01" oninput="calcBetFields()"></div>
-        <div class="fg"><label class="fl">Payout ($)</label><input type="number" class="fi" id="bet-payout" placeholder="auto" step="0.01" oninput="payoutManual=true"></div>
-      </div>
-      <div class="fr3">
+      <div class="fr">
         <div class="fg"><label class="fl">My Prob %</label><input type="number" class="fi" id="bet-myprob" placeholder="35" oninput="calcBetFields()"></div>
         <div class="fg"><label class="fl">Implied %</label><input type="number" class="fi" id="bet-impl" readonly></div>
         <div class="fg"><label class="fl">Edge %</label><input type="number" class="fi" id="bet-edge" readonly></div>
