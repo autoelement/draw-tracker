@@ -1373,13 +1373,18 @@ function calcScore(data,t){
 function getTeamDrawPct(teamData,competitionId,type){
   var season=(teamData||[]).find(function(s){return s.competition_id===competitionId;});
   if(season&&season.stats){
-    return type==="home"?season.stats.drawPercentage_home:season.stats.drawPercentage_away;
+    var pct=type==="home"?season.stats.drawPercentage_home:season.stats.drawPercentage_away;
+    var matchesType=type==="home"?season.stats.seasonMatchesPlayed_home:season.stats.seasonMatchesPlayed_away;
+    if(pct>0)return pct;
+    // თუ ამ ტიპის მატჩები არ ყოფილა — overall გამოვიყენოთ
+    if((!matchesType||matchesType===0)&&season.stats.drawPercentage_overall>0){
+      return season.stats.drawPercentage_overall;
+    }
   }
-  var valid=(teamData||[]).filter(function(s){return s.stats&&s.stats.seasonMatchesPlayed_overall>=5;});
-  if(valid.length){return type==="home"?valid[0].stats.drawPercentage_home:valid[0].stats.drawPercentage_away;}
+  var valid=(teamData||[]).filter(function(s){return s.stats&&s.stats.seasonMatchesPlayed_overall>=5&&s.stats.drawPercentage_overall>0;});
+  if(valid.length){return valid[0].stats.drawPercentage_overall;}
   return 0;
 }
-
 function calcManual(){
   if(!_calcFixtureId){showToast("Select a match first",true);return;}
   var btn=document.getElementById("calc-manual-btn");
