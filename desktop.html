@@ -2682,7 +2682,22 @@ function initSettings(){
     if(!rows.length)sbPost("settings",{single_pct:2,trixie_pct:1,patent_pct:0.5});
   }).catch(function(){});
 }
-(function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}var sc=document.getElementById("scoreChart");if(sc){sc.addEventListener("mousemove",scoreChartHover);sc.addEventListener("mouseleave",scoreChartLeave);}})();
+(function(){
+  document.addEventListener("mousemove",function(ev){
+    var t=ev.target;
+    if(t.id==="pnlChart")pnlHover(ev);
+    else if(t.id==="edgeTimeChart")edgeTimeHover(ev);
+    else if(t.id==="edgeChart")seriesChartHover(ev);
+    else if(t.id==="scoreChart")scoreChartHover(ev);
+  });
+  document.addEventListener("mouseleave",function(ev){
+    var t=ev.target;
+    if(t.id==="pnlChart")pnlLeave();
+    else if(t.id==="edgeTimeChart")edgeTimeLeave();
+    else if(t.id==="edgeChart")seriesChartLeave();
+    else if(t.id==="scoreChart")scoreChartLeave();
+  },true);
+})();
 checkAuth();
 initSettings();
 calcMartingale();
