@@ -678,6 +678,7 @@ function showApp(email){
   var nu=document.getElementById("nav-user");if(nu)nu.textContent=email?email.split("@")[0]:"";
   var emailEl=document.getElementById("set-email");if(emailEl){if(emailEl.tagName==="INPUT")emailEl.value=email||"";else emailEl.textContent=email||"";}
 loadBookmakers().then(function(){loadSettings().then(function(){
+  document.querySelectorAll(".type-tab").forEach(function(p){p.classList.remove("active");});
   setTimeout(function(){
     var savedType=localStorage.getItem("db_type")||"all";
     document.querySelectorAll(".type-tab").forEach(function(p){
