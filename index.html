@@ -692,28 +692,31 @@ function showApp(email){
   document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
   document.getElementById("set-email").value=email||"";
   loadBookmakers().then(function(){loadSettings().then(function(){
-  var savedType=localStorage.getItem("db_type")||"all";
-  document.querySelectorAll("#db-type-filters .filter-pill").forEach(function(p){
-    p.classList.remove("active");
-    if((savedType==="all"&&p.textContent==="All")||
-      (savedType==="single"&&p.textContent==="Singles")||
-      (savedType==="trixie"&&p.textContent==="Trixie")||
-      (savedType==="patent"&&p.textContent==="Patent")||
-      (savedType==="martingale"&&p.textContent==="Martingale")){
-      p.classList.add("active");
+  document.querySelectorAll(".type-tab").forEach(function(p){p.classList.remove("active");});
+  setTimeout(function(){
+    var savedType=localStorage.getItem("db_type")||"all";
+    document.querySelectorAll(".type-tab").forEach(function(p){
+      p.classList.remove("active");
+      if((savedType==="all"&&p.textContent==="All")||
+        (savedType==="single"&&p.textContent==="Singles")||
+        (savedType==="trixie"&&p.textContent==="Trixie")||
+        (savedType==="patent"&&p.textContent==="Patent")||
+        (savedType==="martingale"&&p.textContent==="Martingale")){
+        p.classList.add("active");
+      }
+    });
+    dbType=savedType;
+    document.getElementById("trixie-section").style.display=(savedType==="trixie"||savedType==="patent")?"block":"none";
+    document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
+    var seriesSel=document.getElementById("db-series");
+    if(savedType==="martingale"&&seriesSel){
+      seriesSel.style.display="";
+      seriesSel.innerHTML='<option value="all">All Series</option>'+martSeries.map(function(s){return'<option value="'+s.id+'">'+s.name+(s.is_active?"":" (done)")+'</option>';}).join("");
+      var savedSeries=localStorage.getItem("db_series");
+      if(savedSeries)seriesSel.value=savedSeries;
     }
-  });
-  dbType=savedType;
-  document.getElementById("trixie-section").style.display=(savedType==="trixie"||savedType==="patent")?"block":"none";
-  document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
-  var seriesSel=document.getElementById("db-series");
-  if(savedType==="martingale"&&seriesSel){
-    seriesSel.style.display="";
-    seriesSel.innerHTML='<option value="all">All Series</option>'+martSeries.map(function(s){return'<option value="'+s.id+'">'+s.name+(s.is_active?"":" (done)")+'</option>';}).join("");
-    var savedSeries=localStorage.getItem("db_series");
-    if(savedSeries)seriesSel.value=savedSeries;
-  }
-  loadDashboard();
+    loadDashboard();
+  },100);
 });});
   loadMartSeries();
   loadUpcomingMatches();
