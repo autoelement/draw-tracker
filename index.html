@@ -894,7 +894,7 @@ function setDbType(t,el){
     seriesSel.style.display="none";seriesSel.value="all";
   }
   var ssw=document.getElementById("score-stat-wrap");
-  if(ssw)ssw.className=(t==="trixie"||t==="patent")?"stats-2":"stats-1";
+  if(ssw)ssw.style.cssText=(t==="trixie"||t==="patent")?"display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px":"display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px";
   localStorage.setItem("db_type",t);
   loadDashboard();
 }
