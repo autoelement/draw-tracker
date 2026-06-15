@@ -679,13 +679,17 @@ function showApp(email){
   var emailEl=document.getElementById("set-email");if(emailEl){if(emailEl.tagName==="INPUT")emailEl.value=email||"";else emailEl.textContent=email||"";}
 loadBookmakers().then(function(){loadSettings().then(function(){
   var savedType=localStorage.getItem("db_type")||"all";
-  var pills=document.querySelectorAll("#db-type-filters .filter-pill");
-  pills.forEach(function(p){
-    if(p.getAttribute("onclick")&&p.getAttribute("onclick").indexOf("'"+savedType+"'")!==-1){
-      setDbType(savedType,p);
-    }
-  });
-  loadDashboard();
+  if(savedType!=="all"){
+    var pills=document.querySelectorAll("#db-type-filters .filter-pill");
+    pills.forEach(function(p){
+      if(p.getAttribute("onclick")&&p.getAttribute("onclick").indexOf("'"+savedType+"'")!==-1){
+        setDbType(savedType,p);
+        return;
+      }
+    });
+  } else {
+    loadDashboard();
+  }
 });});
 }
 function syncResults(){
