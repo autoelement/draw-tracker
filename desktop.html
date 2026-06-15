@@ -680,7 +680,7 @@ function showApp(email){
 loadBookmakers().then(function(){loadSettings().then(function(){
   setTimeout(function(){
     var savedType=localStorage.getItem("db_type")||"all";
-    document.querySelectorAll("#db-type-filters .filter-pill").forEach(function(p){
+    document.querySelectorAll(".type-tab").forEach(function(p){
       p.classList.remove("active");
       if((savedType==="all"&&p.textContent==="All")||
         (savedType==="single"&&p.textContent==="Singles")||
