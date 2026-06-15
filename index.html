@@ -283,6 +283,7 @@ canvas{width:100%!important}
       <div class="stat-card"><div class="stat-label">Full Hit (3/3)</div><div class="trix-val green stat-val" id="t-full">0%</div></div>
       <div class="stat-card"><div class="stat-label">Partial (2/3)</div><div class="trix-val amber stat-val" id="t-partial">0%</div></div>
       <div class="stat-card"><div class="stat-label">Dead Loss</div><div class="trix-val red stat-val" id="t-dead">0%</div></div>
+<div class="stat-card"><div class="stat-label">Avg Score</div><div class="stat-val purple" id="s-score-trix">-</div><div class="stat-sub" id="s-score-sub-trix">Calc score</div></div>
     </div>
   </div>
   <div id="martingale-section" style="display:none">
@@ -894,7 +895,7 @@ function setDbType(t,el){
     seriesSel.style.display="none";seriesSel.value="all";
   }
   var ssw=document.getElementById("score-stat-wrap");
-  if(ssw)ssw.style.cssText=(t==="trixie"||t==="patent")?"display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px":"display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px";
+if(ssw)ssw.style.display=(t==="trixie"||t==="patent")?"none":"";
   localStorage.setItem("db_type",t);
   loadDashboard();
 }
@@ -1037,6 +1038,10 @@ function updateScoreStat(bets){
   if(el)el.textContent=avg;
   var sub=document.getElementById("s-score-sub");
   if(sub)sub.textContent=scored.length+" settled bets";
+  var el2=document.getElementById("s-score-trix");  // <-- აქ დაამატე
+  if(el2)el2.textContent=avg;
+  var sub2=document.getElementById("s-score-sub-trix");
+  if(sub2)sub2.textContent=scored.length+" settled bets";
 }
 function drawScoreChart(bets){
   window._lastAllBets=bets;
