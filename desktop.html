@@ -679,17 +679,21 @@ function showApp(email){
   var emailEl=document.getElementById("set-email");if(emailEl){if(emailEl.tagName==="INPUT")emailEl.value=email||"";else emailEl.textContent=email||"";}
 loadBookmakers().then(function(){loadSettings().then(function(){
   var savedType=localStorage.getItem("db_type")||"all";
-  if(savedType!=="all"){
-    var pills=document.querySelectorAll("#db-type-filters .filter-pill");
-    pills.forEach(function(p){
-      if(p.getAttribute("onclick")&&p.getAttribute("onclick").indexOf("'"+savedType+"'")!==-1){
-        setDbType(savedType,p);
-        return;
-      }
-    });
-  } else {
-    loadDashboard();
-  }
+  document.querySelectorAll("#db-type-filters .filter-pill").forEach(function(p){
+    p.classList.remove("active");
+    if(p.textContent.toLowerCase().indexOf(savedType)!==-1||
+      (savedType==="all"&&p.textContent==="All")||
+      (savedType==="single"&&p.textContent==="Singles")||
+      (savedType==="trixie"&&p.textContent==="Trixie")||
+      (savedType==="patent"&&p.textContent==="Patent")||
+      (savedType==="martingale"&&p.textContent==="Martingale")){
+      p.classList.add("active");
+    }
+  });
+  dbType=savedType;
+  document.getElementById("trixie-section").style.display=(savedType==="trixie"||savedType==="patent")?"block":"none";
+  document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
+  loadDashboard();
 });});
 }
 function syncResults(){
