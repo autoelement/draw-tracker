@@ -870,7 +870,7 @@ function setDbType(t, el) {
 function loadDashboard(){
   var savedRange=localStorage.getItem("db_range");
   var savedBk=localStorage.getItem("db_bk");
-  if(savedRange&&document.getElementById("db-range").value==="all")document.getElementById("db-range").value=savedRange;
+  if(savedRange)document.getElementById("db-range").value=savedRange;
   if(savedBk)document.getElementById("db-bk").value=savedBk;
   var savedEdgeFilter=localStorage.getItem("edge_filter")||"all";
 _edgeFilter=savedEdgeFilter;
