@@ -258,7 +258,7 @@ canvas{width:100%!important}
     <button class="filter-pill" onclick="setDbType('trixie',this)">Trixie</button>
     <button class="filter-pill" onclick="setDbType('patent',this)">Patent</button>
     <button class="filter-pill" onclick="setDbType('martingale',this)">Martingale</button>
-    <select class="filter-sel" id="db-range" onchange="loadDashboard()">
+    <select class="filter-sel" id="db-range" onchange="localStorage.setItem('db_range',this.value);loadDashboard()">
       <option value="all">All Time</option>
       <option value="year">This Year</option>
       <option value="month">This Month</option>
@@ -267,7 +267,7 @@ canvas{width:100%!important}
       <option value="7">Last 7d</option>
     </select>
     <select class="filter-sel" id="db-series" onchange="loadDashboard()" style="display:none"><option value="all">All Series</option></select>
-    <select class="filter-sel" id="db-bk" onchange="loadDashboard()"><option value="">All BK</option></select>
+    <select class="filter-sel" id="db-bk" onchange="localStorage.setItem('db_bk',this.value);loadDashboard()"><option value="">All BK</option></select>
   </div>
   <div class="stats-2">
     <div class="stat-card"><div class="stat-label">Total P&L</div><div class="stat-val green" id="s-pnl">$0.00</div></div>
@@ -691,7 +691,16 @@ function showApp(email){
   document.getElementById("app").style.display="block";
   document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
   document.getElementById("set-email").value=email||"";
-  loadBookmakers().then(function(){loadSettings().then(function(){loadDashboard();});});
+  loadBookmakers().then(function(){loadSettings().then(function(){
+  var savedType=localStorage.getItem("db_type")||"all";
+  var pills=document.querySelectorAll("#db-type-filters .filter-pill");
+  pills.forEach(function(p){
+    if(p.getAttribute("onclick")&&p.getAttribute("onclick").indexOf("'"+savedType+"'")!==-1){
+      setDbType(savedType,p);
+    }
+  });
+  loadDashboard();
+});});
   loadMartSeries();
   loadUpcomingMatches();
 }
@@ -870,10 +879,15 @@ function setDbType(t,el){
   } else {
     seriesSel.style.display="none";seriesSel.value="all";
   }
+  localStorage.setItem("db_type",t);
   loadDashboard();
 }
 
 function loadDashboard(){
+  var savedRange=localStorage.getItem("db_range");
+  var savedBk=localStorage.getItem("db_bk");
+  if(savedRange&&document.getElementById("db-range").value==="all")document.getElementById("db-range").value=savedRange;
+  if(savedBk)document.getElementById("db-bk").value=savedBk;
   var savedEdgeFilter=localStorage.getItem("edge_filter")||"all";
   _edgeFilter=savedEdgeFilter;
   var efBtn=document.getElementById("edge-filter-"+savedEdgeFilter);
