@@ -695,11 +695,13 @@ loadBookmakers().then(function(){loadSettings().then(function(){
     document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
     var seriesSel=document.getElementById("db-series");
     if(savedType==="martingale"&&seriesSel){
-      seriesSel.style.display="";
+    seriesSel.style.display="";
+    loadMartSeries().then(function(){
       seriesSel.innerHTML='<option value="all">All Series</option>'+martSeries.map(function(s){return'<option value="'+s.id+'">'+s.name+(s.is_active?"":" (done)")+'</option>';}).join("");
       var savedSeries=localStorage.getItem("db_series");
       if(savedSeries)seriesSel.value=savedSeries;
-    }
+    });
+  }
     loadDashboard();
   },100);
 });});
