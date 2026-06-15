@@ -266,7 +266,7 @@ canvas{width:100%!important}
       <option value="30">Last 30d</option>
       <option value="7">Last 7d</option>
     </select>
-    <select class="filter-sel" id="db-series" onchange="loadDashboard()" style="display:none"><option value="all">All Series</option></select>
+    <select class="filter-sel" id="db-series" onchange="localStorage.setItem('db_series',this.value);loadDashboard()" style="display:none"><option value="all">All Series</option></select>
     <select class="filter-sel" id="db-bk" onchange="localStorage.setItem('db_bk',this.value);loadDashboard()"><option value="">All BK</option></select>
   </div>
   <div class="stats-2">
@@ -886,8 +886,10 @@ function setDbType(t,el){
 function loadDashboard(){
   var savedRange=localStorage.getItem("db_range");
   var savedBk=localStorage.getItem("db_bk");
+  var savedSeries=localStorage.getItem("db_series");
   if(savedRange&&document.getElementById("db-range").value==="all")document.getElementById("db-range").value=savedRange;
   if(savedBk)document.getElementById("db-bk").value=savedBk;
+  if(savedSeries&&document.getElementById("db-series"))document.getElementById("db-series").value=savedSeries;
   var savedEdgeFilter=localStorage.getItem("edge_filter")||"all";
   _edgeFilter=savedEdgeFilter;
   var efBtn=document.getElementById("edge-filter-"+savedEdgeFilter);
