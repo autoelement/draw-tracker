@@ -191,8 +191,8 @@ tr:hover td{background:var(--bg3)}
 <!-- DASHBOARD -->
 <div class="page active" id="page-dashboard">
   <div class="filters-bar">
-    <select class="filter-sel" id="db-bk" onchange="loadDashboard()"><option value="">All Bookmakers</option></select>
-    <select class="filter-sel" id="db-range" onchange="loadDashboard()">
+    <select class="filter-sel" id="db-bk" onchange="localStorage.setItem('db_bk',this.value);loadDashboard()"><option value="">All Bookmakers</option></select>
+    <select class="filter-sel" id="db-range" onchange="localStorage.setItem('db_range',this.value);loadDashboard()">
       <option value="all">All Time</option><option value="year">This Year</option><option value="month">This Month</option>
       <option value="90">Last 90 Days</option><option value="30">Last 30 Days</option><option value="7">Last 7 Days</option>
     </select>
@@ -677,7 +677,16 @@ function showApp(email){
   showPage('dashboard', document.querySelector('.nav-tab'));
   var nu=document.getElementById("nav-user");if(nu)nu.textContent=email?email.split("@")[0]:"";
   var emailEl=document.getElementById("set-email");if(emailEl){if(emailEl.tagName==="INPUT")emailEl.value=email||"";else emailEl.textContent=email||"";}
-loadBookmakers().then(function(){loadSettings().then(function(){loadDashboard();});loadUpcomingMatches();loadMartSeries();});
+loadBookmakers().then(function(){loadSettings().then(function(){
+  var savedType=localStorage.getItem("db_type")||"all";
+  dbType=savedType;
+  document.querySelectorAll("#db-type-filters .filter-pill").forEach(function(x){x.classList.remove("active");});
+  var activePill=document.querySelector("#db-type-filters [onclick*=\"'\"+savedType+\"'\"]");
+  if(activePill)activePill.classList.add("active");
+  document.getElementById("trixie-section").style.display=(savedType==="trixie"||savedType==="patent")?"block":"none";
+  document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
+  loadDashboard();
+});});
 }
 function syncResults(){
   var token=localStorage.getItem("gh_token");
@@ -854,10 +863,15 @@ function setDbType(t, el) {
     seriesSel.style.display = "none";
     seriesSel.value = "all";
   }
+  localStorage.setItem("db_type",t);
   loadDashboard();
 }
 
-function loadDashboard() {
+function loadDashboard(){
+  var savedRange=localStorage.getItem("db_range");
+  var savedBk=localStorage.getItem("db_bk");
+  if(savedRange&&document.getElementById("db-range").value==="all")document.getElementById("db-range").value=savedRange;
+  if(savedBk)document.getElementById("db-bk").value=savedBk;
   var savedEdgeFilter=localStorage.getItem("edge_filter")||"all";
 _edgeFilter=savedEdgeFilter;
 var efBtn=document.getElementById("edge-filter-"+savedEdgeFilter);
