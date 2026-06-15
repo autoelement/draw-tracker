@@ -679,12 +679,12 @@ function showApp(email){
   var emailEl=document.getElementById("set-email");if(emailEl){if(emailEl.tagName==="INPUT")emailEl.value=email||"";else emailEl.textContent=email||"";}
 loadBookmakers().then(function(){loadSettings().then(function(){
   var savedType=localStorage.getItem("db_type")||"all";
-  dbType=savedType;
-  document.querySelectorAll("#db-type-filters .filter-pill").forEach(function(x){x.classList.remove("active");});
-  var activePill=document.querySelector("#db-type-filters [onclick*=\"'\"+savedType+\"'\"]");
-  if(activePill)activePill.classList.add("active");
-  document.getElementById("trixie-section").style.display=(savedType==="trixie"||savedType==="patent")?"block":"none";
-  document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
+  var pills=document.querySelectorAll("#db-type-filters .filter-pill");
+  pills.forEach(function(p){
+    if(p.getAttribute("onclick")&&p.getAttribute("onclick").indexOf("'"+savedType+"'")!==-1){
+      setDbType(savedType,p);
+    }
+  });
   loadDashboard();
 });});
 }
