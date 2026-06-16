@@ -873,7 +873,7 @@ function setDbType(t, el) {
   dbType = t;
   document.querySelectorAll(".type-tab").forEach(function(x) { x.classList.remove("active"); });
   el.classList.add("active");
-  document.getElementById("trixie-section").style.display = (t === "trixie" || t === "patent") ? "block" : "none";
+  document.getElementById("trixie-section").style.display=(t==="trixie")?"block":"none";
   document.getElementById("martingale-section").style.display = t === "martingale" ? "block" : "none";
   var seriesSel = document.getElementById("db-series");
   if (t === "martingale") {
@@ -985,7 +985,7 @@ if(oddsCard){
     oddsCard.title="";
   }
 }
-    if (dbType==="trixie"||dbType==="patent") {
+    if (dbType==="trixie") {
       var tx=settled.filter(function(b){return b.bet_type===dbType;});
       var full=tx.filter(function(b){return b.status==="win";}).length;
       var dead=tx.filter(function(b){return b.status==="loss";}).length;
