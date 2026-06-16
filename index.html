@@ -859,10 +859,9 @@ function saveSettings() {
   var row = {
     single_pct: parseFloat(document.getElementById("set-single").value) || 0,
     trixie_pct: parseFloat(document.getElementById("set-trixie").value) || 0,
-    patent_pct: parseFloat(document.getElementById("set-patent").value) || 0,
     pf_threshold: parseFloat(document.getElementById("set-pf").value) || 1.2,
     odds_threshold: parseFloat(document.getElementById("set-odds").value) || 2.0,
-    steps_threshold: parseFloat(document.getElementById("set-steps").value) || 5,     
+    steps_threshold: parseFloat(document.getElementById("set-steps").value) || 5,
     edge_threshold: parseFloat(document.getElementById("set-edge-thresh").value) || 10
   };
   settings = row;
