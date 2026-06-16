@@ -522,7 +522,11 @@ canvas{width:100%!important}
       </div>
     </div>
     <div id="trixie-fields" style="display:none">
-      <div class="fg"><label class="fl">Unit Stake ($)</label><input type="number" class="fi" id="trix-unit" placeholder="auto" step="0.01" oninput="calcTrixie()"></div>
+      <div class="fg" id="trix-unit-single-wrap" style="display:none"><div class="fr">
+  <div class="fg"><label class="fl">Single Stake ($)</label><input type="number" class="fi" id="trix-unit-single" placeholder="auto" step="0.01" oninput="calcTrixie()"></div>
+  <div class="fg"><label class="fl">Trixie Stake ($)</label><input type="number" class="fi" id="trix-unit-trix" placeholder="auto" step="0.01" oninput="calcTrixie()"></div>
+</div></div>
+<div class="fg" id="trix-unit-wrap"><label class="fl">Unit Stake ($)</label><input type="number" class="fi" id="trix-unit" placeholder="auto" step="0.01" oninput="calcTrixie()"></div>
       <div id="trix-legs"></div>
       <div id="trix-summary" style="background:var(--bg3);border-radius:8px;padding:10px;font-size:12px;color:var(--text2);margin-bottom:10px"></div>
     </div>
