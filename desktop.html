@@ -692,6 +692,7 @@ loadBookmakers().then(function(){loadSettings().then(function(){
       }
     });
     dbType=savedType;
+  window._dbTypeForFab=savedType;
     document.getElementById("trixie-section").style.display=(savedType==="trixie"||savedType==="patent")?"block":"none";
     document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
     var seriesSel=document.getElementById("db-series");
@@ -2123,7 +2124,6 @@ function openAddBet(){
   var fxEl=document.getElementById("bet-fixture-id");if(fxEl)fxEl.value="";
   var mdEl=document.getElementById("match-dropdown");if(mdEl)mdEl.style.display="none";
   document.getElementById("modal-bet-title").textContent="Add Bet";
-  setBetMode("regular");
   document.getElementById("bet-date").value=new Date().toISOString().slice(0,10);
   document.getElementById("bet-status").value="pending";
   document.getElementById("bet-type").value=defaultType;
@@ -2136,8 +2136,12 @@ function openAddBet(){
   if(defaultType==="trixie"||defaultType==="patent")buildTrixLegs(defaultType);
   document.getElementById("mart-bet-info").style.display="none";
   document.getElementById("mart-extra-fields").style.display="none";
-  payoutManual=false;
-  openM("modal-bet");
+  if(window._dbTypeForFab==="martingale"){
+    setTimeout(function(){setBetMode("martingale");},10);
+  } else {
+    setBetMode("regular");
+  }
+  payoutManual=false;openM("modal-bet");
 }
 
 function openEditBet(id,src,extraId,odds) {
