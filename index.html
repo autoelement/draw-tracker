@@ -898,7 +898,7 @@ function setDbType(t,el){
     seriesSel.style.display="none";seriesSel.value="all";
   }
   var ssw=document.getElementById("score-stat-wrap");
-if(ssw)ssw.style.display=(t==="trixie"||t==="patent")?"none":"";
+if(ssw)ssw.style.display=(t==="trixie")?"none":"";
   localStorage.setItem("db_type",t);
   window._dbTypeForFab=t;
   loadDashboard();
