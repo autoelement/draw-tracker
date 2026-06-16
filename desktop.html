@@ -2086,8 +2086,6 @@ function onBetTypeChange() {
   }
 }
 function buildTrixLegs(type) {
-
-function buildTrixLegs(type) {
   var h="";
   for(var i=0;i<3;i++){h+='<div class="trix-leg"><div class="trix-leg-title">Selection '+(i+1)+'</div><div class="fr"><div class="fg"><label class="fl">Match</label><input type="text" class="fi trix-match" placeholder="Team A vs B"></div><div class="fg"><label class="fl">Odds</label><input type="number" class="fi trix-odds" placeholder="2.50" step="0.01" oninput="calcTrixie()"></div></div><div class="fr"><div class="fg"><label class="fl">Selection</label><select class="fs trix-sel"><option value="Draw (X)">Draw (X)</option><option value="Home Win (1)">Home Win (1)</option><option value="Away Win (2)">Away Win (2)</option></select></div><div class="fg"><label class="fl">League</label><input type="text" class="fi trix-league" placeholder="League"></div></div></div>';}
   document.getElementById("trix-legs").innerHTML=h;
