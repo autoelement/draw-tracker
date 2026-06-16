@@ -706,10 +706,10 @@ function showApp(email){
   });
  dbType=savedType;
   window._dbTypeForFab=savedType;
-  document.getElementById("trixie-section").style.display=(savedType==="trixie"||savedType==="patent")?"block":"none";
+  document.getElementById("trixie-section").style.display=(savedType==="trixie")?"block":"none";
   document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
   var ssw=document.getElementById("score-stat-wrap");
-  if(ssw)ssw.style.display=(savedType==="trixie"||savedType==="patent")?"none":"";
+  if(ssw)ssw.style.display=(savedType==="trixie")?"none":"";
   var seriesSel=document.getElementById("db-series");
   if(savedType==="martingale"&&seriesSel){
     seriesSel.style.display="";
