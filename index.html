@@ -928,7 +928,7 @@ function loadDashboard(){
   if(dbType==="martingale")q+="&martingale_series_id=not.is.null";
 else if(dbType==="single")q+="&bet_type=eq.single&martingale_series_id=is.null";
 else if(dbType==="trixie")q+="&bet_type=eq.trixie&martingale_series_id=is.null";
-else if(dbType==="patent")q+="&bet_type=eq.patent&martingale_series_id=is.null";
+else if(dbType==="patent")q+="&notes=like.patent:*&martingale_series_id=is.null";
   ["s-pnl","s-wr","s-roi","s-edge","s-bankroll","s-active","s-odds","s-pf"].forEach(function(id){
   var el=document.getElementById(id);
   if(el)el.innerHTML='<span class="skeleton" style="width:80px;height:22px">&nbsp;</span>';
