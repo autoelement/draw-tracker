@@ -510,7 +510,7 @@ canvas{width:100%!important}
         </div>
       </div>
       <div class="fr3">
-        <div class="fg"><label class="fl">Odds</label><input type="number" class="fi" id="bet-odds" placeholder="3.20" step="0.01" oninput="calcBetFields()"></div>
+        <div class="fg"><label class="fl">Odds</label><input type="number" class="fi" id="bet-odds" placeholder="3.20" step="0.01" oninput="if(!parseFloat(document.getElementById('bet-payout').value))payoutManual=false;calcBetFields()"></div>
         <div class="fg"><label class="fl">Amount ($)</label><input type="number" class="fi" id="bet-amount" placeholder="0" step="0.01" oninput="calcBetFields()"></div>
         <div class="fg"><label class="fl">Payout ($)</label><input type="number" class="fi" id="bet-payout" placeholder="auto" step="0.01" oninput="payoutManual=true"></div>
       </div>
