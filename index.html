@@ -433,7 +433,6 @@ canvas{width:100%!important}
     <div class="settings-title">Stake % of Bankroll</div>
     <div class="fg"><label class="fl">Single Bet %</label><input type="number" class="fi" id="set-single" placeholder="0" step="0.1" oninput="updateSettingsPreview();onStakeChange()"></div>
     <div class="fg"><label class="fl">Trixie Unit %</label><input type="number" class="fi" id="set-trixie" placeholder="0" step="0.1" oninput="updateSettingsPreview();onStakeChange()"></div>
-    <div class="fg"><label class="fl">Patent Unit %</label><input type="number" class="fi" id="set-patent" placeholder="0" step="0.1" oninput="updateSettingsPreview();onStakeChange()"></div>
     <div class="settings-preview" id="settings-preview"></div>
     <button class="btn btn-green" style="width:100%;opacity:.4;cursor:not-allowed" id="save-stake-btn" disabled onclick="saveSettings()">Save</button>
   </div>
@@ -844,17 +843,15 @@ function loadSettings(){
 
 function updateSettingsPreview(){
   var sp=parseFloat(document.getElementById("set-single").value)||0;
-  var tp=parseFloat(document.getElementById("set-trixie").value)||0;
-  var pp=parseFloat(document.getElementById("set-patent").value)||0;
+  var trixPct=parseFloat(document.getElementById("set-trixie").value)||0;
   document.getElementById("set-pf").value=settings.pf_threshold||1.2;
   document.getElementById("set-odds").value=settings.odds_threshold||2.0;
   document.getElementById("set-steps").value=settings.steps_threshold||5;
   document.getElementById("set-edge-thresh").value=settings.edge_threshold||10;
-  document.getElementById("set-edge-thresh").value=settings.edge_threshold||10;
   var tp=document.getElementById("thresholds-preview");
 if(tp)tp.innerHTML="PF Min: <strong>"+(settings.pf_threshold||1.2)+"</strong> | Odds Min: <strong>"+(settings.odds_threshold||2.0)+"</strong> | Steps Max: <strong>"+(settings.steps_threshold||5)+"</strong> | Edge Min: <strong>"+(settings.edge_threshold||10)+"%</strong>";
   var br=bankroll||0;
-  document.getElementById('settings-preview').innerHTML='Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*tp/100).toFixed(2)+'</strong> ('+tp+'%) | Patent unit: <strong>$'+(br*pp/100).toFixed(2)+'</strong> ('+pp+'%)';
+  document.getElementById('settings-preview').innerHTML='Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*trixPct/100).toFixed(2)+'</strong> ('+trixPct+'%)';
 }
 function onStakeChange(){var b=document.getElementById("save-stake-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}}
 function onThreshChange(){   var b=document.getElementById("save-thresh-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}   var tp=document.getElementById("thresholds-preview");   if(tp)tp.innerHTML="PF Min: <strong>"+(document.getElementById("set-pf").value||1.2)+"</strong> | Odds Min: <strong>"+(document.getElementById("set-odds").value||2.0)+"</strong> | Steps Max: <strong>"+(document.getElementById("set-steps").value||5)+"</strong> | Edge Min: <strong>"+(document.getElementById("set-edge-thresh").value||10)+"%</strong>"; }
