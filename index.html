@@ -1980,7 +1980,19 @@ function onBetTypeChange(){
   var t=document.getElementById("bet-type").value;var isTrix=t==="trixie"||t==="patent";
   document.getElementById("single-fields").style.display=isTrix?"none":"block";
   document.getElementById("trixie-fields").style.display=isTrix?"block":"none";
-  if(isTrix){buildTrixLegs(t);var pct=t==="trixie"?settings.trixie_pct:settings.patent_pct;document.getElementById("trix-unit").value=parseFloat((bankroll*pct/100).toFixed(2));}
+  if(isTrix){
+    buildTrixLegs(t);
+    if(t==="patent"){
+      document.getElementById("trix-unit-wrap").style.display="none";
+      document.getElementById("trix-unit-single-wrap").style.display="block";
+      document.getElementById("trix-unit-single").value=parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
+      document.getElementById("trix-unit-trix").value=parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
+    } else {
+      document.getElementById("trix-unit-wrap").style.display="block";
+      document.getElementById("trix-unit-single-wrap").style.display="none";
+      document.getElementById("trix-unit").value=parseFloat((bankroll*(settings.trixie_pct||1)/100).toFixed(2));
+    }
+  }
   else{document.getElementById("bet-amount").value=+(bankroll*(settings.single_pct||2)/100).toFixed(2);calcBetFields();}
 }
 
@@ -2022,8 +2034,16 @@ document.getElementById("single-fields").style.display=(defaultType==="trixie"||
   document.getElementById("trixie-fields").style.display=(defaultType==="trixie"||defaultType==="patent")?"block":"none";
   if(defaultType==="trixie"||defaultType==="patent"){
     buildTrixLegs(defaultType);
-    var pct=defaultType==="trixie"?settings.trixie_pct:settings.patent_pct;
-    document.getElementById("trix-unit").value=parseFloat((bankroll*pct/100).toFixed(2));
+    if(defaultType==="patent"){
+      document.getElementById("trix-unit-wrap").style.display="none";
+      document.getElementById("trix-unit-single-wrap").style.display="block";
+      document.getElementById("trix-unit-single").value=parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
+      document.getElementById("trix-unit-trix").value=parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
+    } else {
+      document.getElementById("trix-unit-wrap").style.display="block";
+      document.getElementById("trix-unit-single-wrap").style.display="none";
+      document.getElementById("trix-unit").value=parseFloat((bankroll*(settings.trixie_pct||1)/100).toFixed(2));
+    }
   }  document.getElementById("mart-bet-info").style.display="none";document.getElementById("mart-extra-fields").style.display="none";
   if(window._dbTypeForFab==="martingale"){
     setTimeout(function(){setBetMode("martingale");},10);
