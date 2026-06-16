@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -882,7 +883,6 @@ function setDbType(t, el) {
     seriesSel.value = "all";
   }
   localStorage.setItem("db_type",t);
-  window._dbTypeForFab=t;
   loadDashboard();
 }
 
@@ -2122,14 +2122,13 @@ function openAddBet() {
   setBetMode("regular");
   document.getElementById("bet-date").value=new Date().toISOString().slice(0,10);
   document.getElementById("bet-status").value="pending";
-  document.getElementById("bet-type").value=defaultType;
+  document.getElementById("bet-type").value="single";
   document.getElementById("bet-sel").value="Draw (X)";
   ["bet-match","bet-league","bet-odds","bet-payout","bet-myprob","bet-impl","bet-edge","bet-notes"].forEach(function(id){document.getElementById(id).value="";});
   var sp=settings.single_pct||2;
   document.getElementById("bet-amount").value=+(bankroll*sp/100).toFixed(2);
-  document.getElementById("single-fields").style.display=(defaultType==="trixie"||defaultType==="patent")?"none":"block";
-  document.getElementById("trixie-fields").style.display=(defaultType==="trixie"||defaultType==="patent")?"block":"none";
-  if(defaultType==="trixie"||defaultType==="patent")buildTrixLegs(defaultType);
+  document.getElementById("single-fields").style.display="block";
+  document.getElementById("trixie-fields").style.display="none";
   document.getElementById("mart-bet-info").style.display="none";
   document.getElementById("mart-extra-fields").style.display="none";
   payoutManual=false;
