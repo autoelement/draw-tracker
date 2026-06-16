@@ -2038,8 +2038,8 @@ document.getElementById("single-fields").style.display=(defaultType==="trixie"||
     if(defaultType==="patent"){
       document.getElementById("trix-unit-wrap").style.display="none";
       document.getElementById("trix-unit-single-wrap").style.display="block";
-      document.getElementById("trix-unit-single").value=parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
-      document.getElementById("trix-unit-trix").value=parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
+      document.getElementById("trix-unit-single").value=parseFloat((bankroll*(settings.single_pct||2)/100).toFixed(2));
+      document.getElementById("trix-unit-trix").value=parseFloat((bankroll*(settings.trixie_pct||1)/100).toFixed(2));
     } else {
       document.getElementById("trix-unit-wrap").style.display="block";
       document.getElementById("trix-unit-single-wrap").style.display="none";
