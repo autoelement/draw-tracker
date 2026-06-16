@@ -2019,6 +2019,8 @@ function openAddBet(){
   document.getElementById("mart-bet-info").style.display="none";document.getElementById("mart-extra-fields").style.display="none";
   if(window._dbTypeForFab==="martingale"){
     setTimeout(function(){setBetMode("martingale");},10);
+  } else {
+    setBetMode("regular");
   }
   payoutManual=false;openM("modal-bet");
 }
