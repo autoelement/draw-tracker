@@ -1992,9 +1992,11 @@ function onBetTypeChange(){
   else{document.getElementById("bet-amount").value=+(bankroll*(settings.single_pct||2)/100).toFixed(2);calcBetFields();}
 }
 
-function buildTrixLegs(type){
-  var h="";for(var i=0;i<3;i++){h+='<div class="trix-leg"><div class="trix-leg-title">Selection '+(i+1)+'</div><div class="fr"><div class="fg"><label class="fl">Match</label><input type="text" class="fi trix-match" placeholder="Team A vs B"></div><div class="fg"><label class="fl">Odds</label><input type="number" class="fi trix-odds" placeholder="2.50" step="0.01" oninput="calcTrixie()"></div></div><div class="fr"><div class="fg"><label class="fl">Selection</label><select class="fs trix-sel"><option value="Draw (X)">Draw (X)</option><option value="Home Win (1)">Home Win (1)</option><option value="Away Win (2)">Away Win (2)</option></select></div><div class="fg"><label class="fl">League</label><input type="text" class="fi trix-league" placeholder="League"></div></div></div>';}
-  document.getElementById("trix-legs").innerHTML=h;calcTrixie();
+function buildTrixLegs(type) {
+  var h="";
+  for(var i=0;i<3;i++){h+='<div class="trix-leg"><div class="trix-leg-title">Selection '+(i+1)+'</div><div class="fg"><label class="fl">Match</label><input type="text" class="fi trix-match" placeholder="Team A vs B"></div><div class="fr"><div class="fg"><label class="fl">Odds</label><input type="number" class="fi trix-odds" placeholder="2.50" step="0.01" oninput="calcTrixie()"></div><div class="fg"><label class="fl">My Prob %</label><input type="number" class="fi trix-myprob" placeholder="35" min="0" max="100"></div></div><div class="fr"><div class="fg"><label class="fl">Selection</label><select class="fs trix-sel"><option value="Draw (X)">Draw (X)</option><option value="Home Win (1)">Home Win (1)</option><option value="Away Win (2)">Away Win (2)</option></select></div><div class="fg"><label class="fl">League</label><input type="text" class="fi trix-league" placeholder="League"></div></div></div>';}
+  document.getElementById("trix-legs").innerHTML=h;
+  calcTrixie();
 }
 
 function calcTrixie(){
@@ -2122,12 +2124,18 @@ function saveBet(){
   if(isTrix&&!id){
     var unit=type==="patent"?(parseFloat(document.getElementById("trix-unit-trix").value)||0):(parseFloat(document.getElementById("trix-unit").value)||0);
     var unitSingle=type==="patent"?(parseFloat(document.getElementById("trix-unit-single").value)||0):unit;
-    var matchEls=document.querySelectorAll(".trix-match");var oddsEls=document.querySelectorAll(".trix-odds");var selEls=document.querySelectorAll(".trix-sel");var legueEls=document.querySelectorAll(".trix-league");
-    var legs=[];matchEls.forEach(function(el,i){legs.push({match:el.value,odds:parseFloat(oddsEls[i].value)||0,sel:selEls[i].value,league:legueEls[i].value});});
+    var matchEls=document.querySelectorAll(".trix-match");
+    var oddsEls=document.querySelectorAll(".trix-odds");
+    var selEls=document.querySelectorAll(".trix-sel");
+    var legueEls=document.querySelectorAll(".trix-league");
+    var myprobEls=document.querySelectorAll(".trix-myprob");
+    var legs=[];
+    matchEls.forEach(function(el,i){legs.push({match:el.value,odds:parseFloat(oddsEls[i].value)||0,sel:selEls[i].value,league:legueEls[i].value,myprob:parseFloat(myprobEls[i].value)||null});});
     var n=legs.length,rows=[];
-if(type==="patent"){legs.forEach(function(l){rows.push({date:date,match:l.match,league:l.league,selection:l.sel,odds:l.odds,amount:unitSingle,payout:+(unitSingle*l.odds).toFixed(2),bookmaker:bk,status:status,bet_type:"single",martingale_series_id:martId,notes:"patent:single"});});}
-    for(var i=0;i<n;i++)for(var j=i+1;j<n;j++){var combo=[legs[i],legs[j]],co=parseFloat((combo[0].odds*combo[1].odds).toFixed(2));rows.push({date:date,match:combo[0].match+" + "+combo[1].match,league:combo[0].league+"/"+combo[1].league,selection:combo[0].sel+" + "+combo[1].sel,odds:co,amount:unit,payout:parseFloat((unit*co).toFixed(2)),bookmaker:bk,status:status,bet_type:type==="patent"?"trixie":type,notes:type==="patent"?"patent:double":"trix:double"});}
-    if(n>=3){var tco=parseFloat((legs[0].odds*legs[1].odds*legs[2].odds).toFixed(2));rows.push({date:date,match:legs.map(function(l){return l.match;}).join(" + "),league:legs.map(function(l){return l.league;}).join("/"),selection:legs.map(function(l){return l.sel;}).join(" + "),odds:tco,amount:unit,payout:parseFloat((unit*tco).toFixed(2)),bookmaker:bk,status:status,bet_type:type==="patent"?"trixie":type,notes:type==="patent"?"patent:treble":"trix:treble"});}    Promise.all(rows.map(function(r){return sbPost("bets",r);})).then(function(){closeM("modal-bet");showToast(rows.length+" bets created!");loadBets();btn.textContent="Save Bet";btn.disabled=false;});return;
+    function avgProb(arr){var vals=arr.filter(function(v){return v!=null;});return vals.length?+(vals.reduce(function(s,v){return s+v;},0)/vals.length).toFixed(1):null;}
+if(type==="patent"){legs.forEach(function(l){rows.push({date:date,match:l.match,league:l.league,selection:l.sel,odds:l.odds,amount:unitSingle,payout:+(unitSingle*l.odds).toFixed(2),bookmaker:bk,status:status,bet_type:"single",my_probability:l.myprob,martingale_series_id:martId,notes:"patent:single"});});}
+    for(var i=0;i<n;i++)for(var j=i+1;j<n;j++){var combo=[legs[i],legs[j]],co=+(combo[0].odds*combo[1].odds).toFixed(2);rows.push({date:date,match:combo[0].match+" + "+combo[1].match,league:combo[0].league+"/"+combo[1].league,selection:combo[0].sel+" + "+combo[1].sel,odds:co,amount:unit,payout:+(unit*co).toFixed(2),bookmaker:bk,status:status,bet_type:type==="patent"?"trixie":type,my_probability:avgProb([combo[0].myprob,combo[1].myprob]),martingale_series_id:martId,notes:type==="patent"?"patent:double":"trix:double"});}
+    if(n>=3){var tco=+(legs[0].odds*legs[1].odds*legs[2].odds).toFixed(2);rows.push({date:date,match:legs.map(function(l){return l.match;}).join(" + "),league:legs.map(function(l){return l.league;}).join("/"),selection:legs.map(function(l){return l.sel;}).join(" + "),odds:tco,amount:unit,payout:+(unit*tco).toFixed(2),bookmaker:bk,status:status,bet_type:type==="patent"?"trixie":type,my_probability:avgProb(legs.map(function(l){return l.myprob;})),martingale_series_id:martId,notes:type==="patent"?"patent:treble":"trix:treble"});}    Promise.all(rows.map(function(r){return sbPost("bets",r);})).then(function(){closeM("modal-bet");showToast(rows.length+" bets created!");loadBets();btn.textContent="Save Bet";btn.disabled=false;});return;
   }
   var odds=parseFloat(document.getElementById("bet-odds").value)||0;var myP=parseFloat(document.getElementById("bet-myprob").value)||null;
   var impl=odds>0?parseFloat((1/odds*100).toFixed(1)):null;var edge=(myP&&impl)?parseFloat((myP-impl).toFixed(1)):null;
