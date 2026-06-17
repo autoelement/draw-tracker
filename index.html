@@ -214,7 +214,7 @@ canvas{width:100%!important}
 <body>
 
 <!-- LOGIN -->
-<div class="login-page" id="login-page">
+<div class="login-page" id="login-page" style="display:none">
   <div class="login-box">
     <div class="login-logo">X<span style="color:var(--text3)">/</span>CAP</div>
     <div class="login-sub">Sign in to continue</div>
@@ -788,18 +788,19 @@ function checkAuth() {
         else {
           refreshAuthToken().then(function(ok){
             if(ok)showApp(email);
-            else doLogout();
+            else{document.getElementById("login-page").style.display="flex";doLogout();}
           });
         }
       }).catch(function() {
         refreshAuthToken().then(function(ok){
           if(ok)showApp(email);
-          else doLogout();
+          else{document.getElementById("login-page").style.display="flex";doLogout();}
         });
       });
+  } else {
+    document.getElementById("login-page").style.display="flex";
   }
 }
-
 document.addEventListener("keydown",function(e){if(e.key==="Enter"&&document.getElementById("login-page").style.display!=="none")doLogin();});
 
 function loadBookmakers(){
