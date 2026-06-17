@@ -2244,7 +2244,6 @@ document.getElementById("bet-mart").value=editS?editS.name:b.martingale_series_i
 
 function saveBet() {
   var btn=document.getElementById("save-bet-btn");
-  btn.textContent="Saving...";btn.disabled=true;
   var id=document.getElementById("bet-id").value;
   var stakeId=document.getElementById("bet-stake-id").value;
   var isMart=document.getElementById("bet-is-mart").value;
@@ -2252,6 +2251,8 @@ function saveBet() {
   var type=document.getElementById("bet-type").value;
   var isTrix=type==="trixie"||type==="patent";
   var bk=document.getElementById("bet-bk").value;
+  if(!bk){showToast("Please select a bookmaker",true);return;}
+  btn.textContent="Saving...";btn.disabled=true;
   var date=document.getElementById("bet-date").value;
   var status=document.getElementById("bet-status").value;
   var notes=document.getElementById("bet-notes").value||null;
