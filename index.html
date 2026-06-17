@@ -275,7 +275,7 @@ canvas{width:100%!important}
     <div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val amber" id="s-roi">0%</div></div>
     <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div><div class="stat-sub" id="s-edge-sub">All bets</div></div>
     <div class="stat-card" onclick="showPage('balances',document.getElementById('nav-balances'));" style="cursor:pointer"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div></div>
-    <div class="stat-card" onclick="document.getElementById('b-status').value='pending';showPage('bets',document.getElementById('nav-bets'));" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
+    <div class="stat-card" onclick="document.getElementById('b-status').value='pending';document.getElementById('b-type').value=(dbType==='single'||dbType==='trixie')?dbType:'';showPage('bets',document.getElementById('nav-bets'));" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
     <div class="stat-card"><div class="stat-label">Avg Odds</div><div class="stat-val amber" id="s-odds">0.00</div></div><div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val" id="s-pf">0.00</div></div>
   </div>
   <div id="trixie-section" style="display:none">
