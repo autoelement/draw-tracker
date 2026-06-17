@@ -757,17 +757,46 @@ function syncResults(){
     btn.textContent="⟳ Sync Results";btn.disabled=false;
   }).catch(function(){showToast("Error",true);btn.textContent="⟳ Sync Results";btn.disabled=false;});
 }
-function checkAuth(){
-  var token=localStorage.getItem("dt_token");var email=localStorage.getItem("dt_email");
-  if(token){
-    authH={"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json"};
-    fetch(SB_URL+"/auth/v1/user",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token}})
-      .then(function(r){return r.json();}).then(function(d){
-        if(d.id){
-          showApp(email||d.email);
-          setInterval(refreshToken,50*60*1000);
-        } else {doLogout();}
-      }).catch(function(){doLogout();});
+function refreshAuthToken(){
+  var refreshToken=localStorage.getItem("dt_refresh");
+  if(!refreshToken)return Promise.resolve(false);
+  return fetch(SB_URL+"/auth/v1/token?grant_type=refresh_token",{
+    method:"POST",
+    headers:{"apikey":SB_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({refresh_token:refreshToken})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.access_token){
+      authToken=d.access_token;
+      authH={"apikey":SB_KEY,"Authorization":"Bearer "+authToken,"Content-Type":"application/json"};
+      localStorage.setItem("dt_token",authToken);
+      if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);
+      return true;
+    }
+    return false;
+  }).catch(function(){return false;});
+}
+function checkAuth() {
+  var token = localStorage.getItem("dt_token");
+  var email = localStorage.getItem("dt_email");
+  if (token) {
+    authToken = token;
+    authH = {"apikey": SB_KEY, "Authorization": "Bearer " + authToken, "Content-Type": "application/json"};
+    fetch(SB_URL + "/auth/v1/user", {headers: {"apikey": SB_KEY, "Authorization": "Bearer " + authToken}})
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.id) { showApp(email || d.email); }
+        else {
+          refreshAuthToken().then(function(ok){
+            if(ok)showApp(email);
+            else doLogout();
+          });
+        }
+      }).catch(function() {
+        refreshAuthToken().then(function(ok){
+          if(ok)showApp(email);
+          else doLogout();
+        });
+      });
   }
 }
 
