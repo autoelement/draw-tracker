@@ -2703,6 +2703,7 @@ function loadUpcomingMatches(){
 }
 
 function searchMatches(q){
+  console.log("searchMatches called:", q);
   var dd=document.getElementById("match-dropdown");
   if(!q||q.length<2){dd.style.display="none";return;}
   clearTimeout(matchSearchTimeout);
