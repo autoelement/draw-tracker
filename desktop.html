@@ -971,6 +971,8 @@ else if(dbType==="patent")q+="&notes=like.patent:*&martingale_series_id=is.null"
     var eb = settled.filter(function(b){return b.edge!=null;});
     var avgE = eb.length?(eb.reduce(function(s,b){return s+b.edge;},0)/eb.length).toFixed(1):0;
     var avgO = settled.length?(settled.reduce(function(s,b){return s+(b.odds||0);},0)/settled.length).toFixed(2):0;
+    var avgOWin=wins.length?(wins.reduce(function(s,b){return s+(b.odds||0);},0)/wins.length).toFixed(2):"-";
+    var avgOLoss=settled.filter(function(b){return b.status==="loss";}).length?(settled.filter(function(b){return b.status==="loss";}).reduce(function(s,b){return s+(b.odds||0);},0)/settled.filter(function(b){return b.status==="loss";}).length).toFixed(2):"-";
     document.getElementById("s-pnl").textContent=(pnl>=0?"+":"")+"$"+pnl.toFixed(2);
     document.getElementById("s-pnl").className="stat-val "+(pnl>=0?"green":"red");
     document.getElementById("s-wr").textContent=wr+"%";
@@ -980,6 +982,8 @@ else if(dbType==="patent")q+="&notes=like.patent:*&martingale_series_id=is.null"
     document.getElementById("s-edge").textContent=(avgE>=0?"+":"")+avgE+"%";
     document.getElementById("s-active").textContent=pending.length;
     document.getElementById("s-odds").textContent=avgO;
+    var oddsSubEl=document.getElementById("s-odds").nextElementSibling;
+    if(oddsSubEl)oddsSubEl.textContent="Win: "+avgOWin+" | Loss: "+avgOLoss;
    updateScoreStat(all);
     var bkMap={};
     settled.forEach(function(b){var k=b.bookmaker||"?";if(!bkMap[k])bkMap[k]={w:0,p:0};bkMap[k].w+=b.amount||0;bkMap[k].p+=(b.payout||0)-(b.amount||0);});
