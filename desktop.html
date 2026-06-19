@@ -2113,15 +2113,19 @@ function buildTrixLegs(type) {
 }
 function searchTrixMatch(el){
   var q=el.value;
-  var dd=el.nextElementSibling;
-  if(!dd||!dd.classList.contains("trix-match-dropdown")){
+  var ddId="trix-match-dd";
+  var dd=document.getElementById(ddId);
+  if(!dd){
     dd=document.createElement("div");
-    dd.className="trix-match-dropdown";
-    dd.style.cssText="position:absolute;z-index:9999;background:var(--bg3);border:1px solid var(--border2);border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;width:100%";
-    el.parentNode.style.position="relative";
-    el.parentNode.appendChild(dd);
+    dd.id=ddId;
+    dd.style.cssText="position:fixed;z-index:9999;background:var(--bg3);border:1px solid var(--border2);border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;width:300px";
+    document.body.appendChild(dd);
   }
   if(!q||q.length<2){dd.style.display="none";return;}
+  var rect=el.getBoundingClientRect();
+  dd.style.top=(rect.bottom)+"px";
+  dd.style.left=rect.left+"px";
+  dd.style.width=rect.width+"px";
   var ql=q.toLowerCase();
   var allMatches=upcomingMatches.slice();
   if(window._todaysMatches){window._todaysMatches.forEach(function(m){var alreadyIn=allMatches.some(function(x){return x.fixture_id===m.id;});if(!alreadyIn)allMatches.push({home:m.home_name,away:m.away_name,league:"",fixture_id:m.id,kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():""});});}
@@ -2130,9 +2134,16 @@ function searchTrixMatch(el){
   dd.innerHTML=results.map(function(m){
     var safeHome=(m.home||"").replace(/'/g,"&#39;");
     var safeAway=(m.away||"").replace(/'/g,"&#39;");
-    return "<div onclick=\"selectTrixMatch(this,'"+safeHome+"','"+safeAway+"')\" style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div>";
+    return "<div onclick=\"selectTrixMatch('"+safeHome+"','"+safeAway+"')\" style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div>";
   }).join("");
   dd.style.display="block";
+  window._lastTrixMatchEl=el;
+}
+function selectTrixMatch(home,away){
+  var el=window._lastTrixMatchEl;
+  if(el)el.value=home+" vs "+away;
+  var dd=document.getElementById("trix-match-dd");
+  if(dd)dd.style.display="none";
 }
 function selectTrixMatch(el,home,away){
   var input=el.parentNode.previousElementSibling;
