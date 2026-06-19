@@ -987,7 +987,11 @@ else if(dbType==="patent")q+="&notes=like.patent:*&martingale_series_id=is.null"
     document.getElementById("s-edge").textContent=(avgE>=0?"+":"")+avgE+"%";
     document.getElementById("s-active").textContent=pending.length;
     var avgO=settled.length?(settled.reduce(function(s,b){return s+(b.odds||0);},0)/settled.length).toFixed(2):0;
+    var avgOWin=wins.length?(wins.reduce(function(s,b){return s+(b.odds||0);},0)/wins.length).toFixed(2):"-";
+    var avgOLoss=settled.filter(function(b){return b.status==="loss";}).length?(settled.filter(function(b){return b.status==="loss";}).reduce(function(s,b){return s+(b.odds||0);},0)/settled.filter(function(b){return b.status==="loss";}).length).toFixed(2):"-";
     document.getElementById("s-odds").textContent=avgO;
+    var oddsSubEl=document.getElementById("s-odds").nextElementSibling;
+    if(oddsSubEl)oddsSubEl.textContent="Win: "+avgOWin+" | Loss: "+avgOLoss;
     var grossWin=wins.reduce(function(s,b){return s+((b.payout||0)-(b.amount||0));},0);
     var grossLoss=settled.filter(function(b){return b.status==="loss";}).reduce(function(s,b){return s+(b.amount||0);},0);
     var pf=grossLoss>0?(grossWin/grossLoss).toFixed(2):(grossWin>0?"∞":"0.00");
