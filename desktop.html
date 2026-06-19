@@ -1014,29 +1014,7 @@ if(oddsCard){
     oddsCard.title="";
   }
 }
-    if (dbType==="trixie") {
-      var tx=all.filter(function(b){return b.bet_type==="trixie"&&b.slip_id;});
-      var slipMap={};
-      tx.forEach(function(b){if(!slipMap[b.slip_id])slipMap[b.slip_id]=[];slipMap[b.slip_id].push(b);});
-      var slips=Object.values(slipMap);
-      var fullHit=0,partial=0,deadLoss=0;
-      slips.forEach(function(rows){
-        var settled2=rows.filter(function(b){return b.status==="win"||b.status==="loss";});
-        if(!settled2.length)return;
-        var hasWin=rows.some(function(b){return b.status==="win";});
-        var allLoss=rows.every(function(b){return b.status==="loss";});
-        var treble=rows.find(function(b){return b.notes&&b.notes.indexOf("treble")!==-1;});
-        var trebleWin=treble&&treble.status==="win";
-        if(trebleWin){fullHit++;}
-        else if(hasWin){partial++;}
-        else if(allLoss){deadLoss++;}
-      });
-      var totalSlips=fullHit+partial+deadLoss;
-      var pct=function(n){return totalSlips?(n/totalSlips*100).toFixed(0)+"%":"0%";};
-      document.getElementById("t-full").textContent=pct(fullHit);
-      document.getElementById("t-partial").textContent=pct(partial);
-      document.getElementById("t-dead").textContent=pct(deadLoss);
-    }
+    if(dbType==="trixie"){var tx=all.filter(function(b){return b.bet_type==="trixie"&&b.slip_id;});var slipMap={};tx.forEach(function(b){if(!slipMap[b.slip_id])slipMap[b.slip_id]=[];slipMap[b.slip_id].push(b);});var slips=Object.values(slipMap);var fullHit=0,partial=0,deadLoss=0;slips.forEach(function(rows){var hasWin=rows.some(function(b){return b.status==="win";});var allLoss=rows.every(function(b){return b.status==="loss";});var treble=rows.find(function(b){return b.notes&&b.notes.indexOf("treble")!==-1;});var trebleWin=treble&&treble.status==="win";if(trebleWin){fullHit++;}else if(hasWin){partial++;}else if(allLoss){deadLoss++;}});var totalSlips=fullHit+partial+deadLoss;var pct=function(n){return totalSlips?(n/totalSlips*100).toFixed(0)+"%":"0%";};document.getElementById("t-full").textContent=pct(fullHit);document.getElementById("t-partial").textContent=pct(partial);document.getElementById("t-dead").textContent=pct(deadLoss);}
     if (dbType==="martingale") {
       var seriesFilter=document.getElementById("db-series").value;
       var sm={};
