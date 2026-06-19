@@ -2028,11 +2028,38 @@ function onBetTypeChange(){
 
 function buildTrixLegs(type) {
   var h="";
-  for(var i=0;i<3;i++){h+='<div class="trix-leg"><div class="trix-leg-title">Selection '+(i+1)+'</div><div class="fg"><label class="fl">Match</label><input type="text" class="fi trix-match" placeholder="Team A vs B"></div><div class="fr"><div class="fg"><label class="fl">Odds</label><input type="number" class="fi trix-odds" placeholder="2.50" step="0.01" oninput="calcTrixie()"></div><div class="fg"><label class="fl">My Prob %</label><input type="number" class="fi trix-myprob" placeholder="35" min="0" max="100"></div></div><div class="fr"><div class="fg"><label class="fl">Selection</label><select class="fs trix-sel"><option value="Draw (X)">Draw (X)</option><option value="Home Win (1)">Home Win (1)</option><option value="Away Win (2)">Away Win (2)</option></select></div><div class="fg"><label class="fl">League</label><input type="text" class="fi trix-league" placeholder="League"></div></div></div>';}
+  for(var i=0;i<3;i++){h+='<div class="trix-leg"><div class="trix-leg-title">Selection '+(i+1)+'</div><div class="fg"><label class="fl">Match</label><input type="text" class="fi trix-match" placeholder="Team A vs B" oninput="searchTrixMatch(this)"></div><div class="fr"><div class="fg"><label class="fl">Odds</label><input type="number" class="fi trix-odds" placeholder="2.50" step="0.01" oninput="calcTrixie()"></div><div class="fg"><label class="fl">My Prob %</label><input type="number" class="fi trix-myprob" placeholder="35" min="0" max="100"></div></div><div class="fr"><div class="fg"><label class="fl">Selection</label><select class="fs trix-sel"><option value="Draw (X)">Draw (X)</option><option value="Home Win (1)">Home Win (1)</option><option value="Away Win (2)">Away Win (2)</option></select></div><div class="fg"><label class="fl">League</label><input type="text" class="fi trix-league" placeholder="League"></div></div></div>';}
   document.getElementById("trix-legs").innerHTML=h;
   calcTrixie();
 }
-
+function searchTrixMatch(el){
+  var q=el.value;
+  var dd=el.nextElementSibling;
+  if(!dd||!dd.classList.contains("trix-match-dropdown")){
+    dd=document.createElement("div");
+    dd.className="trix-match-dropdown";
+    dd.style.cssText="position:absolute;z-index:9999;background:var(--bg3);border:1px solid var(--border2);border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;width:100%";
+    el.parentNode.style.position="relative";
+    el.parentNode.appendChild(dd);
+  }
+  if(!q||q.length<2){dd.style.display="none";return;}
+  var ql=q.toLowerCase();
+  var allMatches=upcomingMatches.slice();
+  if(window._todaysMatches){window._todaysMatches.forEach(function(m){var alreadyIn=allMatches.some(function(x){return x.fixture_id===m.id;});if(!alreadyIn)allMatches.push({home:m.home_name,away:m.away_name,league:"",fixture_id:m.id,kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():""});});}
+  var results=allMatches.filter(function(m){return(m.home||"").toLowerCase().indexOf(ql)!==-1||(m.away||"").toLowerCase().indexOf(ql)!==-1;}).slice(0,6);
+  if(!results.length){dd.style.display="none";return;}
+  dd.innerHTML=results.map(function(m){
+    var safeHome=(m.home||"").replace(/'/g,"&#39;");
+    var safeAway=(m.away||"").replace(/'/g,"&#39;");
+    return "<div onclick=\"selectTrixMatch(this,'"+safeHome+"','"+safeAway+"')\" style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div>";
+  }).join("");
+  dd.style.display="block";
+}
+function selectTrixMatch(el,home,away){
+  var input=el.parentNode.previousElementSibling;
+  if(input)input.value=home+" vs "+away;
+  el.parentNode.style.display="none";
+}
 function calcTrixie(){
   var type=document.getElementById("bet-type").value;
   var unitSingle=type==="patent"?(parseFloat(document.getElementById("trix-unit-single").value)||0):0;
