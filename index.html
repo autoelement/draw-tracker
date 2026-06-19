@@ -276,7 +276,7 @@ canvas{width:100%!important}
     <div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue" id="s-edge">0%</div><div class="stat-sub" id="s-edge-sub">All bets</div></div>
     <div class="stat-card" onclick="showPage('balances',document.getElementById('nav-balances'));" style="cursor:pointer"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div></div>
     <div class="stat-card" onclick="document.getElementById('b-status').value='pending';document.getElementById('b-type').value=(dbType==='single'||dbType==='trixie')?dbType:'';document.getElementById('b-bk').value=document.getElementById('db-bk').value;showPage('bets',document.getElementById('nav-bets'));" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Odds</div><div class="stat-val amber" id="s-odds">0.00</div></div><div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val" id="s-pf">0.00</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Odds</div><div class="stat-val amber" id="s-odds">0.00</div><div class="stat-sub" id="s-odds-sub">Settled bets</div></div><div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val" id="s-pf">0.00</div></div>
   </div>
   <div id="trixie-section" style="display:none">
     <div class="stats-2" style="margin-bottom:14px">
@@ -990,7 +990,7 @@ else if(dbType==="patent")q+="&notes=like.patent:*&martingale_series_id=is.null"
     var avgOWin=wins.length?(wins.reduce(function(s,b){return s+(b.odds||0);},0)/wins.length).toFixed(2):"-";
     var avgOLoss=settled.filter(function(b){return b.status==="loss";}).length?(settled.filter(function(b){return b.status==="loss";}).reduce(function(s,b){return s+(b.odds||0);},0)/settled.filter(function(b){return b.status==="loss";}).length).toFixed(2):"-";
     document.getElementById("s-odds").textContent=avgO;
-    var oddsSubEl=document.getElementById("s-odds").nextElementSibling;
+    var oddsSubEl=document.getElementById("s-odds-sub");
     if(oddsSubEl)oddsSubEl.textContent="Win: "+avgOWin+" | Loss: "+avgOLoss;
     var grossWin=wins.reduce(function(s,b){return s+((b.payout||0)-(b.amount||0));},0);
     var grossLoss=settled.filter(function(b){return b.status==="loss";}).reduce(function(s,b){return s+(b.amount||0);},0);
