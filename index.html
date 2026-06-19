@@ -2265,14 +2265,16 @@ function renderTxPage(){
 }
 function gotoTxPage(p){txPage=p;renderTxPage();}
 function loadBalances(){
-  Promise.all([sbGet("balances?select=*&order=bookmaker.asc"),sbGet("transactions?select=*&order=created_at.desc&limit=2000")]).then(function(res){
-    var bals=res[0],txs=res[1];
+  Promise.all([sbGet("balances?select=*&order=bookmaker.asc"),sbGet("transactions?select=*&order=created_at.desc&limit=2000"),sbGet("bets?select=bookmaker,amount,status&status=eq.pending")]).then(function(res){
+    var bals=res[0],txs=res[1],pendingBets=res[2];
+    var stakeMap={};
+    pendingBets.forEach(function(b){if(!stakeMap[b.bookmaker])stakeMap[b.bookmaker]=0;stakeMap[b.bookmaker]+=(b.amount||0);});
     bankroll=bals.reduce(function(s,b){return s+(b.balance||0);},0);
     document.getElementById("bankroll-val").textContent="$"+bankroll.toFixed(2);
     document.getElementById("bankroll-bk-count").textContent=bals.length+" bookmakers";
     var h="";
     if(!bals.length){h='<div class="empty">No bookmakers yet</div>';}
-    else{bals.forEach(function(b){var amt=b.balance||0;h+='<div class="bal-card"><div class="bal-info"><div class="bal-bk">'+b.bookmaker+'</div><div class="bal-amount">$'+amt.toFixed(2)+'</div></div><div class="bal-btns"><button class="bal-btn" style="background:var(--green-mid);color:var(--green)" onclick="quickTx(\''+b.bookmaker+'\',\'deposit\')">+</button><button class="bal-btn" style="background:var(--red-dim);color:var(--red)" onclick="quickTx(\''+b.bookmaker+'\',\'withdrawal\')">-</button><button class="bal-btn" style="background:var(--border);color:var(--text3)" onclick="deleteBookmaker(\''+b.bookmaker+'\')">Del</button></div></div>';});}
+    else{bals.forEach(function(b){var amt=b.balance||0;var stake=stakeMap[b.bookmaker]||0;h+='<div class="bal-card"><div class="bal-info"><div class="bal-bk">'+b.bookmaker+'</div><div class="bal-amount">$'+amt.toFixed(2)+'</div>'+(stake>0?'<div class="bal-sub" style="color:var(--amber)">Staked: $'+stake.toFixed(2)+'</div>':'')+'</div><div class="bal-btns"><button class="bal-btn" style="background:var(--green-mid);color:var(--green)" onclick="quickTx(\''+b.bookmaker+'\',\'deposit\')">+</button><button class="bal-btn" style="background:var(--red-dim);color:var(--red)" onclick="quickTx(\''+b.bookmaker+'\',\'withdrawal\')">-</button><button class="bal-btn" style="background:var(--border);color:var(--text3)" onclick="deleteBookmaker(\''+b.bookmaker+'\')">Del</button></div></div>';});}
     document.getElementById("bal-cards").innerHTML=h;
     txAll=txs;txPage=1;renderTxPage();
   });
