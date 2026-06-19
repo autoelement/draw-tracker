@@ -709,6 +709,8 @@ loadBookmakers().then(function(){loadSettings().then(function(){
     loadDashboard();
   },100);
 });});
+  loadMartSeries();
+  loadUpcomingMatches();
 }
 function syncResults(){
   var token=localStorage.getItem("gh_token");
