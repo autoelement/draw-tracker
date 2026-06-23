@@ -1906,6 +1906,36 @@ function sortCalcResults(field){
   });
   _renderCalcResultsWithDateOnly(window._lastCalcResults);
 }
+function updateComboStatuses(slipId){
+  return sbGet("bets?slip_id=eq."+slipId+"&select=*").then(function(rows){
+    var singles=rows.filter(function(b){return b.bet_type==="single"||b.notes==="patent:single";});
+    var combos=rows.filter(function(b){return b.bet_type==="trixie";});
+    if(!singles.length||!combos.length)return;
+    var updates=[];
+    combos.forEach(function(combo){
+      var comboMatches=combo.match?combo.match.split(" + "):[];
+      var legsForCombo=singles.filter(function(s){return comboMatches.indexOf(s.match)!==-1;});
+      if(!legsForCombo.length)return;
+      var allWin=legsForCombo.every(function(l){return l.status==="win";});
+      var anyLoss=legsForCombo.some(function(l){return l.status==="loss";});
+      var newStatus=allWin?"win":anyLoss?"loss":"pending";
+      if(newStatus!==combo.status){
+        var effPayout=0;
+        if(newStatus==="win")effPayout=+(combo.amount*combo.odds).toFixed(2);
+        var oldEff=combo.balance_applied?settledEffect(combo.status,combo.amount,combo.payout):0;
+        var newEff=settledEffect(newStatus,combo.amount,effPayout);
+        updates.push(
+          adjustBalance(combo.bookmaker,-oldEff).then(function(){
+            return sbPatch("bets?id=eq."+combo.id,{status:newStatus,payout:effPayout,balance_applied:true});
+          }).then(function(){
+            return adjustBalance(combo.bookmaker,newEff);
+          })
+        );
+      }
+    });
+    return Promise.all(updates);
+  });
+}
 function saveInline(id,src,field,val,extraId){
   var patch={};patch[field]=val;
   if(src==="manual"){
@@ -1930,6 +1960,10 @@ function saveInline(id,src,field,val,extraId){
           return sbPatch("bets?id=eq."+id,patch);
         }).then(function(){
           return adjustBalance(newBk,newEff);
+        }).then(function(){
+          if(field==="status"&&ob.slip_id&&(ob.notes==="patent:single"||(ob.notes&&ob.notes.indexOf("trix:")===-1&&ob.notes.indexOf("patent:")===-1)||ob.bet_type==="single")){
+            return updateComboStatuses(ob.slip_id);
+          }
         }).then(function(){showToast("Saved!");loadBets();loadBookmakers();});
       });
       return;
