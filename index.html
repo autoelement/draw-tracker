@@ -355,6 +355,7 @@ canvas{width:100%!important}
 <!-- MY BETS -->
 <div class="page" id="page-bets">
   <div class="filters">
+    <input type="text" class="filter-sel" id="b-search" placeholder="Search match..." oninput="loadBets()" style="width:160px">
     <select class="filter-sel" id="b-bk" onchange="loadBets()"><option value="">All BK</option></select>
     <select class="filter-sel" id="b-status" onchange="loadBets()">
       <option value="">All</option><option value="win">Win</option>
@@ -1944,8 +1945,12 @@ function loadBets(){
   var el=document.getElementById("bets-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
   var bk=document.getElementById("b-bk").value;var st=document.getElementById("b-status").value;var tp=document.getElementById("b-type").value;
+  var search=document.getElementById("b-search")?document.getElementById("b-search").value.trim():"";
   var q="bets?select=*&order=date.desc,id.desc";
-  if(bk)q+="&bookmaker=eq."+encodeURIComponent(bk);if(st)q+="&status=eq."+st;if(tp)q+="&bet_type=eq."+tp;
+  if(bk)q+="&bookmaker=eq."+encodeURIComponent(bk);
+  if(st)q+="&status=eq."+st;
+  if(tp)q+="&bet_type=eq."+tp;
+  if(search)q+="&match=ilike.*"+encodeURIComponent(search)+"*";
   sbGet(q).then(function(manual){
     betsAll=manual.filter(function(b){return!b.notes||b.notes.indexOf("stake:")!==0;});
     betsPage=1;renderBetsPage();
