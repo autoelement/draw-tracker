@@ -2025,7 +2025,7 @@ function renderBetsPage(){
       h+='</div>';
     } else {
       h+='<div class="bet-actions" style="justify-content:space-between;align-items:center">';
-      h+='<div style="font-size:11px;color:var(--text3)">'+(b.my_probability!=null?'My: '+b.my_probability+'% '+eStr:'')+'</div>';
+      h+='<div style="font-size:11px;color:var(--text3)">'+(b.bookmaker?'<span class="bet-tag">'+b.bookmaker+'</span> ':'')+( b.my_probability!=null?'My: '+b.my_probability+'% '+eStr:'')+'</div>';
       h+='<div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm btn-icon" onclick="openEditBet(\''+editId+'\',\'manual\',\'\','+(b.odds||0)+')">✎</button><button class="btn btn-red btn-sm btn-icon" onclick="deleteBet(\''+b.id+'\')">✕</button></div>';
       h+='</div>';
     }
