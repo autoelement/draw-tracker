@@ -294,7 +294,7 @@ canvas{width:100%!important}
       <div class="stat-card"><div class="stat-label">Max Loss Run</div><div class="stat-val red" id="m-lstreak">0</div></div>
     </div>
   </div>
-  <div id="score-stat-wrap" style="margin-bottom:14px"><div class="stats-2"><div class="stat-card"><div class="stat-label">Avg Score</div><div class="stat-val purple" id="s-score">-</div><div class="stat-sub" id="s-score-sub">Calc score</div></div><div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val green" id="s-clv2">—</div><div class="stat-sub" id="s-clv-sub2">CLV tracked</div></div></div></div>
+  <div id="score-stat-wrap" style="margin-bottom:14px"><div class="stats-2"><div class="stat-card" id="avg-score-card"><div class="stat-label">Avg Score</div><div class="stat-val purple" id="s-score">-</div><div class="stat-sub" id="s-score-sub">Calc score</div></div><div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val green" id="s-clv2">—</div><div class="stat-sub" id="s-clv-sub2">CLV tracked</div></div></div></div>
 <div class="chart-card"><div class="chart-title">P&L Over Time</div>
   <canvas id="pnlChart" height="140" style="width:100%;display:block;height:140px"></canvas></div>
   <div class="chart-card" id="edge-chart-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="chart-title" style="margin-bottom:0">Avg Edge Over Time</div><div style="display:flex;gap:4px"><button id="edge-filter-all" onclick="setEdgeFilter('all',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--blue-dim);color:var(--blue);font-family:'Outfit',sans-serif">All</button><button id="edge-filter-win" onclick="setEdgeFilter('win',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Win</button><button id="edge-filter-loss" onclick="setEdgeFilter('loss',this)" style="padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text3);font-family:'Outfit',sans-serif">Loss</button></div></div><canvas id="edgeTimeChart" height="140" style="width:100%;display:block;height:140px"></canvas></div>
@@ -711,6 +711,8 @@ function showApp(email){
   document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
   var ssw=document.getElementById("score-stat-wrap");
 if(ssw)ssw.style.display="";
+  var avgScoreCard=document.getElementById("avg-score-card");
+if(avgScoreCard)avgScoreCard.style.display=(t==="trixie")?"none":"";
   var seriesSel=document.getElementById("db-series");
   if(savedType==="martingale"&&seriesSel){
     seriesSel.style.display="";
@@ -927,6 +929,8 @@ function setDbType(t,el){
   }
   var ssw=document.getElementById("score-stat-wrap");
 if(ssw)ssw.style.display="";
+  var avgScoreCard=document.getElementById("avg-score-card");
+if(avgScoreCard)avgScoreCard.style.display=(savedType==="trixie")?"none":"";
   localStorage.setItem("db_type",t);
   window._dbTypeForFab=t;
   loadDashboard();
