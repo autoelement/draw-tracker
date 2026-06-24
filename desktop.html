@@ -2153,15 +2153,18 @@ function renderBetsPage(){
       myPctCell='<input class="inline-input" style="width:60px" type="number" value="'+(b.my_probability||"")+'" placeholder="%" onchange="saveInline(\''+editId+'\',\'manual\',\'my_probability\',parseFloat(this.value)||null,\'\')">';
       bkCell='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\'manual\',\'bookmaker\',this.value,\'\')">'+bookmakers.map(function(bk2){return'<option value="'+bk2+'"'+(bk2===b.bookmaker?' selected':'')+'>'+bk2+"</option>";}).join("")+"</select>";
       statusCell='<select class="inline-sel" onchange="saveInline(\''+editId+'\',\'manual\',\'status\',this.value,\'\')"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
+      closingOddsCell='<input class="inline-input" style="width:70px" type="number" value="'+(b.closing_odds||"")+'" placeholder="Close" step="0.01" onchange="saveInline(\''+editId+'\',\'manual\',\'closing_odds\',parseFloat(this.value)||null,\'\')">';
     } else {
       myPctCell=(b.my_probability!=null?b.my_probability+"%":'<span style="color:var(--text3)">-</span>');
       bkCell=b.bookmaker||"";
       statusCell=oc;
+      var clv=b.closing_odds&&b.odds?+((b.odds/b.closing_odds-1)*100).toFixed(1):null;
+      closingOddsCell=clv!=null?'<span style="color:'+(clv>=0?'var(--green)':'var(--red)')+'">CLV: '+(clv>=0?'+':'')+clv+'%</span>':"";
     }
     var edgeColor=b.status==="win"?"edge-pos":b.status==="loss"?"edge-neg":"";
     var edgeStyle=isPending?'style="color:var(--text3)"':'';
     var eStr2=b.edge!=null?'<span class="'+edgeColor+'" '+edgeStyle+'>'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'<span style="color:var(--text3)">-</span>';
-    h+="<tr data-id='"+b.id+"'><td class='mono' style='white-space:nowrap'>"+(b.date||"")+"<td style='color:var(--text);font-weight:500;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default' title='"+( b.match||"")+"'>"+(b.match||"")+autoScore+"</td><td style='font-size:11px;color:var(--text3)'>"+(b.selection||"")+"</td><td>"+tp2+mart+"</td><td><span class='odds-badge bet-odds-val'>"+(b.odds||0)+"</span></td><td class='mono'>$"+(b.amount||0).toFixed(2)+"</td><td class='mono'>$"+(b.payout||0).toFixed(2)+"</td><td class='"+(isPending?"":(pnl>=0?"pnl-pos":"pnl-neg"))+"' style='"+(isPending?"color:var(--text3)":"")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+myPctCell+"</td><td>"+eStr2+"</td><td>"+bkCell+"</td><td>"+statusCell+"</td><td style='white-space:nowrap'><button class='btn btn-ghost btn-sm' onclick=\"openEditBet('"+editId+"','manual','',"+(b.odds||0)+")\">Edit</button><button class='btn btn-red btn-sm' onclick=\"deleteBet('"+b.id+"')\">x</button></td></tr>";
+    h+="<tr data-id='"+b.id+"'><td class='mono' style='white-space:nowrap'>"+(b.date||"")+"<td style='color:var(--text);font-weight:500;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default' title='"+( b.match||"")+"'>"+(b.match||"")+autoScore+"</td><td style='font-size:11px;color:var(--text3)'>"+(b.selection||"")+"</td><td>"+tp2+mart+"</td><td><span class='odds-badge bet-odds-val'>"+(b.odds||0)+"</span></td><td class='mono'>$"+(b.amount||0).toFixed(2)+"</td><td class='mono'>$"+(b.payout||0).toFixed(2)+"</td><td class='"+(isPending?"":(pnl>=0?"pnl-pos":"pnl-neg"))+"' style='"+(isPending?"color:var(--text3)":"")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+myPctCell+"</td><td>"+eStr2+"</td><td>"+bkCell+"</td><td>"+statusCell+"</td><td>"+closingOddsCell+"</td><td style='white-space:nowrap'><button class='btn btn-ghost btn-sm' onclick=\"openEditBet('"+editId+"','manual','',"+(b.odds||0)+")\">Edit</button><button class='btn btn-red btn-sm' onclick=\"deleteBet('"+b.id+"')\">x</button></td></tr>";
   });
   h+="</tbody></table></div>";
   h+=pagControls(betsPage,totalPages,"gotoBetsPage");
