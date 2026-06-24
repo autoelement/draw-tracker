@@ -2170,7 +2170,7 @@ function searchTrixMatch(el){
   dd.innerHTML=results.map(function(m){
     var safeHome=(m.home||"").replace(/'/g,"&#39;");
     var safeAway=(m.away||"").replace(/'/g,"&#39;");
-    return "<div onclick=\"selectTrixMatch('"+safeHome+"','"+safeAway+"')\" style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div>";
+    return '<div onclick="selectTrixMatch(this.dataset.h,this.dataset.a)" data-h="'+safeHome+'" data-a="'+safeAway+'" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)">'+safeHome+' vs '+safeAway+'</div>'; style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div>";
   }).join("");
   dd.style.display="block";
   window._lastTrixMatchEl=el;
@@ -2183,13 +2183,13 @@ function selectTrixMatch(home,away){
     if(leg){
       var todayM=window._todaysMatches&&window._todaysMatches.find(function(m){return m.home_name===home&&m.away_name===away;});
       var leagueInput=leg.querySelector(".trix-league");
-      if(leagueInput&&todayM)leagueInput.value=todayM.league_name||"";
+      if(leagueInput){leagueInput.value=(calcResult&&calcResult.match.league_name)||(todayM&&todayM.league_name)||"";}
       var calcResult=window._lastCalcResults&&window._lastCalcResults.find(function(r){return r.match.home_name===home&&r.match.away_name===away;});
       var probInput=leg.querySelector(".trix-myprob");
       if(probInput&&calcResult)probInput.value=calcResult.result.ourProb||"";
     }
   }
-  var dd=document.getElementById("trix-match-dd");
+  var dd=document.querySelector(".trix-match-dropdown");
   if(dd)dd.style.display="none";
 }
 function calcTrixie(){
