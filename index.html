@@ -277,6 +277,7 @@ canvas{width:100%!important}
     <div class="stat-card" onclick="showPage('balances',document.getElementById('nav-balances'));" style="cursor:pointer"><div class="stat-label">Bankroll</div><div class="stat-val green" id="s-bankroll">$0</div></div>
     <div class="stat-card" onclick="document.getElementById('b-status').value='pending';document.getElementById('b-type').value=(dbType==='single'||dbType==='trixie')?dbType:'';document.getElementById('b-bk').value=document.getElementById('db-bk').value;showPage('bets',document.getElementById('nav-bets'));" style="cursor:pointer"><div class="stat-label">Active Bets</div><div class="stat-val" id="s-active">0</div></div>
     <div class="stat-card"><div class="stat-label">Avg Odds</div><div class="stat-val amber" id="s-odds">0.00</div><div class="stat-sub" id="s-odds-sub">Settled bets</div></div><div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val" id="s-pf">0.00</div></div>
+    <div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val green" id="s-clv">—</div><div class="stat-sub" id="s-clv-sub">CLV tracked</div></div>
   </div>
   <div id="trixie-section" style="display:none">
     <div class="stats-2" style="margin-bottom:14px">
@@ -994,6 +995,12 @@ else if(dbType==="patent")q+="&notes=like.patent:*&martingale_series_id=is.null"
     var grossLoss=settled.filter(function(b){return b.status==="loss";}).reduce(function(s,b){return s+(b.amount||0);},0);
     var pf=grossLoss>0?(grossWin/grossLoss).toFixed(2):(grossWin>0?"∞":"0.00");
     document.getElementById("s-pf").textContent=pf;
+    var clvBets=settled.filter(function(b){return b.closing_odds&&b.odds;});
+var avgClv=clvBets.length?+(clvBets.reduce(function(s,b){return s+((b.odds/b.closing_odds-1)*100);},0)/clvBets.length).toFixed(1):null;
+var clvEl=document.getElementById("s-clv");
+if(clvEl)clvEl.textContent=avgClv!=null?(avgClv>=0?"+":"")+avgClv+"%":"—";
+var clvSub=document.getElementById("s-clv-sub");
+if(clvSub)clvSub.textContent=clvBets.length+" bets tracked";
     document.getElementById("s-pf").className="stat-val "+(parseFloat(pf)>=1||pf==="∞"?"green":"red");
     var pfThreshold=parseFloat(settings.pf_threshold)||1.2;
 var oddsThreshold=parseFloat(settings.odds_threshold)||2.0;
