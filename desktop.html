@@ -1784,7 +1784,7 @@ function _buildCalcRows(results){
     var flags=r.result.flags&&r.result.flags.length?r.result.flags.map(function(f){return'<span style="font-size:10px;color:var(--red)">'+f+'</span>';}).join(" "):"";
     h+="<tr>";
     h+="<td class='mono' style='font-size:11px;color:var(--text3)'>"+date+"</td>";
-    h+="<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"</td>";
+    h+="<td onclick=\"toggleCalcDetails('"+detailsId+"')\" style='cursor:pointer;color:var(--text);font-weight:500'>"+matchName+"<br><span style='font-size:11px;color:var(--text3);font-weight:400'>"+(r.match.league_name||"")+"</span></td>";
     h+="<td style='font-family:Space Mono;font-weight:700;color:"+color+"'>"+r.result.score+"/15</td>";
     h+="<td>"+r.result.verdict+"</td>";
     h+="<td style='font-size:12px;color:var(--text2)'>"+( r.result.confidence||"")+"</td>";
@@ -2253,7 +2253,7 @@ function selectTrixMatch(home,away){
     if(leg){
       var todayM=window._todaysMatches&&window._todaysMatches.find(function(m){return m.home_name===home&&m.away_name===away;});
       var leagueInput=leg.querySelector(".trix-league");
-      if(leagueInput&&todayM)leagueInput.value=todayM.league_name||"";
+      if(leagueInput){leagueInput.value=(calcResult&&calcResult.match.league_name)||(todayM&&todayM.league_name)||"";}
       var calcResult=window._lastCalcResults&&window._lastCalcResults.find(function(r){return r.match.home_name===home&&r.match.away_name===away;});
       var probInput=leg.querySelector(".trix-myprob");
       if(probInput&&calcResult)probInput.value=calcResult.result.ourProb||"";
