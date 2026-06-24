@@ -1359,10 +1359,10 @@ function searchCalcMatch(q){
     }
     if(!results.length){dd.style.display="none";return;}
     dd.innerHTML=results.map(function(m){
-      var kd=m.date_unix?new Date(m.date_unix*1000):"";
-      var ko=kd?(String(kd.getDate()).padStart(2,"0")+"/"+String(kd.getMonth()+1).padStart(2,"0")+" "+String(kd.getHours()).padStart(2,"0")+":"+String(kd.getMinutes()).padStart(2,"0")).replace(/"/g,""):"";
-      return'<div onclick="selectCalcMatch('+m.id+',\''+m.home_name+' vs '+m.away_name+'\','+m.competition_id+')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.home_name+' vs '+m.away_name+'</div><div style="color:var(--text3);font-size:11px">'+ko+"</div></div>";
-    }).join("");
+    var safeHome=(m.home||"").replace(/'/g,"&#39;");
+    var safeAway=(m.away||"").replace(/'/g,"&#39;");
+    return '<div onclick="selectTrixMatch(this.dataset.h,this.dataset.a)" data-h="'+safeHome+'" data-a="'+safeAway+'" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)">'+safeHome+' vs '+safeAway+'</div>';
+  }).join("");
     dd.style.display="block";
   },400);
 }
@@ -2182,9 +2182,9 @@ function selectTrixMatch(home,away){
     var leg=el.closest(".trix-leg");
     if(leg){
       var todayM=window._todaysMatches&&window._todaysMatches.find(function(m){return m.home_name===home&&m.away_name===away;});
+     var calcResult=window._lastCalcResults&&window._lastCalcResults.find(function(r){return r.match.home_name===home&&r.match.away_name===away;});
       var leagueInput=leg.querySelector(".trix-league");
       if(leagueInput){leagueInput.value=(calcResult&&calcResult.match.league_name)||(todayM&&todayM.league_name)||"";}
-      var calcResult=window._lastCalcResults&&window._lastCalcResults.find(function(r){return r.match.home_name===home&&r.match.away_name===away;});
       var probInput=leg.querySelector(".trix-myprob");
       if(probInput&&calcResult)probInput.value=calcResult.result.ourProb||"";
     }
