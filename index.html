@@ -1919,7 +1919,8 @@ function _buildCalcCards(results){
     h+='<div style="font-size:12px;color:var(--text3);font-family:Space Mono">'+date.replace("<br>"," ")+'</div>';
     h+="<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button>";
     h+='</div>';
-    h+='<div style="font-weight:600;color:var(--text);margin-bottom:8px">'+matchName+'</div>';
+    h+='<div style="font-weight:600;color:var(--text);margin-bottom:4px">'+matchName+'</div>';
+    h+='<div style="font-size:11px;color:var(--text3);margin-bottom:8px">'+(r.match.league_name||"")+'</div>';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
     h+='<div style="font-size:13px">'+r.result.verdict+'</div>';
     h+='<div style="display:flex;align-items:center;gap:6px">';
@@ -2668,7 +2669,7 @@ function loadUpcomingMatches(){
       return{
         home:m.home_name,
         away:m.away_name,
-        league:"",
+        league:m.league_name||m.competition||"",
         competition_id:m.competition_id,
         fixture_id:m.id,
         kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():""
@@ -2703,8 +2704,10 @@ function searchMatches(q){
 
 function selectMatch(el){
   document.getElementById("bet-match").value=el.getAttribute("data-home")+" vs "+el.getAttribute("data-away");
-  document.getElementById("bet-league").value=el.getAttribute("data-league");
-  document.getElementById("bet-fixture-id").value=el.getAttribute("data-fixture");
+  var fixtureId=el.getAttribute("data-fixture");
+  var todayMatch=window._todaysMatches&&window._todaysMatches.find(function(m){return String(m.id)===String(fixtureId);});
+  document.getElementById("bet-league").value=(todayMatch&&todayMatch.league_name)||el.getAttribute("data-league")||"";
+  document.getElementById("bet-fixture-id").value=fixtureId;
   document.getElementById("match-dropdown").style.display="none";
 }
 (function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}var sc=document.getElementById("scoreChart");if(sc){sc.addEventListener("mousemove",scoreChartHover);sc.addEventListener("mouseleave",scoreChartLeave);}})();
