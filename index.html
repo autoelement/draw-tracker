@@ -712,9 +712,9 @@ function showApp(email){
   var ssw=document.getElementById("score-stat-wrap");
 if(ssw)ssw.style.display="";
   var avgScoreCard=document.getElementById("avg-score-card");
-if(avgScoreCard)avgScoreCard.style.display=(t==="trixie")?"none":"";
+if(avgScoreCard)avgScoreCard.style.display=(savedType==="trixie")?"none":"";
 var sswGrid=document.querySelector("#score-stat-wrap .stats-2");
-if(sswGrid)sswGrid.style.gridTemplateColumns=(t==="trixie")?"1fr":"1fr 1fr";
+if(sswGrid)sswGrid.style.gridTemplateColumns=(savedType==="trixie")?"1fr":"1fr 1fr";
   var seriesSel=document.getElementById("db-series");
   if(savedType==="martingale"&&seriesSel){
     seriesSel.style.display="";
