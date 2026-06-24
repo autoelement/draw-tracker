@@ -1379,7 +1379,7 @@ function showCalcDropdown(results){
   if(!results.length){dd.style.display="none";return;}
   dd.innerHTML=results.map(function(m){
     var date=m.date_unix?new Date(m.date_unix*1000).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
-    return'<div onclick="selectCalcMatch('+m.id+',\''+m.home_name+' vs '+m.away_name+'\','+m.competition_id+')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.home_name+' vs '+m.away_name+'</div><div style="color:var(--text3);font-size:11px">'+date+"</div></div>";
+    return'<div onclick="selectCalcMatch('+m.id+',\''+m.home_name+' vs '+m.away_name+'\','+m.competition_id+')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.home_name+' vs '+m.away_name+'</div><div style="color:var(--text3);font-size:11px">'+(m.league_name||m.competition||"")+" · "+date+"</div></div>";
   }).join("");
   dd.style.display="block";
 }
@@ -2828,10 +2828,10 @@ function loadUpcomingMatches(){
   .then(function(r){return r.json();})
   .then(function(d){
     upcomingMatches=(d.data||[]).map(function(m){
-     return{
+      return{
         home:m.home_name,
         away:m.away_name,
-        league:"",
+        league:m.league_name||m.competition||"",
         competition_id:m.competition_id,
         fixture_id:m.id,
         kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():""
