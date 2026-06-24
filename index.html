@@ -2159,20 +2159,19 @@ function searchTrixMatch(el){
   }
   if(!q||q.length<2){dd.style.display="none";return;}
   var ql=q.toLowerCase();
-    var allMatches=[];
-    if(window._todaysMatches&&window._todaysMatches.length){
-      allMatches=window._todaysMatches.map(function(m){return{home:m.home_name,away:m.away_name,league:m.league_name||"",fixture_id:m.id,kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():"",competition_id:m.competition_id};});
-    } else {
-      allMatches=upcomingMatches.slice();
-    }
+  var allMatches=[];
+  if(window._todaysMatches&&window._todaysMatches.length){
+    allMatches=window._todaysMatches.map(function(m){return{home:m.home_name,away:m.away_name,league:m.league_name||"",fixture_id:m.id,kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():"",competition_id:m.competition_id};});
+  } else {
+    allMatches=upcomingMatches.slice();
+  }
   var results=allMatches.filter(function(m){return(m.home||"").toLowerCase().indexOf(ql)!==-1||(m.away||"").toLowerCase().indexOf(ql)!==-1;}).slice(0,6);
   if(!results.length){dd.style.display="none";return;}
   dd.innerHTML=results.map(function(m){
     var safeHome=(m.home||"").replace(/'/g,"&#39;");
     var safeAway=(m.away||"").replace(/'/g,"&#39;");
-    return "<div onclick=\"selectTrixMatch('"+safeHome+"','"+safeAway+"')\" style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div>"; style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div>";
+    return "<div onclick=\"selectTrixMatch('"+safeHome+"','"+safeAway+"')\" style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div>";
   }).join("");
-  dd.style.display="block";
   dd.style.display="block";
   window._lastTrixMatchEl=el;
 }
