@@ -2865,12 +2865,10 @@ return "<div onclick='selectMatch(this)' data-home='"+safeHome+"' data-away='"+s
 }
 
 function selectMatch(el){
-  var home=el.getAttribute("data-home");
-  var away=el.getAttribute("data-away");
-  var league=el.getAttribute("data-league");
+  document.getElementById("bet-match").value=el.getAttribute("data-home")+" vs "+el.getAttribute("data-away");
   var fixtureId=el.getAttribute("data-fixture");
-  document.getElementById("bet-match").value=home+" vs "+away;
-  document.getElementById("bet-league").value=league;
+  var todayMatch=window._todaysMatches&&window._todaysMatches.find(function(m){return String(m.id)===String(fixtureId);});
+  document.getElementById("bet-league").value=(todayMatch&&todayMatch.league_name)||el.getAttribute("data-league")||"";
   document.getElementById("bet-fixture-id").value=fixtureId;
   document.getElementById("match-dropdown").style.display="none";
 }
