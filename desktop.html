@@ -2240,10 +2240,10 @@ function searchTrixMatch(el){
   dd.innerHTML=results.map(function(m){
     var safeHome=(m.home||"").replace(/'/g,"&#39;");
     var safeAway=(m.away||"").replace(/'/g,"&#39;");
-    return "<div onclick=\"selectTrixMatch('"+safeHome+"','"+safeAway+"')\" style='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)'>"+safeHome+" vs "+safeAway+"</div>";
+    return '<div onclick="selectTrixMatchFromDd(this)" data-h="'+safeHome+'" data-a="'+safeAway+'" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)">'+safeHome+' vs '+safeAway+'</div>';
   }).join("");
   dd.style.display="block";
-  window._lastTrixMatchEl=el;
+  dd._inputEl=el;
 }
 function selectTrixMatch(home,away){
   var el=window._lastTrixMatchEl;
@@ -2262,7 +2262,25 @@ function selectTrixMatch(home,away){
   var dd=document.getElementById("trix-match-dd");
   if(dd)dd.style.display="none";
 }
-
+function selectTrixMatchFromDd(item){
+  var dd=item.parentNode;
+  var el=dd._inputEl;
+  if(el){
+    var home=item.getAttribute("data-h");
+    var away=item.getAttribute("data-a");
+    el.value=home+" vs "+away;
+    var leg=el.closest(".trix-leg");
+    if(leg){
+      var todayM=window._todaysMatches&&window._todaysMatches.find(function(m){return m.home_name===home&&m.away_name===away;});
+      var calcResult=window._lastCalcResults&&window._lastCalcResults.find(function(r){return r.match.home_name===home&&r.match.away_name===away;});
+      var leagueInput=leg.querySelector(".trix-league");
+      if(leagueInput){leagueInput.value=(calcResult&&calcResult.match.league_name)||(todayM&&todayM.league_name)||"";}
+      var probInput=leg.querySelector(".trix-myprob");
+      if(probInput&&calcResult)probInput.value=calcResult.result.ourProb||"";
+    }
+  }
+  dd.style.display="none";
+}
 function calcTrixie(){
   var type=document.getElementById("bet-type").value;
   var unitSingle=type==="patent"?(parseFloat(document.getElementById("trix-unit-single").value)||0):0;
