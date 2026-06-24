@@ -1444,6 +1444,10 @@ function calcScore(data,t){
   else if(homeMatches>=15&&awayMatches>=15){confidence="🟡 MEDIUM";}
   else{confidence="🔴 LOW";}
 
+ // Confidence penalty
+  if(confidence==="🔴 LOW"){score=Math.max(0,score-4);}
+  else if(confidence==="🟡 MEDIUM"){score=Math.max(0,score-1);}
+
   // Market Edge
   var mktProb=data.odds>0?+(100/data.odds).toFixed(1):0;
   var marketEdge=+(ourProb-mktProb).toFixed(1);
