@@ -2247,7 +2247,18 @@ function searchTrixMatch(el){
 }
 function selectTrixMatch(home,away){
   var el=window._lastTrixMatchEl;
-  if(el)el.value=home+" vs "+away;
+  if(el){
+    el.value=home+" vs "+away;
+    var leg=el.closest(".trix-leg");
+    if(leg){
+      var todayM=window._todaysMatches&&window._todaysMatches.find(function(m){return m.home_name===home&&m.away_name===away;});
+      var leagueInput=leg.querySelector(".trix-league");
+      if(leagueInput&&todayM)leagueInput.value=todayM.league_name||"";
+      var calcResult=window._lastCalcResults&&window._lastCalcResults.find(function(r){return r.match.home_name===home&&r.match.away_name===away;});
+      var probInput=leg.querySelector(".trix-myprob");
+      if(probInput&&calcResult)probInput.value=calcResult.result.ourProb||"";
+    }
+  }
   var dd=document.getElementById("trix-match-dd");
   if(dd)dd.style.display="none";
 }
