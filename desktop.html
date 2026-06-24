@@ -2851,13 +2851,9 @@ function searchMatches(q){
   if(!q||q.length<2){dd.style.display="none";return;}
   clearTimeout(matchSearchTimeout);
   matchSearchTimeout=setTimeout(function(){
-    vvar ql=q.toLowerCase();
-    var allMatches=[];
-    if(window._todaysMatches&&window._todaysMatches.length){
-      allMatches=window._todaysMatches.map(function(m){return{home:m.home_name,away:m.away_name,league:m.league_name||"",fixture_id:m.id,kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():"",competition_id:m.competition_id};});
-    } else {
-      allMatches=upcomingMatches.slice();
-    }
+    var ql=q.toLowerCase();
+    var allMatches=upcomingMatches.slice();
+    if(window._todaysMatches){window._todaysMatches.forEach(function(m){var alreadyIn=allMatches.some(function(x){return x.fixture_id===m.id;});if(!alreadyIn)allMatches.push({home:m.home_name,away:m.away_name,league:"",fixture_id:m.id,kickoff:m.date_unix?new Date(m.date_unix*1000).toISOString():""});});}
     var results=allMatches.filter(function(m){
       return (m.home||"").toLowerCase().indexOf(ql)!==-1||(m.away||"").toLowerCase().indexOf(ql)!==-1;
     }).slice(0,8);
