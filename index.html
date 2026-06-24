@@ -239,7 +239,7 @@ canvas{width:100%!important}
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <div class="sidebar" id="sidebar">
   <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</button>
-  <button class="nav-item" id="nav-predictions" onclick="showPage('predictions',this)"><i class="ti ti-target"></i>Predictions</button>
+  <button class="nav-item" id="nav-predictions" onclick="showPage('predictions',this)"><i class="ti ti-target"></i>Draw Selection</button>
   <button class="nav-item" id="nav-bets" onclick="showPage('bets',this)"><i class="ti ti-cards"></i>My Bets</button>
   <button class="nav-item" id="nav-balances" onclick="showPage('balances',this)"><i class="ti ti-wallet"></i>Balances</button>
   <button class="nav-item" id="nav-martingale" onclick="showPage('martingale',this)"><i class="ti ti-trending-up"></i>Martingale</button>
@@ -335,14 +335,13 @@ canvas{width:100%!important}
       <div class="section-title" style="margin-bottom:14px">Thresholds</div>
       <div class="fr">
         <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05" oninput="saveCalcThresholds()"></div>
-        <div class="fg"><label class="fl">Min Draw Prob %</label><input type="number" class="fi" id="calc-min-draw-prob" value="45" step="5" oninput="saveCalcThresholds()"></div>
       </div>
       <div class="fg"><label class="fl">Min Score</label><input type="number" class="fi" id="calc-min-score" value="5" step="1" oninput="saveCalcThresholds()"></div>
     </div>
   </div>
   <div class="table-card">
 <div class="section-hd" style="margin-bottom:12px;margin-top:20px;padding:0 20px">
-    <div class="section-title">Draw Predictions</div>
+    <div class="section-title">Draw Selection</div>
     <div style="display:flex;gap:6px">
       <button class="btn btn-ghost btn-sm" id="star-filter-btn" onclick="toggleStarFilter(this)">☆</button>
       <button class="btn btn-ghost btn-sm" onclick="loadDrawPredictions()">Refresh</button>
@@ -1311,15 +1310,13 @@ function toggleStar(fixtureId){
 function getCalcThresholds(){
   return {
     minOdds: parseFloat((document.getElementById("calc-min-odds")||{}).value)||2.80,
-    minDrawProb: parseFloat((document.getElementById("calc-min-draw-prob")||{}).value)||45,
-    minScore: parseFloat((document.getElementById("calc-min-score")||{}).value)||5
+    minScore: parseFloat((document.getElementById("calc-min-score")||{}).value)||7
   };
 }
 function saveCalcThresholds(){
   localStorage.setItem("calc_thresholds",JSON.stringify({
     minOdds:parseFloat((document.getElementById("calc-min-odds")||{}).value)||2.80,
-    minDrawProb:parseFloat((document.getElementById("calc-min-draw-prob")||{}).value)||45,
-    minScore:parseFloat((document.getElementById("calc-min-score")||{}).value)||5
+    minScore:parseFloat((document.getElementById("calc-min-score")||{}).value)||7
   }));
 }
 function loadCalcThresholds(){
@@ -1328,7 +1325,6 @@ function loadCalcThresholds(){
   try{
     var v=JSON.parse(t);
     if(v.minOdds&&document.getElementById("calc-min-odds"))document.getElementById("calc-min-odds").value=v.minOdds;
-    if(v.minDrawProb&&document.getElementById("calc-min-draw-prob"))document.getElementById("calc-min-draw-prob").value=v.minDrawProb;
     if(v.minScore&&document.getElementById("calc-min-score"))document.getElementById("calc-min-score").value=v.minScore;
   }catch(e){}
 }
@@ -1582,6 +1578,8 @@ function calcAuto(){
           results.push({match:m,data:data,result:result});
           m._homePct=data.home_draw_pct;
           m._awayPct=data.away_draw_pct;
+          m._homeMatches=data.home_matches;
+          m._awayMatches=data.away_matches;
           saveDrawPrediction(m,data,result);
         }
         done++;
@@ -1630,9 +1628,10 @@ function calcRecalculate(){
   matches.forEach(function(m){
     if(!m._leagueData)return;
     var league=m._leagueData;
-    var h2hDraw=0;
+    var h2hDraw=0;var h2hMatches=0;
     if(m.h2h&&m.h2h.previous_matches_results&&m.h2h.previous_matches_results.totalMatches>0){
-      h2hDraw=+(m.h2h.previous_matches_results.draw/m.h2h.previous_matches_results.totalMatches*100).toFixed(1);
+      h2hMatches=m.h2h.previous_matches_results.totalMatches;
+      h2hDraw=+(m.h2h.previous_matches_results.draw/h2hMatches*100).toFixed(1);
     }
     var bestOdds=m.odds_ft_x||0;
     if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]){
@@ -1643,16 +1642,19 @@ function calcRecalculate(){
       league_draw_rate:league.drawPercentage||0,
       home_draw_pct:m._homePct||0,
       away_draw_pct:m._awayPct||0,
+      home_matches:m._homeMatches||0,
+      away_matches:m._awayMatches||0,
       avg_potential:m.avg_potential||0,
       btts_pct:m.btts_potential||0,
       ppg_home:m.pre_match_home_ppg||m.home_ppg||0,
       ppg_away:m.pre_match_away_ppg||m.away_ppg||0,
       h2h_draw_rate:h2hDraw,
+      h2h_matches:h2hMatches,
       odds:m.odds_ft_x||0,
       best_odds:bestOdds
     };
     var result=calcScore(data,getCalcThresholds());
-    if(!result.skip&&result.score>=5){
+    if(!result.skip&&result.score>=7){
       results.push({match:m,data:data,result:result});
     }
   });
@@ -1725,7 +1727,7 @@ function loadDrawPredictions(){
   var el=document.getElementById("pred-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
   sbGet("draw_predictions?select=*&order=kickoff.asc&limit=100").then(function(d){
-    if(!d.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
+    if(!d.length){el.innerHTML='<div class="empty">No selections yet</div>';return;}
     var results=d.map(function(p){
       return{
         match:{
@@ -1735,7 +1737,7 @@ function loadDrawPredictions(){
           competition_id:p.league,
           _savedAt:p.created_at,
           _kickoff:p.kickoff,
-          league_name:p.league_name||""
+          league_name:p.league_name||"",
         },
         data:{
           odds:p.odds,
@@ -1743,18 +1745,24 @@ function loadDrawPredictions(){
           league_draw_rate:p.league_draw_rate||0,
           home_draw_pct:p.home_draw_pct||0,
           away_draw_pct:p.away_draw_pct||0,
+          home_matches:p.home_matches||0,
+          away_matches:p.away_matches||0,
           avg_potential:p.avg_goals||0,
           btts_pct:p.btts_pct||0,
           ppg_home:0,
           ppg_away:0,
-          h2h_draw_rate:p.h2h_draw_rate||0
+          h2h_draw_rate:p.h2h_draw_rate||0,
+          h2h_matches:p.h2h_matches||0
         },
         result:{
           score:p.score,
           verdict:p.verdict,
+          confidence:p.confidence||"",
+          flags:p.flags?JSON.parse(p.flags):[],
           ourProb:p.our_prob||0,
           mktProb:p.odds>0?+(100/p.odds).toFixed(1):0,
-          ev:p.ev||0,
+          marketEdge:p.market_edge||0,
+          ev:p.market_edge||0,
           reasons:p.details?JSON.parse(p.details):[]
         }
       };
