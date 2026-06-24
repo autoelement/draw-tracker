@@ -174,7 +174,7 @@ tr:hover td{background:var(--bg3)}
   <div class="logo" onclick="showPage('dashboard',document.querySelector('.nav-tab'))" style="cursor:pointer">X<span>/</span>CAP</div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard',this)">Dashboard</button>
-    <button class="nav-tab" onclick="showPage('predictions',this)">Predictions</button>
+    <button class="nav-tab" onclick="showPage('predictions',this)">Draw Selection</button>
     <button class="nav-tab" onclick="showPage('bets',this)">My Bets</button>
     <button class="nav-tab" onclick="showPage('balances',this)">Balances</button>
     <button class="nav-tab" onclick="showPage('martingale',this)">Martingale</button>
@@ -272,7 +272,6 @@ tr:hover td{background:var(--bg3)}
   <div class="chart-title">Thresholds</div>
 <div class="fr3">
     <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05" oninput="saveCalcThresholds()"></div>
-    <div class="fg"><label class="fl">Min Draw Prob %</label><input type="number" class="fi" id="calc-min-draw-prob" value="45" step="5" oninput="saveCalcThresholds()"></div>
     <div class="fg"><label class="fl">Min Score</label><input type="number" class="fi" id="calc-min-score" value="5" step="1" oninput="saveCalcThresholds()"></div></div>
   </div>
 </div>
@@ -1390,15 +1389,13 @@ function selectCalcMatch(fixtureId,matchName,leagueId){
 function getCalcThresholds(){
   return {
     minOdds: parseFloat((document.getElementById("calc-min-odds")||{}).value)||2.80,
-    minDrawProb: parseFloat((document.getElementById("calc-min-draw-prob")||{}).value)||45,
-    minScore: parseFloat((document.getElementById("calc-min-score")||{}).value)||5
+    minScore: parseFloat((document.getElementById("calc-min-score")||{}).value)||7
   };
 }
 function saveCalcThresholds(){
   localStorage.setItem("calc_thresholds",JSON.stringify({
     minOdds:parseFloat((document.getElementById("calc-min-odds")||{}).value)||2.80,
-    minDrawProb:parseFloat((document.getElementById("calc-min-draw-prob")||{}).value)||45,
-    minScore:parseFloat((document.getElementById("calc-min-score")||{}).value)||5
+    minScore:parseFloat((document.getElementById("calc-min-score")||{}).value)||7
   }));
 }
 function loadCalcThresholds(){
@@ -1407,7 +1404,6 @@ function loadCalcThresholds(){
   try{
     var v=JSON.parse(t);
     if(v.minOdds&&document.getElementById("calc-min-odds"))document.getElementById("calc-min-odds").value=v.minOdds;
-    if(v.minDrawProb&&document.getElementById("calc-min-draw-prob"))document.getElementById("calc-min-draw-prob").value=v.minDrawProb;
     if(v.minScore&&document.getElementById("calc-min-score"))document.getElementById("calc-min-score").value=v.minScore;
   }catch(e){}
 }
@@ -1631,6 +1627,8 @@ function calcAuto(){
           results.push({match:m,data:data,result:result});
           m._homePct=data.home_draw_pct;
           m._awayPct=data.away_draw_pct;
+          m._homeMatches=data.home_matches;
+          m._awayMatches=data.away_matches;
           saveDrawPrediction(m,data,result);
         }
         done++;
@@ -1881,32 +1879,33 @@ function calcRecalculate(){
   matches.forEach(function(m){
     if(!m._leagueData)return;
     var league=m._leagueData;
-    var h2hDraw=0;
+    var h2hDraw=0;var h2hMatches=0;
     if(m.h2h&&m.h2h.previous_matches_results&&m.h2h.previous_matches_results.totalMatches>0){
-      h2hDraw=+(m.h2h.previous_matches_results.draw/m.h2h.previous_matches_results.totalMatches*100).toFixed(1);
+      h2hMatches=m.h2h.previous_matches_results.totalMatches;
+      h2hDraw=+(m.h2h.previous_matches_results.draw/h2hMatches*100).toFixed(1);
     }
-    var sboOdds=0;var bestOdds=m.odds_ft_x||0;
+    var bestOdds=m.odds_ft_x||0;
     if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]){
-      var drawOdds=m.odds_comparison["FT Result"]["Draw"];
-      if(drawOdds["Sbo"])sboOdds=parseFloat(drawOdds["Sbo"]);
-      Object.values(drawOdds).forEach(function(v){var f=parseFloat(v);if(f>bestOdds)bestOdds=f;});
+      Object.values(m.odds_comparison["FT Result"]["Draw"]).forEach(function(v){var f=parseFloat(v);if(f>bestOdds)bestOdds=f;});
     }
     m._kickoff=m.date_unix?new Date(m.date_unix*1000).toISOString():null;
     var data={
       league_draw_rate:league.drawPercentage||0,
       home_draw_pct:m._homePct||0,
       away_draw_pct:m._awayPct||0,
+      home_matches:m._homeMatches||0,
+      away_matches:m._awayMatches||0,
       avg_potential:m.avg_potential||0,
       btts_pct:m.btts_potential||0,
       ppg_home:m.pre_match_home_ppg||m.home_ppg||0,
       ppg_away:m.pre_match_away_ppg||m.away_ppg||0,
       h2h_draw_rate:h2hDraw,
+      h2h_matches:h2hMatches,
       odds:m.odds_ft_x||0,
-      best_odds:bestOdds,
-      sbo_odds:sboOdds
+      best_odds:bestOdds
     };
     var result=calcScore(data,getCalcThresholds());
-    if(!result.skip&&result.score>=5){
+    if(!result.skip&&result.score>=7){
       results.push({match:m,data:data,result:result});
     }
   });
@@ -1949,7 +1948,7 @@ function loadDrawPredictions(){
   var el=document.getElementById("pred-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
   sbGet("draw_predictions?select=*&order=kickoff.asc&limit=100").then(function(d){
-    if(!d.length){el.innerHTML='<div class="empty">No predictions yet</div>';return;}
+    if(!d.length){el.innerHTML='<div class="empty">No selections yet</div>';return;}
     var results=d.map(function(p){
       return{
         match:{
@@ -1967,19 +1966,24 @@ function loadDrawPredictions(){
           league_draw_rate:p.league_draw_rate||0,
           home_draw_pct:p.home_draw_pct||0,
           away_draw_pct:p.away_draw_pct||0,
+          home_matches:p.home_matches||0,
+          away_matches:p.away_matches||0,
           avg_potential:p.avg_goals||0,
           btts_pct:p.btts_pct||0,
           ppg_home:0,
           ppg_away:0,
           h2h_draw_rate:p.h2h_draw_rate||0,
-          sbo_odds:p.sbo_odds||0
+          h2h_matches:p.h2h_matches||0
         },
         result:{
           score:p.score,
           verdict:p.verdict,
+          confidence:p.confidence||"",
+          flags:p.flags?JSON.parse(p.flags):[],
           ourProb:p.our_prob||0,
           mktProb:p.odds>0?+(100/p.odds).toFixed(1):0,
-          ev:p.ev||0,
+          marketEdge:p.market_edge||0,
+          ev:p.market_edge||0,
           reasons:p.details?JSON.parse(p.details):[]
         }
       };
