@@ -2170,10 +2170,10 @@ function searchTrixMatch(el){
   dd.innerHTML=results.map(function(m){
     var safeHome=(m.home||"").replace(/'/g,"&#39;");
     var safeAway=(m.away||"").replace(/'/g,"&#39;");
-    return '<div onclick="selectTrixMatch(this.dataset.h,this.dataset.a)" data-h="'+safeHome+'" data-a="'+safeAway+'" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)">'+safeHome+' vs '+safeAway+'</div>';
+    return '<div onclick="selectTrixMatchFromDd(this)" data-h="'+safeHome+'" data-a="'+safeAway+'" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)">'+safeHome+' vs '+safeAway+'</div>';
   }).join("");
   dd.style.display="block";
-  window._lastTrixMatchEl=el;
+  dd._inputEl=el;
 }
 function selectTrixMatch(home,away){
   var el=window._lastTrixMatchEl;
