@@ -927,10 +927,10 @@ function setDbType(t,el){
 } else {
     seriesSel.style.display="none";seriesSel.value="all";
   }
-  var ssw=document.getElementById("score-stat-wrap");
+ var ssw=document.getElementById("score-stat-wrap");
 if(ssw)ssw.style.display="";
   var avgScoreCard=document.getElementById("avg-score-card");
-if(avgScoreCard)avgScoreCard.style.display=(savedType==="trixie")?"none":"";
+if(avgScoreCard)avgScoreCard.style.display=(t==="trixie")?"none":"";
   localStorage.setItem("db_type",t);
   window._dbTypeForFab=t;
   loadDashboard();
