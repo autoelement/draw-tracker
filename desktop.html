@@ -2247,11 +2247,7 @@ function selectTrixMatch(home,away){
   var dd=document.getElementById("trix-match-dd");
   if(dd)dd.style.display="none";
 }
-function selectTrixMatch(el,home,away){
-  var input=el.parentNode.previousElementSibling;
-  if(input)input.value=home+" vs "+away;
-  el.parentNode.style.display="none";
-}
+
 function calcTrixie(){
   var type=document.getElementById("bet-type").value;
   var unitSingle=type==="patent"?(parseFloat(document.getElementById("trix-unit-single").value)||0):0;
