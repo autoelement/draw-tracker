@@ -710,7 +710,7 @@ function showApp(email){
   document.getElementById("trixie-section").style.display=(savedType==="trixie")?"block":"none";
   document.getElementById("martingale-section").style.display=savedType==="martingale"?"block":"none";
   var ssw=document.getElementById("score-stat-wrap");
-  if(ssw)ssw.style.display=(savedType==="trixie")?"none":"";
+if(ssw)ssw.style.display="";
   var seriesSel=document.getElementById("db-series");
   if(savedType==="martingale"&&seriesSel){
     seriesSel.style.display="";
@@ -926,7 +926,7 @@ function setDbType(t,el){
     seriesSel.style.display="none";seriesSel.value="all";
   }
   var ssw=document.getElementById("score-stat-wrap");
-if(ssw)ssw.style.display=(t==="trixie")?"none":"";
+if(ssw)ssw.style.display="";
   localStorage.setItem("db_type",t);
   window._dbTypeForFab=t;
   loadDashboard();
