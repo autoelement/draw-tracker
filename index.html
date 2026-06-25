@@ -335,6 +335,7 @@ canvas{width:100%!important}
       <div class="section-title" style="margin-bottom:14px">Thresholds</div>
       <div class="fg"><label class="fl">Min Odds</label><input type="number" class="fi" id="calc-min-odds" value="2.80" step="0.05" oninput="saveCalcThresholds()"></div>
       <div class="fg"><label class="fl">Min Score (/15)</label><input type="number" class="fi" id="calc-min-score" value="7" step="1" oninput="saveCalcThresholds()"></div>
+<div class="fg"><label class="fl">Min League Draw %</label><input type="number" class="fi" id="calc-min-league-draw" value="25" step="1" oninput="saveCalcThresholds()"></div>
     </div>
   </div>
   <div class="table-card">
@@ -1326,13 +1327,15 @@ function toggleStar(fixtureId){
 function getCalcThresholds(){
   return {
     minOdds: parseFloat((document.getElementById("calc-min-odds")||{}).value)||2.80,
-    minScore: parseFloat((document.getElementById("calc-min-score")||{}).value)||7
+    minScore: parseFloat((document.getElementById("calc-min-score")||{}).value)||7,
+    minLeagueDraw: parseFloat((document.getElementById("calc-min-league-draw")||{}).value)||25
   };
 }
 function saveCalcThresholds(){
   localStorage.setItem("calc_thresholds",JSON.stringify({
     minOdds:parseFloat((document.getElementById("calc-min-odds")||{}).value)||2.80,
-    minScore:parseFloat((document.getElementById("calc-min-score")||{}).value)||7
+    minScore:parseFloat((document.getElementById("calc-min-score")||{}).value)||7,
+    minLeagueDraw:parseFloat((document.getElementById("calc-min-league-draw")||{}).value)||25
   }));
 }
 function loadCalcThresholds(){
@@ -1342,6 +1345,7 @@ function loadCalcThresholds(){
     var v=JSON.parse(t);
     if(v.minOdds&&document.getElementById("calc-min-odds"))document.getElementById("calc-min-odds").value=v.minOdds;
     if(v.minScore&&document.getElementById("calc-min-score"))document.getElementById("calc-min-score").value=v.minScore;
+    if(v.minLeagueDraw&&document.getElementById("calc-min-league-draw"))document.getElementById("calc-min-league-draw").value=v.minLeagueDraw;
   }catch(e){}
 }
 
@@ -1381,7 +1385,7 @@ function calcScore(data,t){
 
   // საბაზო ფილტრები
   if(data.odds<(t.minOdds||2.80)){return{score:0,skip:true,verdict:"🔴 SKIP",reasons:["❌ Odds "+data.odds+" < "+(t.minOdds||2.80)],ourProb:0,mktProb:0,ev:0,confidence:"",flags:[]};}
-  if(data.league_draw_rate>0&&data.league_draw_rate<25){var mkt=data.odds>0?+(100/data.odds).toFixed(1):0;return{score:0,skip:true,verdict:"🔴 SKIP",reasons:["❌ League Draw "+data.league_draw_rate+"% < 25%"],ourProb:0,mktProb:mkt,ev:0,marketEdge:0,confidence:"",flags:[]};}
+  if(data.league_draw_rate>0&&data.league_draw_rate<(t.minLeagueDraw||25)){var mkt=data.odds>0?+(100/data.odds).toFixed(1):0;return{score:0,skip:true,verdict:"🔴 SKIP",reasons:["❌ League Draw "+data.league_draw_rate+"% < 25%"],ourProb:0,mktProb:mkt,ev:0,marketEdge:0,confidence:"",flags:[]};}
   if(data.home_draw_pct===0&&data.away_draw_pct===0){return{score:0,skip:true,verdict:"🔴 SKIP",reasons:["❌ No team draw data"],ourProb:0,mktProb:0,ev:0,confidence:"",flags:[]};}
 
   // XCAP_Prob
