@@ -1519,9 +1519,20 @@ function getTeamDrawPct(teamData,competitionId,type){
     var awayMatches=season.stats.seasonMatchesPlayed_away||0;
     var pct=type==="home"?homePct:awayPct;
     var matches=type==="home"?homeMatches:awayMatches;
-    if(matches<5&&season.stats.drawPercentage_overall&&(season.stats.seasonMatchesPlayed_overall||0)>=5){
-      pct=season.stats.drawPercentage_overall;
-      matches=season.stats.seasonMatchesPlayed_overall||0;
+    if(matches<5){
+      if(season.stats.drawPercentage_overall&&(season.stats.seasonMatchesPlayed_overall||0)>=5){
+        pct=season.stats.drawPercentage_overall;
+        matches=season.stats.seasonMatchesPlayed_overall||0;
+      } else {
+        var otherSeason=(teamData||[]).find(function(s){
+          return s.competition_id!==competitionId&&s.stats&&(s.stats.seasonMatchesPlayed_overall||0)>=10;
+        });
+        if(otherSeason){
+          pct=type==="home"?(otherSeason.stats.drawPercentage_home||otherSeason.stats.drawPercentage_overall||0):(otherSeason.stats.drawPercentage_away||otherSeason.stats.drawPercentage_overall||0);
+          matches=type==="home"?(otherSeason.stats.seasonMatchesPlayed_home||0):(otherSeason.stats.seasonMatchesPlayed_away||0);
+          if(matches<5){pct=otherSeason.stats.drawPercentage_overall||0;matches=otherSeason.stats.seasonMatchesPlayed_overall||0;}
+        }
+      }
     }
     return{pct:pct||0,matches:matches};
   }
