@@ -1381,7 +1381,7 @@ function calcScore(data,t){
 
   // საბაზო ფილტრები
   if(data.odds<(t.minOdds||2.80)){return{score:0,skip:true,verdict:"🔴 SKIP",reasons:["❌ Odds "+data.odds+" < "+(t.minOdds||2.80)],ourProb:0,mktProb:0,ev:0,confidence:"",flags:[]};}
-  if(data.league_draw_rate>0&&data.league_draw_rate<25){return{score:0,skip:true,verdict:"🔴 SKIP",reasons:["❌ League Draw "+data.league_draw_rate+"% < 25%"],ourProb:0,mktProb:0,ev:0,confidence:"",flags:[]};}
+  if(data.league_draw_rate>0&&data.league_draw_rate<25){var mkt=data.odds>0?+(100/data.odds).toFixed(1):0;return{score:0,skip:true,verdict:"🔴 SKIP",reasons:["❌ League Draw "+data.league_draw_rate+"% < 25%"],ourProb:0,mktProb:mkt,ev:0,marketEdge:0,confidence:"",flags:[]};}
   if(data.home_draw_pct===0&&data.away_draw_pct===0){return{score:0,skip:true,verdict:"🔴 SKIP",reasons:["❌ No team draw data"],ourProb:0,mktProb:0,ev:0,confidence:"",flags:[]};}
 
   // XCAP_Prob
