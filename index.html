@@ -2114,9 +2114,10 @@ function renderBetsPage(){
     var eStr=b.edge!=null?'<span class="'+(b.edge>=0?"edge-pos":"edge-neg")+'">'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'';
     var selS=(b.selection||"").replace(" Win","").replace("Draw (X)","X").replace("(1)","1").replace("(2)","2");
     var matchDisplay=(b.match||"—")+(autoScore?' <span style="color:var(--text3);font-size:13px">'+b.notes.split("auto:FT:")[1]+'</span>':"");
-    h+='<div class="bet-card"><div class="bet-card-top"><div class="bet-match">'+matchDisplay+'</div>'+oc+'</div>';
-    var betTime=b.created_at?(" "+new Date(b.created_at).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})):"";
-    h+='<div class="bet-meta"><span class="bet-tag">'+(b.date||"")+betTime+'</span><span class="bet-tag"><strong>'+selS+'</strong></span><span class="bet-tag"><span class="odds-badge">'+(b.odds||0)+'</span></span>'+(b.league?'<span class="bet-tag">'+(b.league)+'</span>':"")+tp2+mart+'</div>';
+var koDate=b.kickoff?new Date(b.kickoff):"";
+var koTime=koDate?(String(koDate.getHours()).padStart(2,"0")+":"+String(koDate.getMinutes()).padStart(2,"0")):"";
+h+='<div class="bet-card"><div class="bet-card-top"><div class="bet-match">'+matchDisplay+'</div>'+oc+'</div>';
+h+='<div class="bet-meta"><span class="bet-tag">'+(b.date||"")+(koTime?" "+koTime:"")+'</span><span class="bet-tag"><strong>'+selS+'</strong></span><span class="bet-tag"><span class="odds-badge">'+(b.odds||0)+'</span></span>'+(b.league?'<span class="bet-tag">'+(b.league)+'</span>':"")+tp2+mart+'</div>';
     h+='<div class="bet-nums"><div><div class="bet-num-label">Amount</div><div class="bet-num-val">$'+((b.amount||0).toFixed(2))+'</div></div><div><div class="bet-num-label">Payout</div><div class="bet-num-val">$'+((b.payout||0).toFixed(2))+'</div></div><div><div class="bet-num-label">P&L</div><div class="bet-num-val '+(isPending?"":(pnl>=0?"pnl-pos":"pnl-neg"))+'" style="'+(isPending?"color:var(--text3)":"")+'">'+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+'</div></div></div>';
     if(isPending){
       h+='<div class="bet-actions" style="flex-wrap:wrap;gap:6px">';
@@ -2394,7 +2395,9 @@ if(type==="patent"){legs.forEach(function(l){rows.push({slip_id:slipId,date:date
   var isMartMode=document.getElementById("mode-mart").style.background!=="transparent"&&document.getElementById("mode-mart").style.background!==""; if(isMartMode&&!document.getElementById("bet-series-pick").value){   showToast("Please select a series",true);   document.getElementById("bet-series-pick").style.border="1px solid var(--red)";   btn.textContent="Save Bet";btn.disabled=false;return; } document.getElementById("bet-series-pick").style.border="";
   var fixtureId=parseInt(document.getElementById("bet-fixture-id").value)||null;
   var calcScoreVal=parseInt(document.getElementById("bet-calc-score").value)||null;
-  var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:isMart||null,martingale_step:martStep,notes:notes,fixture_id:fixtureId,calc_score:calcScoreVal};
+  var todayMatchKo=fixtureId&&window._todaysMatches?window._todaysMatches.find(function(m){return m.id===fixtureId;}):null;
+  var kickoffVal=todayMatchKo&&todayMatchKo.date_unix?new Date(todayMatchKo.date_unix*1000).toISOString():null;
+  var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:isMart||null,martingale_step:martStep,notes:notes,fixture_id:fixtureId,calc_score:calcScoreVal,kickoff:kickoffVal};
   var newEff=settledEffect(status,amt,payout);
   row.balance_applied=true;
   var p;
