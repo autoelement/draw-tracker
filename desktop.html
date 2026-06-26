@@ -1531,13 +1531,12 @@ function getTeamDrawPct(teamData,competitionId,type,leagueName){
 
   if(matches<15){
     var otherSeason=(teamData||[]).filter(function(s){
-      return s.stats&&
-             s.season!==season.season&&
-             (s.stats.seasonMatchesPlayed_overall||0)>=10&&
-             leagueName&&(s.english_name||s.name||"")===leagueName;
-    }).sort(function(a,b){
-      return (b.season||"").localeCompare(a.season||"");
-    })[0];
+  return s.stats&&
+         s.season!==season.season&&
+         (s.stats.seasonMatchesPlayed_overall||0)>=10;
+}).sort(function(a,b){
+  return (b.season||"").localeCompare(a.season||"");
+})[0];
 
     if(otherSeason){
       var otherPct=type==="home"?otherSeason.stats.drawPercentage_home||0:otherSeason.stats.drawPercentage_away||0;
