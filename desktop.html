@@ -301,8 +301,10 @@ tr:hover td{background:var(--bg3)}
       <option value="loss">Loss</option><option value="pending">Pending</option>
     </select>
     <select class="filter-sel" id="b-type" onchange="loadBets()">
-  <option value="">All Types</option><option value="single">Single</option>
+  <option value="">All Types</option>
+  <option value="single">Single</option>
   <option value="trixie">Trixie</option>
+  <option value="paper">📋 Paper</option>
 </select>
   </div>
   <div class="table-card">
@@ -2193,8 +2195,15 @@ function loadBets(){
   if(st)q+="&status=eq."+st;
   if(tp)q+="&bet_type=eq."+tp;
   if(search)q+="&match=ilike.*"+encodeURIComponent(search)+"*";
-  sbGet(q).then(function(manual){
-    betsAll=manual.filter(function(b){return!b.notes||b.notes.indexOf("stake:")!==0;});
+if(tp==="paper"){
+  sbGet("paper_bets?select=*&order=created_at.desc").then(function(rows){
+    betsAll=rows.map(function(r){return Object.assign(r,{_isPaper:true,bet_type:"paper",status:r.status||"pending",amount:r.stake||10});});
+    betsPage=1;renderBetsPage();
+  });
+  return;
+}
+sbGet(q).then(function(manual){
+  betsAll=manual.filter(function(b){return!b.notes||b.notes.indexOf("stake:")!==0;});
     betsPage=1;
     renderBetsPage();
   });
