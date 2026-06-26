@@ -2122,9 +2122,14 @@ function loadBets(){
   if(tp)q+="&bet_type=eq."+tp;
   if(search)q+="&match=ilike.*"+encodeURIComponent(search)+"*";
 if(tp==="paper"){
-  sbGet("paper_bets?select=*&order=created_at.desc").then(function(rows){
-    betsAll=rows.map(function(r){return Object.assign(r,{_isPaper:true,bet_type:"paper",status:r.status||"pending",amount:r.stake||10});});
-    betsPage=1;renderBetsPage();
+  var pst=document.getElementById("b-status").value;
+  var psearch=search;
+  var pq="paper_bets?select=*&order=created_at.desc";
+  if(pst)pq+="&status=eq."+pst;
+  if(psearch)pq+="&match=ilike.*"+encodeURIComponent(psearch)+"*";
+  sbGet(pq).then(function(rows){
+    betsAll=rows;
+    betsPage=1;renderPaperBets();
   });
   return;
 }
@@ -2180,6 +2185,66 @@ h+='<div style="font-size:11px;color:var(--text3)">'+(b.bookmaker?'<span class="
   });
   h+=pagControls(betsPage,totalPages,"gotoBetsPage");
   el.innerHTML=h;
+}
+function renderPaperBets(){
+  var el=document.getElementById("bets-body");
+  var all=betsAll;
+  if(!all.length){el.innerHTML='<div class="empty">No paper bets found</div>';return;}
+  
+  var pending=all.filter(function(b){return b.status==="pending";});
+  var wins=all.filter(function(b){return b.status==="win";});
+  var losses=all.filter(function(b){return b.status==="loss";});
+  var settled=wins.concat(losses);
+  var totalStaked=settled.reduce(function(s,b){return s+(b.stake||10);},0);
+  var totalReturn=wins.reduce(function(s,b){return s+((b.stake||10)*(b.odds||0));},0);
+  var pnl=totalReturn-totalStaked;
+  var roi=totalStaked?((pnl/totalStaked)*100).toFixed(1):0;
+  var avgEdge=all.length?(all.reduce(function(s,b){return s+(b.market_edge||0);},0)/all.length).toFixed(1):0;
+
+  var h='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
+  h+='<div class="stat-card"><div class="stat-label">P&L</div><div class="stat-val '+(pnl>=0?"green":"red")+'">'+(pnl>=0?"+":"")+pnl.toFixed(2)+'</div></div>';
+  h+='<div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val '+(parseFloat(roi)>=0?"amber":"red")+'">'+(parseFloat(roi)>=0?"+":"")+roi+'%</div></div>';
+  h+='<div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val">'+(settled.length?(wins.length/settled.length*100).toFixed(0):0)+'%<div class="stat-sub">'+wins.length+"/"+settled.length+'</div></div></div>';
+  h+='<div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue">'+avgEdge+'%</div></div>';
+  h+='</div>';
+
+  var totalPages=Math.ceil(all.length/betsPerPage);
+  var start=(betsPage-1)*betsPerPage;
+  var pageItems=all.slice(start,start+betsPerPage);
+
+  h+='<div class="table-scroll"><table><thead><tr><th>Date</th><th>Match</th><th>Odds</th><th>Stake</th><th>Edge</th><th>Score</th><th>Conf.</th><th>P&L</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  
+  pageItems.forEach(function(b){
+    var isPending=b.status==="pending";
+    var pnlB=b.status==="win"?(b.stake||10)*(b.odds||0)-(b.stake||10):b.status==="loss"?-(b.stake||10):0;
+    var koDate=b.kickoff?new Date(b.kickoff):"";
+    var koStr=koDate?(String(koDate.getDate()).padStart(2,"0")+"/"+String(koDate.getMonth()+1).padStart(2,"0")+" "+String(koDate.getHours()).padStart(2,"0")+":"+String(koDate.getMinutes()).padStart(2,"0")):"";
+    var edgeColor=(b.market_edge||0)>0?"color:var(--green)":"color:var(--red)";
+    var statusCell=isPending?
+      '<select class="inline-sel" onchange="savePaperStatus(\''+b.id+'\',this.value)"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>':
+      (b.status==="win"?'<span class="badge bw">WIN</span>':'<span class="badge bl">LOSS</span>');
+    h+="<tr><td class='mono'>"+koStr+"</td><td style='font-weight:500'>"+b.match+"</td><td><span class='odds-badge'>"+b.odds+"</span></td><td class='mono'>$"+(b.stake||10).toFixed(2)+"</td><td style='"+edgeColor+"'>"+(b.market_edge>=0?"+":"")+b.market_edge+"%</td><td style='color:var(--purple)'>"+b.calc_score+"/15</td><td style='font-size:11px'>"+b.confidence+"</td><td class='"+(pnlB>=0?"pnl-pos":"pnl-neg")+"'>"+(isPending?"-":(pnlB>=0?"+":"")+pnlB.toFixed(2))+"</td><td>"+statusCell+"</td><td><button class='btn btn-red btn-sm' onclick='deletePaperBet(\""+b.id+"\")'>x</button></td></tr>";
+  });
+  
+  h+="</tbody></table></div>";
+  h+=pagControls(betsPage,totalPages,"gotoBetsPage");
+  el.innerHTML=h;
+}
+
+function savePaperStatus(id,status){
+  sbPatch("paper_bets?id=eq."+id,{status:status}).then(function(){
+    showToast("Saved!");
+    var tp=document.getElementById("b-type").value;
+    if(tp==="paper")loadBets();
+  });
+}
+
+function deletePaperBet(id){
+  confirmAction("Delete this paper bet?",function(){
+    sbDelete("paper_bets?id=eq."+id).then(function(){
+      showToast("Deleted!");loadBets();
+    });
+  });
 }
 function gotoBetsPage(p){betsPage=p;renderBetsPage();window.scrollTo(0,0);}
 function pagControls(page,totalPages,fn){
