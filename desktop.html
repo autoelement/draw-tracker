@@ -1846,6 +1846,7 @@ function _buildCalcRows(results){
       "<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button> "+
       "<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+
       "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+")'>"+"+ Bet</button>"+
+"<button class='btn btn-ghost btn-sm' onclick='trackPaperBet("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+","+r.result.marketEdge+","+r.result.score+",\""+r.result.confidence+"\",\""+(r.match.league_name||"")+"\",\""+(r.match._kickoff||"")+"\")'>"+"📋 Track</button>"+
       "</td>";
     h+="</tr>";
     h+="<tr id='"+detailsId+"' style='display:none'><td colspan='14' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
@@ -1907,6 +1908,21 @@ function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName,calcScore){
     if(calcScore)document.getElementById("bet-calc-score").value=calcScore;
     calcBetFields();
   },100);
+}
+function trackPaperBet(fixtureId,matchName,odds,ourProb,marketEdge,calcScore,confidence,leagueName,kickoff){
+  sbPost("paper_bets",{
+    match:matchName,
+    league:leagueName||"",
+    fixture_id:fixtureId,
+    kickoff:kickoff||null,
+    odds:odds,
+    our_prob:ourProb,
+    market_edge:marketEdge,
+    calc_score:calcScore,
+    confidence:confidence||"",
+    stake:10,
+    status:"pending"
+  }).then(function(){showToast("📋 Tracked!");});
 }
 var _starredMatches=JSON.parse(localStorage.getItem("starred_matches")||"[]");
 
