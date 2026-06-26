@@ -1474,34 +1474,48 @@ function calcScore(data,t){
   var verdict=score>=13?"⭐⭐⭐ PREMIUM":score>=10?"✅✅✅ STRONG":score>=7?"✅ CONSIDER":"🔴 SKIP";
   return{score:score,skip:false,verdict:verdict,reasons:reasons,ourProb:ourProb,mktProb:mktProb,ev:ev,marketEdge:marketEdge,confidence:confidence,flags:flags};
 }
-function getTeamDrawPct(teamData,competitionId,type){
+function getTeamDrawPct(teamData,competitionId,type,leagueName){
   var season=(teamData||[]).find(function(s){return s.competition_id===competitionId;});
   if(!season&&teamData&&teamData.length)season=teamData[0];
-  if(season&&season.stats){
-    var homePct=season.stats.drawPercentage_home||0;
-    var awayPct=season.stats.drawPercentage_away||0;
-    var homeMatches=season.stats.seasonMatchesPlayed_home||0;
-    var awayMatches=season.stats.seasonMatchesPlayed_away||0;
-    var pct=type==="home"?homePct:awayPct;
-    var matches=type==="home"?homeMatches:awayMatches;
-    if(matches<5){
-      if(season.stats.drawPercentage_overall&&(season.stats.seasonMatchesPlayed_overall||0)>=5){
-        pct=season.stats.drawPercentage_overall;
-        matches=season.stats.seasonMatchesPlayed_overall||0;
-      } else {
-        var otherSeason=(teamData||[]).find(function(s){
-          return s.competition_id!==competitionId&&s.stats&&(s.stats.seasonMatchesPlayed_overall||0)>=10;
-        });
-        if(otherSeason){
-          pct=type==="home"?(otherSeason.stats.drawPercentage_home||otherSeason.stats.drawPercentage_overall||0):(otherSeason.stats.drawPercentage_away||otherSeason.stats.drawPercentage_overall||0);
-          matches=type==="home"?(otherSeason.stats.seasonMatchesPlayed_home||0):(otherSeason.stats.seasonMatchesPlayed_away||0);
-          if(matches<5){pct=otherSeason.stats.drawPercentage_overall||0;matches=otherSeason.stats.seasonMatchesPlayed_overall||0;}
-        }
+  if(!season||!season.stats)return{pct:0,matches:0};
+
+  var pct=type==="home"?season.stats.drawPercentage_home||0:season.stats.drawPercentage_away||0;
+  var matches=type==="home"?season.stats.seasonMatchesPlayed_home||0:season.stats.seasonMatchesPlayed_away||0;
+  var currentMatches=matches;
+
+  if(matches<5){
+    pct=season.stats.drawPercentage_overall||0;
+    matches=season.stats.seasonMatchesPlayed_overall||0;
+    currentMatches=matches;
+  }
+
+  if(matches<15){
+    var otherSeason=(teamData||[]).filter(function(s){
+      return s.stats&&
+             s.season!==season.season&&
+             (s.stats.seasonMatchesPlayed_overall||0)>=10&&
+             leagueName&&(s.english_name||s.name||"")===leagueName;
+    }).sort(function(a,b){
+      return (b.season||"").localeCompare(a.season||"");
+    })[0];
+
+    if(otherSeason){
+      var otherPct=type==="home"?otherSeason.stats.drawPercentage_home||0:otherSeason.stats.drawPercentage_away||0;
+      var otherMatches=type==="home"?otherSeason.stats.seasonMatchesPlayed_home||0:otherSeason.stats.seasonMatchesPlayed_away||0;
+      if(otherMatches<5){
+        otherPct=otherSeason.stats.drawPercentage_overall||0;
+        otherMatches=otherSeason.stats.seasonMatchesPlayed_overall||0;
+      }
+      if(otherMatches>0&&matches>0){
+        var mergedPct=+((pct*matches+otherPct*otherMatches)/(matches+otherMatches)).toFixed(1);
+        return{pct:mergedPct,matches:currentMatches};
+      } else if(otherMatches>0){
+        return{pct:otherPct,matches:currentMatches};
       }
     }
-    return{pct:pct||0,matches:matches};
   }
-  return{pct:0,matches:0};
+
+  return{pct:pct||0,matches:currentMatches};
 }
 function calcManual(){
   if(!_calcFixtureId){showToast("Select a match first",true);return;}
@@ -1524,8 +1538,8 @@ function calcManual(){
     var league=results[0].data||{};
     var m=matchData;
     var compId=m.competition_id;
-    var homeData=getTeamDrawPct(results[1].data,compId,"home");
-    var awayData=getTeamDrawPct(results[2].data,compId,"away");
+    var homeData=getTeamDrawPct(results[1].data,compId,"home",league.english_name||league.name||"");
+    var awayData=getTeamDrawPct(results[2].data,compId,"away",league.english_name||league.name||"");
     var homePct=homeData.pct;var awayPct=awayData.pct;
     var h2hDraw=0;var h2hMatches=0;
 var md=m;
@@ -1644,8 +1658,8 @@ function calcAuto(){
         var matchPromise=fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+m.id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
           .then(function(r){return r.json();}).then(function(d){return d.data||null;}).catch(function(){return null;});
         Promise.all([homePromise,awayPromise,matchPromise]).then(function(res){
-    var homeData=getTeamDrawPct(res[0],compId,"home");
-    var awayData=getTeamDrawPct(res[1],compId,"away");
+    var homeData=getTeamDrawPct(res[0],compId,"home",league.english_name||league.name||"");
+var awayData=getTeamDrawPct(res[1],compId,"away",league.english_name||league.name||"");
     processWithTeams(league,homeData.pct,awayData.pct,res[2],homeData.matches,awayData.matches);
   }).catch(function(){processWithTeams(league,0,0,null,0,0);});
       }
