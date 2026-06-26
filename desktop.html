@@ -1460,7 +1460,9 @@ function calcScore(data,t){
 
   // Flags
   if(marketEdge>18){flags.push("🚩 REVIEW: Edge "+marketEdge+"% > 18%");}
-  if(marketEdge<0){flags.push("🔴 VALUE MISSING: Edge "+marketEdge+"%");}
+  if(marketEdge<=0){flags.push("🔴 VALUE MISSING: Edge "+marketEdge+"%");
+    return{score:0,skip:true,verdict:"🔴 SKIP",reasons:["🔴 VALUE MISSING: Edge "+marketEdge+"% ≤ 0"],ourProb:ourProb,mktProb:mktProb,ev:ev,marketEdge:marketEdge,confidence:confidence,flags:flags};
+  }
 
   // 1. Draw Stats % (home_draw_pct ან away_draw_pct საშუალო)
   var drawStats=data.home_draw_pct>0&&data.away_draw_pct>0?+((data.home_draw_pct+data.away_draw_pct)/2).toFixed(1):(data.home_draw_pct||data.away_draw_pct);
