@@ -2720,8 +2720,7 @@ if(type==="patent"){legs.forEach(function(l){rows.push({slip_id:slipId,date:date
   var calcScoreVal=parseInt(document.getElementById("bet-calc-score").value)||null;
   var todayMatchKo=fixtureId&&window._todaysMatches?window._todaysMatches.find(function(m){return m.id===fixtureId;}):null;
   var kickoffVal=todayMatchKo&&todayMatchKo.date_unix?new Date(todayMatchKo.date_unix*1000).toISOString():null;
-  var dateToSave=kickoffVal?new Date(kickoffVal).toLocaleDateString("en-GB",{day:"2-digit",month:"2-digit",year:"2-digit"}):date;
-  var row={date:dateToSave,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:martId,martingale_step:martStep,notes:notes,fixture_id:fixtureId,calc_score:calcScoreVal,kickoff:kickoffVal};
+  var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:martId,martingale_step:martStep,notes:notes,fixture_id:fixtureId,calc_score:calcScoreVal,kickoff:kickoffVal};
   var newEff=settledEffect(status,amt,payout);
   row.balance_applied=true;
   var p;
