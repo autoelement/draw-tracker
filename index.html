@@ -761,10 +761,11 @@ function syncResults(){
         if(m&&m.status==="complete"){
           var isDraw=m.homeGoalCount===m.awayGoalCount;
           var status=isDraw?"win":"loss";
-          var payout=isDraw?+(b.amount*b.odds).toFixed(2):0;
-          sbPatch("bets?id=eq."+b.id,{status:status,payout:payout}).then(function(){
-            adjustBalance(b.bookmaker,isDraw?(payout-b.amount):(-b.amount));
-          });
+var payout=isDraw?+(b.amount*b.odds).toFixed(2):0;
+sbPatch("bets?id=eq."+b.id,{status:status,payout:payout,balance_applied:true}).then(function(){
+  adjustBalance(b.bookmaker,isDraw?(payout-b.amount):(-b.amount));
+  if(b.slip_id){updateComboStatuses(b.slip_id);}
+});
         }
         done++;
         if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync Results";btn.disabled=false;loadBets();loadBookmakers();}
