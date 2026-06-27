@@ -2236,9 +2236,9 @@ function renderBetsPage(){
     var selS=(b.selection||"").replace(" Win","").replace("Draw (X)","X").replace("(1)","1").replace("(2)","2");
     var matchDisplay=(b.match||"—")+(autoScore?' <span style="color:var(--text3);font-size:13px">'+b.notes.split("auto:FT:")[1]+'</span>':"");
 var koDate=b.kickoff?new Date(b.kickoff):"";
-var koTime=koDate?(String(koDate.getHours()).padStart(2,"0")+":"+String(koDate.getMinutes()).padStart(2,"0")):"";
+var koStr=koDate?(String(koDate.getDate()).padStart(2,"0")+"-"+koDate.toLocaleString("en-GB",{month:"short"})+" "+String(koDate.getHours()).padStart(2,"0")+":"+String(koDate.getMinutes()).padStart(2,"0")):"";
 h+='<div class="bet-card"><div class="bet-card-top"><div class="bet-match">'+matchDisplay+'</div>'+oc+'</div>';
-h+='<div class="bet-meta"><span class="bet-tag">'+(b.date||"")+(koTime?" "+koTime:"")+'</span><span class="bet-tag"><strong>'+selS+'</strong></span><span class="bet-tag"><span class="odds-badge">'+(b.odds||0)+'</span></span>'+(b.league?'<span class="bet-tag">'+(b.league)+'</span>':"")+tp2+mart+'</div>';
+h+='<div class="bet-meta"><span class="bet-tag">'+(b.date||"")+(koStr?" · "+koStr:"")+'</span><span class="bet-tag"><strong>'+selS+'</strong></span><span class="bet-tag"><span class="odds-badge">'+(b.odds||0)+'</span></span>'+(b.league?'<span class="bet-tag">'+(b.league)+'</span>':"")+tp2+mart+'</div>';
     h+='<div class="bet-nums"><div><div class="bet-num-label">Amount</div><div class="bet-num-val">$'+((b.amount||0).toFixed(2))+'</div></div><div><div class="bet-num-label">Payout</div><div class="bet-num-val">$'+((b.payout||0).toFixed(2))+'</div></div><div><div class="bet-num-label">P&L</div><div class="bet-num-val '+(isPending?"":(pnl>=0?"pnl-pos":"pnl-neg"))+'" style="'+(isPending?"color:var(--text3)":"")+'">'+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+'</div></div></div>';
     if(isPending){
       h+='<div class="bet-actions" style="flex-wrap:wrap;gap:6px">';
