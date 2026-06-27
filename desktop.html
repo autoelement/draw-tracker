@@ -938,18 +938,16 @@ function showPage(name,el){
   if (name === "settings") { loadSettings(); updateSettingsPreview(); }
 }
 function togglePaperFilter(el){
-  var sel=document.getElementById("b-type");
   var dot=document.getElementById("paper-dot");
-  if(sel.value==="paper"){
-    sel.value="";
+  if(window._paperFilterOn){
+    window._paperFilterOn=false;
     el.classList.remove("active");
     dot.style.background="var(--text3)";
   } else {
-    sel.value="paper";
+    window._paperFilterOn=true;
     el.classList.add("active");
     dot.style.background="var(--green)";
   }
-  betsAll=[];
   loadBets();
 }
 function setDbType(t, el) {
@@ -1985,12 +1983,7 @@ function trackPaperBet(fixtureId,matchName,odds,ourProb,marketEdge,calcScore,con
     confidence:confidence||"",
     stake:10,
     status:"pending"
-  }).then(function(){
-    showToast("📋 Tracked!");
-    window._trackedFixtures=window._trackedFixtures||[];
-    window._trackedFixtures.push(fixtureId);
-    loadDrawPredictions();
-  });
+  }).then(function(){showToast("📋 Tracked!");});
 }
 var _starredMatches=JSON.parse(localStorage.getItem("starred_matches")||"[]");
 
@@ -2747,9 +2740,7 @@ if(type==="patent"){legs.forEach(function(l){rows.push({slip_id:slipId,date:date
     });
   }
   p.then(function(){
-  }).then(function(){closeM("modal-bet");showToast("Bet saved!");loadBets();loadBookmakers();
-    if(fixtureId){window._bettedFixtures=window._bettedFixtures||[];window._bettedFixtures.push(fixtureId);}
-    loadDrawPredictions();if(isMart){loadMartSeries();var sel=document.getElementById("m-series-sel");if(sel&&sel.value)updateSeriesPreview(sel.value);}})
+  }).then(function(){closeM("modal-bet");showToast("Bet saved!");loadBets();loadBookmakers();if(isMart){loadMartSeries();var sel=document.getElementById("m-series-sel");if(sel&&sel.value)updateSeriesPreview(sel.value);}})
   .catch(function(e){showToast("Error: "+e.message,true);})
   .finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
 }
