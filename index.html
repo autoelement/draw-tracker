@@ -1631,7 +1631,6 @@ function calcAuto(){
   showToast("Fetching matches...");
   var el=document.getElementById("pred-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Fetching matches...</div>';
-  Promise.all([
     var requests=[
     fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
     fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
