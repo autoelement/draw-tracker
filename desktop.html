@@ -1535,7 +1535,7 @@ function getTeamDrawPct(teamData,competitionId,type,leagueName){
     currentMatches=matches;
   }
 
-  if(matches<15){
+  if(matches<8){
     var otherSeason=(teamData||[]).filter(function(s){
   var oPct=type==="home"?s.stats.drawPercentage_home||0:s.stats.drawPercentage_away||0;
   return s.stats&&
