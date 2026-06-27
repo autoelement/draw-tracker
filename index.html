@@ -2231,13 +2231,16 @@ function renderPaperBets(){
     h+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)">';
     h+='<div style="font-size:11px;color:var(--text3)">'+b.confidence+'</div>';
     if(isPending){
-      h+='<div style="display:flex;gap:6px;align-items:center">';
-      h+='<select class="inline-sel" onchange="savePaperStatus(\''+b.id+'\',this.value)"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
+      var clv=b.closing_odds&&b.odds?+((b.odds/b.closing_odds-1)*100).toFixed(1):null;
+      h+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">';
+      h+='<div class="'+(pnlB>=0?"pnl-pos":"pnl-neg")+'" style="font-family:Space Mono;font-size:14px">'+(pnlB>=0?"+":"")+pnlB.toFixed(2)+'</div>';
+      h+=(clv!=null?'<div style="font-size:11px;color:'+(clv>=0?'var(--green)':'var(--red)')+'">CLV: '+(clv>=0?'+':'')+clv+'%</div>':"");
       h+='<button class="btn btn-red btn-sm btn-icon" onclick="deletePaperBet(\''+b.id+'\')">✕</button>';
       h+='</div>';
     } else {
-      h+='<div style="display:flex;gap:6px;align-items:center">';
-      h+='<div class="'+(pnlB>=0?"pnl-pos":"pnl-neg")+'" style="font-family:Space Mono;font-size:14px">'+(pnlB>=0?"+":"")+pnlB.toFixed(2)+'</div>';
+      h+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">';
+      h+='<select class="inline-sel" onchange="savePaperStatus(\''+b.id+'\',this.value)"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
+      h+='<input class="inline-input" style="width:70px" type="number" placeholder="Close" step="0.01" value="'+(b.closing_odds||"")+'" onchange="savePaperClosingOdds(\''+b.id+'\',this.value)">';
       h+='<button class="btn btn-red btn-sm btn-icon" onclick="deletePaperBet(\''+b.id+'\')">✕</button>';
       h+='</div>';
     }
@@ -2256,7 +2259,11 @@ function savePaperStatus(id,status){
     if(tp==="paper")loadBets();
   });
 }
-
+function savePaperClosingOdds(id,val){
+  sbPatch("paper_bets?id=eq."+id,{closing_odds:parseFloat(val)||null}).then(function(){
+    showToast("Saved!");
+  });
+}
 function deletePaperBet(id){
   confirmAction("Delete this paper bet?",function(){
     sbDelete("paper_bets?id=eq."+id).then(function(){
