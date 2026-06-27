@@ -673,15 +673,15 @@ function closeSidebar(){document.getElementById("sidebar").classList.remove("ope
 function togglePaperFilter(el){
   var sel=document.getElementById("b-type");
   var dot=document.getElementById("paper-dot");
-  if(sel.value==="paper"){sel.value="";el.classList.remove("active");dot.style.background="var(--text3)";}
-  else{sel.value="paper";el.classList.add("active");dot.style.background="var(--green)";}
-  loadBets();
-}
-  function togglePaperFilter(el){
-  var sel=document.getElementById("b-type");
-  var dot=document.getElementById("paper-dot");
-  if(sel.value==="paper"){sel.value="";el.classList.remove("active");dot.style.background="var(--text3)";}
-  else{sel.value="paper";el.classList.add("active");dot.style.background="var(--green)";}
+  if(sel.value==="paper"){
+    sel.value="";
+    el.classList.remove("active");
+    dot.style.background="var(--text3)";
+  } else {
+    sel.value="paper";
+    el.classList.add("active");
+    dot.style.background="var(--green)";
+  }
   loadBets();
 }
 function doLogin(){
