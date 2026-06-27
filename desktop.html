@@ -2179,6 +2179,22 @@ function exportBets(){
     {key:"bookmaker",label:"Bookmaker"},{key:"status",label:"Status"},{key:"_mode",label:"Mode"}
   ],"bets_"+new Date().toISOString().slice(0,10)+".csv");
 }
+function exportPaperBets(){
+  exportCSV(betsAll,[
+    {key:"kickoff",label:"Date"},
+    {key:"match",label:"Match"},
+    {key:"league",label:"League"},
+    {key:"odds",label:"Odds"},
+    {key:"stake",label:"Stake"},
+    {key:"market_edge",label:"Edge%"},
+    {key:"calc_score",label:"Score"},
+    {key:"confidence",label:"Confidence"},
+    {key:"our_prob",label:"XCAP%"},
+    {key:"status",label:"Status"},
+    {key:"closing_odds",label:"Closing Odds"},
+    {key:"pnl",label:"P&L"}
+  ],"paper_bets_"+new Date().toISOString().slice(0,10)+".csv");
+}
 function exportTx(){
   exportCSV(txAll,[
     {key:"created_at",label:"Date"},{key:"bookmaker",label:"Bookmaker"},
