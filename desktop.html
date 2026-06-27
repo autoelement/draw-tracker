@@ -938,16 +938,18 @@ function showPage(name,el){
   if (name === "settings") { loadSettings(); updateSettingsPreview(); }
 }
 function togglePaperFilter(el){
+  var sel=document.getElementById("b-type");
   var dot=document.getElementById("paper-dot");
-  if(window._paperFilterOn){
-    window._paperFilterOn=false;
+  if(sel.value==="paper"){
+    sel.value="";
     el.classList.remove("active");
     dot.style.background="var(--text3)";
   } else {
-    window._paperFilterOn=true;
+    sel.value="paper";
     el.classList.add("active");
     dot.style.background="var(--green)";
   }
+  betsAll=[];
   loadBets();
 }
 function setDbType(t, el) {
