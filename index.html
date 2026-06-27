@@ -1878,6 +1878,10 @@ function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName,calcScore){
   },100);
 }
 function trackPaperBet(fixtureId,matchName,odds,ourProb,marketEdge,calcScore,confidence,leagueName,kickoff){
+  if(window._trackedFixtures&&window._trackedFixtures.indexOf(fixtureId)!==-1){
+    showToast("Already tracked!",true);
+    return;
+  }
   sbPost("paper_bets",{
     match:matchName,
     league:leagueName||"",
