@@ -789,7 +789,7 @@ function syncPaperResults(){
           sbPatch("paper_bets?id=eq."+b.id,{status:status});
         }
         done++;
-        if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync";btn.disabled=false;loadBets();}
+        if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync";btn.disabled=false;loadBets();loadBookmakers();}
       }).catch(function(){done++;if(done===rows.length){btn.textContent="⟳ Sync";btn.disabled=false;loadBets();}});
     });
   });
