@@ -313,7 +313,7 @@ tr:hover td{background:var(--bg3)}
       <div style="display:flex;gap:6px">
         <button class="btn btn-ghost" onclick="loadBets()">Refresh</button>
 <button class="btn btn-ghost" onclick="document.getElementById('b-type').value==='paper'?exportPaperBets():exportBets()">⬇ CSV</button>
-<button class="btn btn-ghost" onclick="syncResults()" id="sync-btn">⟳ Sync Results</button>
+<button class="btn btn-ghost" onclick="document.getElementById('b-type').value==='paper'?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync Results</button>
 <button class="btn btn-green" onclick="openAddBet()">+ Add Bet</button>
       </div>
     </div>
@@ -733,6 +733,28 @@ function syncResults(){
     else{showToast("Error: "+r.status,true);}
     btn.textContent="⟳ Sync Results";btn.disabled=false;
   }).catch(function(){showToast("Error",true);btn.textContent="⟳ Sync Results";btn.disabled=false;});
+}
+function syncPaperResults(){
+  var btn=document.getElementById("sync-btn");
+  btn.textContent="Running...";btn.disabled=true;
+  sbGet("paper_bets?select=*&status=eq.pending").then(function(rows){
+    if(!rows.length){showToast("No pending paper bets",true);btn.textContent="⟳ Sync";btn.disabled=false;return;}
+    var done=0;
+    rows.forEach(function(b){
+      if(!b.fixture_id){done++;if(done===rows.length){btn.textContent="⟳ Sync";btn.disabled=false;loadBets();}return;}
+      fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+b.fixture_id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var m=d.data;
+        if(m&&m.status==="complete"){
+          var status=m.homeGoalCount===m.awayGoalCount?"win":"loss";
+          sbPatch("paper_bets?id=eq."+b.id,{status:status});
+        }
+        done++;
+        if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync";btn.disabled=false;loadBets();}
+      }).catch(function(){done++;if(done===rows.length){btn.textContent="⟳ Sync";btn.disabled=false;loadBets();}});
+    });
+  });
 }
 function refreshAuthToken(){
   var refreshToken=localStorage.getItem("dt_refresh");
