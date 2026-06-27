@@ -2199,8 +2199,12 @@ if(tp==="paper"||window._paperFilterOn){
   if(pst)pq+="&status=eq."+pst;
   if(psearch)pq+="&match=ilike.*"+encodeURIComponent(psearch)+"*";
   sbGet(pq).then(function(rows){
-    betsAll=rows;
-    betsPage=1;renderPaperBets();
+    betsAll=rows||[];
+    betsPage=1;
+    renderPaperBets();
+  }).catch(function(){
+    betsAll=[];
+    renderPaperBets();
   });
   return;
 }
