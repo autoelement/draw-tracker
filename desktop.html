@@ -2300,7 +2300,11 @@ function savePaperStatus(id,status){
     if(tp==="paper")loadBets();
   });
 }
-
+function savePaperClosingOdds(id,val){
+  sbPatch("paper_bets?id=eq."+id,{closing_odds:parseFloat(val)||null}).then(function(){
+    showToast("Saved!");
+  });
+}
 function deletePaperBet(id){
   confirmAction("Delete this paper bet?",function(){
     sbDelete("paper_bets?id=eq."+id).then(function(){
