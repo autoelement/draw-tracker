@@ -2201,11 +2201,14 @@ function renderPaperBets(){
   var roi=totalStaked?((pnl/totalStaked)*100).toFixed(1):0;
   var avgEdge=all.length?(all.reduce(function(s,b){return s+(b.market_edge||0);},0)/all.length).toFixed(1):0;
 
+  var clvBets=settled.filter(function(b){return b.closing_odds&&b.odds;});
+  var avgClv=clvBets.length?+(clvBets.reduce(function(s,b){return s+((b.odds/b.closing_odds-1)*100);},0)/clvBets.length).toFixed(1):null;
   var h='<div class="stats-2" style="margin-bottom:14px">';
   h+='<div class="stat-card"><div class="stat-label">P&L</div><div class="stat-val '+(pnl>=0?"green":"red")+'">'+(pnl>=0?"+":"")+pnl.toFixed(2)+'</div></div>';
   h+='<div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val '+(parseFloat(roi)>=0?"amber":"red")+'">'+(parseFloat(roi)>=0?"+":"")+roi+'%</div></div>';
   h+='<div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val">'+(settled.length?(wins.length/settled.length*100).toFixed(0):0)+'%</div><div class="stat-sub">'+wins.length+"/"+settled.length+'</div></div>';
   h+='<div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue">'+(avgEdge>=0?"+":"")+avgEdge+'%</div></div>';
+  h+='<div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val green">'+(avgClv!=null?(avgClv>=0?"+":"")+avgClv+'%':"—")+'</div><div class="stat-sub">'+clvBets.length+' tracked</div></div>';
   h+='</div>';
 
   var totalPages=Math.ceil(all.length/betsPerPage);
@@ -2231,16 +2234,16 @@ function renderPaperBets(){
     h+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)">';
     h+='<div style="font-size:11px;color:var(--text3)">'+b.confidence+'</div>';
     if(isPending){
+      h+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">';
+      h+='<select class="inline-sel" onchange="savePaperStatus(\''+b.id+'\',this.value)"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
+      h+='<input class="inline-input" style="width:70px" type="number" placeholder="Close" step="0.01" value="'+(b.closing_odds||"")+'" onchange="savePaperClosingOdds(\''+b.id+'\',this.value)">';
+      h+='<button class="btn btn-red btn-sm btn-icon" onclick="deletePaperBet(\''+b.id+'\')">✕</button>';
+      h+='</div>';
+    } else {
       var clv=b.closing_odds&&b.odds?+((b.odds/b.closing_odds-1)*100).toFixed(1):null;
       h+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">';
       h+='<div class="'+(pnlB>=0?"pnl-pos":"pnl-neg")+'" style="font-family:Space Mono;font-size:14px">'+(pnlB>=0?"+":"")+pnlB.toFixed(2)+'</div>';
       h+=(clv!=null?'<div style="font-size:11px;color:'+(clv>=0?'var(--green)':'var(--red)')+'">CLV: '+(clv>=0?'+':'')+clv+'%</div>':"");
-      h+='<button class="btn btn-red btn-sm btn-icon" onclick="deletePaperBet(\''+b.id+'\')">✕</button>';
-      h+='</div>';
-    } else {
-      h+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">';
-      h+='<select class="inline-sel" onchange="savePaperStatus(\''+b.id+'\',this.value)"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
-      h+='<input class="inline-input" style="width:70px" type="number" placeholder="Close" step="0.01" value="'+(b.closing_odds||"")+'" onchange="savePaperClosingOdds(\''+b.id+'\',this.value)">';
       h+='<button class="btn btn-red btn-sm btn-icon" onclick="deletePaperBet(\''+b.id+'\')">✕</button>';
       h+='</div>';
     }
