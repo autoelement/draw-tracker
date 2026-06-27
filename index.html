@@ -364,11 +364,10 @@ canvas{width:100%!important}
   <option value="">All Types</option>
   <option value="single">Single</option>
   <option value="trixie">Trixie</option>
-  <option value="paper">📋 Paper</option>
 </select>
-    <button class="btn btn-ghost btn-sm" onclick="loadBets()">Refresh</button>
-<button class="btn btn-ghost btn-sm" onclick="document.getElementById('b-type').value==='paper'?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync</button>
-  </div>
+<button class="btn btn-ghost btn-sm" onclick="loadBets()">Refresh</button>
+<button class="filter-pill" id="paper-toggle-btn" onclick="togglePaperFilter(this)"><span id="paper-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;margin-right:4px"></span>📋 Paper</button>
+<button class="btn btn-ghost btn-sm" onclick="document.getElementById('b-type').value==='paper'?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync</button>  </div>
   <div id="bets-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
 </div>
 
@@ -671,7 +670,20 @@ function confirmAction(msg,fn){
 
 function toggleSidebar(){var s=document.getElementById("sidebar"),o=document.getElementById("sidebar-overlay"),h=document.getElementById("hamburger");s.classList.toggle("open");o.classList.toggle("open");h.classList.toggle("open");}
 function closeSidebar(){document.getElementById("sidebar").classList.remove("open");document.getElementById("sidebar-overlay").classList.remove("open");document.getElementById("hamburger").classList.remove("open");}
-
+function togglePaperFilter(el){
+  var sel=document.getElementById("b-type");
+  var dot=document.getElementById("paper-dot");
+  if(sel.value==="paper"){sel.value="";el.classList.remove("active");dot.style.background="var(--text3)";}
+  else{sel.value="paper";el.classList.add("active");dot.style.background="var(--green)";}
+  loadBets();
+}
+  function togglePaperFilter(el){
+  var sel=document.getElementById("b-type");
+  var dot=document.getElementById("paper-dot");
+  if(sel.value==="paper"){sel.value="";el.classList.remove("active");dot.style.background="var(--text3)";}
+  else{sel.value="paper";el.classList.add("active");dot.style.background="var(--green)";}
+  loadBets();
+}
 function doLogin(){
   var email=document.getElementById("login-email").value;
   var pass=document.getElementById("login-pass").value;
