@@ -1632,10 +1632,20 @@ function calcAuto(){
   var el=document.getElementById("pred-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Fetching matches...</div>';
   Promise.all([
+    var requests=[
     fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
     fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
-  ]).then(function(pages){
-    var d={data:(pages[0].data||[]).concat(pages[1].data||[])};
+  ];
+  var hours=parseInt(document.getElementById("calc-time-range").value)||48;
+  if(hours>48){
+    for(var d2=2;d2<=Math.ceil(hours/24);d2++){
+      var dt=new Date();dt.setDate(dt.getDate()+d2);var dateStr=dt.toISOString().slice(0,10);
+      requests.push(fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&date="+dateStr,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}));
+    }
+  }
+  Promise.all(requests).then(function(pages){
+    var allData=[];pages.forEach(function(p){allData=allData.concat(p.data||[]);});
+    var d={data:allData};
     if(!d.data||!d.data.length){el.innerHTML='<div class="empty">No matches found</div>';return;}
     window._todaysMatches=d.data||[];
     var matches=window._todaysMatches.filter(function(m){return m.date_unix<=until&&m.odds_ft_x>=(parseFloat(document.getElementById("calc-min-odds").value)||2.80);});
