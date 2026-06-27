@@ -767,7 +767,7 @@ function syncResults(){
           });
         }
         done++;
-        if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync Results";btn.disabled=false;loadBets();}
+        if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync Results";btn.disabled=false;loadBets();loadBookmakers();}
       }).catch(function(){done++;if(done===rows.length){btn.textContent="⟳ Sync Results";btn.disabled=false;loadBets();}});
     });
   });
