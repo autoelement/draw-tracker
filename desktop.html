@@ -1537,11 +1537,11 @@ function getTeamDrawPct(teamData,competitionId,type,leagueName){
 
   if(matches<15){
     var otherSeason=(teamData||[]).filter(function(s){
+  var oPct=type==="home"?s.stats.drawPercentage_home||0:s.stats.drawPercentage_away||0;
   return s.stats&&
          s.season!==season.season&&
-         s.competition_id!==season.competition_id&&
          (s.stats.seasonMatchesPlayed_overall||0)>=10&&
-         Math.abs(parseInt(s.season||0)-parseInt(season.season||0))<=2;
+         oPct>0;
 }).sort(function(a,b){
   return (b.season||"").localeCompare(a.season||"");
 })[0];
