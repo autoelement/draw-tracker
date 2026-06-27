@@ -2608,7 +2608,17 @@ if(type==="patent"){legs.forEach(function(l){rows.push({slip_id:slipId,date:date
   var fixtureId=parseInt(document.getElementById("bet-fixture-id").value)||null;
   var calcScoreVal=parseInt(document.getElementById("bet-calc-score").value)||null;
   var todayMatchKo=fixtureId&&window._todaysMatches?window._todaysMatches.find(function(m){return m.id===fixtureId;}):null;
-  var kickoffVal=todayMatchKo&&todayMatchKo.date_unix?new Date(todayMatchKo.date_unix*1000).toISOString():null;
+var kickoffVal=todayMatchKo&&todayMatchKo.date_unix?new Date(todayMatchKo.date_unix*1000).toISOString():null;
+if(!kickoffVal&&fixtureId){
+  fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+fixtureId,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.data&&d.data.date_unix){
+      kickoffVal=new Date(d.data.date_unix*1000).toISOString();
+      sbPatch("bets?fixture_id=eq."+fixtureId+"&kickoff=is.null",{kickoff:kickoffVal});
+    }
+  });
+}
   var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:isMart||null,martingale_step:martStep,notes:notes,fixture_id:fixtureId,calc_score:calcScoreVal,kickoff:kickoffVal};
   var newEff=settledEffect(status,amt,payout);
   row.balance_applied=true;
