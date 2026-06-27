@@ -937,7 +937,20 @@ function showPage(name,el){
   if (name === "martingale") { calcMartingale(); loadMartSeries().then(function() { loadMartingaleHistory(); }); }
   if (name === "settings") { loadSettings(); updateSettingsPreview(); }
 }
-
+function togglePaperFilter(el){
+  var sel=document.getElementById("b-type");
+  var dot=document.getElementById("paper-dot");
+  if(sel.value==="paper"){
+    sel.value="";
+    el.classList.remove("active");
+    dot.style.background="var(--text3)";
+  } else {
+    sel.value="paper";
+    el.classList.add("active");
+    dot.style.background="var(--green)";
+  }
+  loadBets();
+}
 function setDbType(t, el) {
   dbType = t;
   document.querySelectorAll(".type-tab").forEach(function(x) { x.classList.remove("active"); });
