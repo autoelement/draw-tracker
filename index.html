@@ -671,14 +671,13 @@ function confirmAction(msg,fn){
 function toggleSidebar(){var s=document.getElementById("sidebar"),o=document.getElementById("sidebar-overlay"),h=document.getElementById("hamburger");s.classList.toggle("open");o.classList.toggle("open");h.classList.toggle("open");}
 function closeSidebar(){document.getElementById("sidebar").classList.remove("open");document.getElementById("sidebar-overlay").classList.remove("open");document.getElementById("hamburger").classList.remove("open");}
 function togglePaperFilter(el){
-  var sel=document.getElementById("b-type");
   var dot=document.getElementById("paper-dot");
-  if(sel.value==="paper"){
-    sel.value="";
+  if(window._paperFilterOn){
+    window._paperFilterOn=false;
     el.classList.remove("active");
     dot.style.background="var(--text3)";
   } else {
-    sel.value="paper";
+    window._paperFilterOn=true;
     el.classList.add("active");
     dot.style.background="var(--green)";
   }
@@ -2179,7 +2178,7 @@ function loadBets(){
   if(st)q+="&status=eq."+st;
   if(tp)q+="&bet_type=eq."+tp;
   if(search)q+="&match=ilike.*"+encodeURIComponent(search)+"*";
-if(tp==="paper"){
+if(tp==="paper"||window._paperFilterOn){
   var pst=document.getElementById("b-status").value;
   var psearch=search;
   var pq="paper_bets?select=*&order=created_at.desc";
