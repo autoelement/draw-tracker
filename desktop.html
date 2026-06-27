@@ -2171,12 +2171,16 @@ function exportCSV(rows,cols,filename){
   URL.revokeObjectURL(url);
 }
 function exportBets(){
-  betsAll.forEach(function(b){b._mode=b.martingale_series_id?"Martingale":"Regular";});
+  betsAll.forEach(function(b){
+    b._mode=b.martingale_series_id?"Martingale":"Regular";
+    b._clv=b.closing_odds&&b.odds?+((b.odds/b.closing_odds-1)*100).toFixed(1):null;
+  });
   exportCSV(betsAll,[
     {key:"date",label:"Date"},{key:"match",label:"Match"},{key:"selection",label:"Selection"},
     {key:"bet_type",label:"Type"},{key:"odds",label:"Odds"},{key:"amount",label:"Amount"},
     {key:"payout",label:"Payout"},{key:"my_probability",label:"My%"},{key:"edge",label:"Edge"},
-    {key:"bookmaker",label:"Bookmaker"},{key:"status",label:"Status"},{key:"_mode",label:"Mode"}
+    {key:"bookmaker",label:"Bookmaker"},{key:"status",label:"Status"},{key:"_mode",label:"Mode"},
+    {key:"closing_odds",label:"Closing Odds"},{key:"_clv",label:"CLV%"},{key:"calc_score",label:"Score"}
   ],"bets_"+new Date().toISOString().slice(0,10)+".csv");
 }
 function exportPaperBets(){
