@@ -1539,7 +1539,9 @@ function getTeamDrawPct(teamData,competitionId,type,leagueName){
     var otherSeason=(teamData||[]).filter(function(s){
   return s.stats&&
          s.season!==season.season&&
-         (s.stats.seasonMatchesPlayed_overall||0)>=10;
+         s.competition_id!==season.competition_id&&
+         (s.stats.seasonMatchesPlayed_overall||0)>=10&&
+         Math.abs(parseInt(s.season||0)-parseInt(season.season||0))<=2;
 }).sort(function(a,b){
   return (b.season||"").localeCompare(a.season||"");
 })[0];
