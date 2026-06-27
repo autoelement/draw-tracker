@@ -938,14 +938,13 @@ function showPage(name,el){
   if (name === "settings") { loadSettings(); updateSettingsPreview(); }
 }
 function togglePaperFilter(el){
-  var sel=document.getElementById("b-type");
   var dot=document.getElementById("paper-dot");
-  if(sel.value==="paper"){
-    sel.value="";
+  if(window._paperFilterOn){
+    window._paperFilterOn=false;
     el.classList.remove("active");
     dot.style.background="var(--text3)";
   } else {
-    sel.value="paper";
+    window._paperFilterOn=true;
     el.classList.add("active");
     dot.style.background="var(--green)";
   }
@@ -2273,7 +2272,7 @@ function loadBets(){
   if(st)q+="&status=eq."+st;
   if(tp)q+="&bet_type=eq."+tp;
   if(search)q+="&match=ilike.*"+encodeURIComponent(search)+"*";
-if(tp==="paper"){
+if(tp==="paper"||window._paperFilterOn){
   var pst=document.getElementById("b-status").value;
   var psearch=search;
   var pq="paper_bets?select=*&order=created_at.desc";
