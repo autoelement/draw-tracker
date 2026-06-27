@@ -1848,9 +1848,9 @@ function _buildCalcRows(results){
     h+="<td>"+flags+"</td>";
     h+="<td style='white-space:nowrap'>"+
       "<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button> "+
-      "<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+
-      "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+")'>"+"+ Bet</button>"+
-"<button class='btn btn-ghost btn-sm' onclick='trackPaperBet("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+","+r.result.marketEdge+","+r.result.score+",\""+r.result.confidence+"\",\""+(r.match.league_name||"")+"\",\""+(r.match._kickoff||"")+"\")'>"+"📋 Track</button>"+
+"<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+
+"<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+")'>"+(window._bettedFixtures&&window._bettedFixtures.indexOf(r.match.id)!==-1?"✅ Betted":"+ Bet")+"</button>"+
+"<button class='btn btn-ghost btn-sm' onclick='"+(window._trackedFixtures&&window._trackedFixtures.indexOf(r.match.id)!==-1?"":"trackPaperBet("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+","+r.result.marketEdge+","+r.result.score+",\""+r.result.confidence+"\",\""+(r.match.league_name||"")+"\",\""+(r.match._kickoff||"")+"\")")+"'>"+(window._trackedFixtures&&window._trackedFixtures.indexOf(r.match.id)!==-1?"📋 Tracked":"📋 Track")+"</button>"+
       "</td>";
     h+="</tr>";
     h+="<tr id='"+detailsId+"' style='display:none'><td colspan='14' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
@@ -2019,7 +2019,14 @@ function saveDrawPrediction(match,data,result){
 function loadDrawPredictions(){
   var el=document.getElementById("pred-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
-  sbGet("draw_predictions?select=*&order=kickoff.asc&limit=100").then(function(d){
+  Promise.all([
+    sbGet("draw_predictions?select=*&order=kickoff.asc&limit=100"),
+    sbGet("paper_bets?select=fixture_id&status=eq.pending"),
+    sbGet("bets?select=fixture_id&status=eq.pending")
+  ]).then(function(res){
+    var d=res[0];
+    window._trackedFixtures=(res[1]||[]).map(function(b){return b.fixture_id;});
+    window._bettedFixtures=(res[2]||[]).map(function(b){return b.fixture_id;}).filter(Boolean);
     if(!d.length){el.innerHTML='<div class="empty">No selections yet</div>';return;}
     var results=d.map(function(p){
       return{
