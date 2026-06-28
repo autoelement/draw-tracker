@@ -866,7 +866,35 @@ function loadBookmakers(){
     });
   });
 }
-
+function recalcBalances(){
+  Promise.all([
+    sbGet("transactions?select=*"),
+    sbGet("bets?select=*&order=id.asc")
+  ]).then(function(res){
+    var txs=res[0];
+    var bets=res[1];
+    var books={};
+    txs.forEach(function(t){
+      if(!books[t.bookmaker])books[t.bookmaker]=0;
+      if(t.type==="deposit")books[t.bookmaker]+=t.amount||0;
+      if(t.type==="withdrawal")books[t.bookmaker]-=t.amount||0;
+    });
+    bets.forEach(function(b){
+      if(!b.bookmaker||b.bookmaker==="Stake")return;
+      if(!books[b.bookmaker])books[b.bookmaker]=0;
+      if(b.status==="win")books[b.bookmaker]+=(b.payout||0)-(b.amount||0);
+      if(b.status==="loss")books[b.bookmaker]-=(b.amount||0);
+      if(b.status==="pending")books[b.bookmaker]-=(b.amount||0);
+    });
+    var updates=Object.keys(books).map(function(bk){
+      return sbPatch("balances?bookmaker=eq."+encodeURIComponent(bk),{balance:books[bk],updated_at:new Date().toISOString()});
+    });
+    Promise.all(updates).then(function(){
+      showToast("Balances recalculated!");
+      loadBookmakers();
+    });
+  });
+}
 function loadMartSeries(){
   return sbGet("martingale_series?select=*&order=created_at.asc").then(function(rows){
     martSeries=rows;
