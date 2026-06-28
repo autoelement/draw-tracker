@@ -379,7 +379,10 @@ canvas{width:100%!important}
   </div>
   <div class="section-hd">
     <div class="section-title">Bookmakers</div>
-    <button class="btn btn-ghost btn-sm" onclick="openM('modal-add-bk')">+ Add</button>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" onclick="recalcBalances()">⟳ Recalc</button>
+      <button class="btn btn-ghost btn-sm" onclick="openM('modal-add-bk')">+ Add</button>
+    </div>
   </div>
   <div id="bal-cards"><div class="loading"><div class="sp"></div>Loading...</div></div>
   <div class="section-hd" style="margin-top:16px">
