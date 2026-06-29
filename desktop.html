@@ -646,6 +646,26 @@ function confirmAction(msg,fn){
 }
 
 // AUTH
+function refreshAuthToken(){
+  var refresh=localStorage.getItem("dt_refresh");
+  if(!refresh)return;
+  fetch(SB_URL+"/auth/v1/token?grant_type=refresh_token",{
+    method:"POST",
+    headers:{"apikey":SB_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({refresh_token:refresh})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.access_token){
+      authToken=d.access_token;
+      authH={"apikey":SB_KEY,"Authorization":"Bearer "+authToken,"Content-Type":"application/json"};
+      localStorage.setItem("dt_token",authToken);
+      if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);
+    } else {
+      showLogin();
+    }
+  }).catch(function(){showLogin();});
+}
+
+// AUTH
 function doLogin() {
   var email = document.getElementById("login-email").value;
   var pass = document.getElementById("login-pass").value;
@@ -681,6 +701,7 @@ function doLogout() {
 }
 
 function showApp(email){
+  setInterval(refreshAuthToken, 10*60*1000);
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
   showPage('dashboard', document.querySelector('.nav-tab'));
