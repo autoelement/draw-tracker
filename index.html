@@ -728,6 +728,7 @@ function doLogout(){localStorage.removeItem("dt_token");localStorage.removeItem(
 
 function showApp(email){
   setInterval(refreshAuthToken, 10*60*1000);
+  initSettings();
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
   document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
@@ -3065,8 +3066,8 @@ function selectMatch(el){
 }
 (function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}var sc=document.getElementById("scoreChart");if(sc){sc.addEventListener("mousemove",scoreChartHover);sc.addEventListener("mouseleave",scoreChartLeave);}})();
 checkAuth();
-loadCalcThresholds();
 calcMartingale();
+loadCalcThresholds();
 </script>
 </body>
 </html>
