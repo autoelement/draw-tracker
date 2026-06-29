@@ -728,7 +728,6 @@ function doLogout(){localStorage.removeItem("dt_token");localStorage.removeItem(
 
 function showApp(email){
   setInterval(refreshAuthToken, 10*60*1000);
-  initSettings();
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
   document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
