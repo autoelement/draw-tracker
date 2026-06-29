@@ -686,7 +686,27 @@ function togglePaperFilter(el){
   }
   loadBets();
 }
-function doLogin(){
+function refreshAuthToken(){
+  var refresh=localStorage.getItem("dt_refresh");
+  if(!refresh)return;
+  fetch(SB_URL+"/auth/v1/token?grant_type=refresh_token",{
+    method:"POST",
+    headers:{"apikey":SB_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({refresh_token:refresh})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.access_token){
+      authToken=d.access_token;
+      authH={"apikey":SB_KEY,"Authorization":"Bearer "+authToken,"Content-Type":"application/json"};
+      localStorage.setItem("dt_token",authToken);
+      if(d.refresh_token)localStorage.setItem("dt_refresh",d.refresh_token);
+    } else {
+      showLogin();
+    }
+  }).catch(function(){showLogin();});
+}
+
+// AUTH
+function doLogin() {
   var email=document.getElementById("login-email").value;
   var pass=document.getElementById("login-pass").value;
   var btn=document.getElementById("login-btn");
@@ -707,6 +727,7 @@ function doLogin(){
 function doLogout(){localStorage.removeItem("dt_token");localStorage.removeItem("dt_email");localStorage.removeItem("dt_refresh");authH=H;document.getElementById("app").style.display="none";document.getElementById("login-page").style.display="flex";}
 
 function showApp(email){
+  setInterval(refreshAuthToken, 10*60*1000);
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
   document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
