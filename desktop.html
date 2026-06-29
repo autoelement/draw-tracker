@@ -702,6 +702,7 @@ function doLogout() {
 
 function showApp(email){
   setInterval(refreshAuthToken, 10*60*1000);
+  initSettings();
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
   showPage('dashboard', document.querySelector('.nav-tab'));
@@ -3232,7 +3233,6 @@ document.addEventListener("mouseleave",function(ev){
   },true);
 })();
 checkAuth();
-initSettings();
 calcMartingale();
 loadCalcThresholds();
 </script>
