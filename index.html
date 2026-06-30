@@ -2088,7 +2088,7 @@ function _buildCalcRows(results){
     h+="<td style='white-space:nowrap'>"+
       "<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button> "+
       "<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+
-      "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+")'>"+"+ Bet</button>"+
+      "<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+",\""+r.result.confidence+"\",\""+r.result.verdict+"\")'>"+"+ Bet</button>"+
       "</td>";
     h+="</tr>";
     h+="<tr id='"+detailsId+"' style='display:none'><td colspan='14' style='background:var(--bg3);padding:10px 16px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg2);padding:5px 8px;border-radius:5px'>"+reason+"</div>";}).join("")+"</div></td></tr>";
@@ -2130,7 +2130,7 @@ function _buildCalcCards(results){
     h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">';
     h+="<button class='btn btn-ghost btn-sm' style='width:100%' onclick='toggleCalcDetails(\""+detailsId+"\")'>Details</button>";
     h+="<button class='btn btn-ghost btn-sm' style='width:100%' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button>";
-    h+="<button class='btn btn-green btn-sm' style='width:100%' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+")'>"+(isBetted?"✅ Betted":"+ Bet")+"</button>";
+    h+="<button class='btn btn-green btn-sm' style='width:100%' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+",\""+r.result.confidence+"\",\""+r.result.verdict+"\")'>"+(isBetted?"✅ Betted":"+ Bet")+"</button>";
     h+="<button class='btn btn-ghost btn-sm' style='width:100%;margin-top:6px;grid-column:span 3' onclick='"+(isTracked?"":"trackPaperBet("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+","+r.result.marketEdge+","+r.result.score+",\""+r.result.confidence+"\",\""+(r.match.league_name||"")+"\",\""+(r.match._kickoff||"")+"\")")+"'>"+(isTracked?"📋 Tracked":"📋 Track")+"</button>";
     h+='</div>';
     h+='<div id="'+detailsId+'" style="display:none;margin-top:12px">';
