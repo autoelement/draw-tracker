@@ -2743,7 +2743,7 @@ var row={date:date,match:document.getElementById("bet-match").value,league:docum
       window._bettedFixtures.push(fixtureId);
       var betBtn=document.querySelector('[onclick*="addBetFromMatch("+fixtureId+","]');
       if(betBtn)betBtn.innerHTML="✅ Betted";
-    }if(isMart){loadMartSeries();var sel=document.getElementById("m-series-sel");if(sel&&sel.value)updateSeriesPreview(sel.value);}})
+    }if(window._lastCalcResults&&window._lastCalcResults.length){renderCalcResultsWithDate(window._lastCalcResults);}if(isMart){loadMartSeries();var sel=document.getElementById("m-series-sel");if(sel&&sel.value)updateSeriesPreview(sel.value);}})
   .catch(function(e){showToast("Error: "+e.message,true);}).finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
 }
 
