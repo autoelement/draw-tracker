@@ -436,6 +436,8 @@ tr:hover td{background:var(--bg3)}
     <input type="hidden" id="bet-is-mart">     
     <input type="hidden" id="bet-fixture-id">
     <input type="hidden" id="bet-calc-score">
+    <input type="hidden" id="bet-confidence">
+    <input type="hidden" id="bet-category">
     <div style="display:flex;gap:0;background:var(--bg3);border-radius:8px;padding:3px;margin-bottom:14px">
       <button id="mode-regular" onclick="setBetMode('regular')" style="flex:1;padding:8px;border-radius:6px;border:none;background:var(--green);color:var(--bg);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s">Regular</button>
       <button id="mode-mart" onclick="setBetMode('martingale')" style="flex:1;padding:8px;border-radius:6px;border:none;background:transparent;color:var(--text3);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s">Martingale</button>
@@ -1959,7 +1961,7 @@ function _buildCalcRows(results){
     h+="<td style='white-space:nowrap'>"+
       "<button class='btn btn-ghost btn-sm' onclick='toggleStar("+r.match.id+")' style='font-size:14px'>"+(isStarred(r.match.id)?"⭐":"☆")+"</button> "+
 "<button class='btn btn-ghost btn-sm' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button> "+
-"<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+")'>"+(window._bettedFixtures&&window._bettedFixtures.indexOf(r.match.id)!==-1?"✅ Betted":"+ Bet")+"</button>"+
+"<button class='btn btn-green btn-sm' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+",\""+r.result.confidence+"\",\""+r.result.verdict+"\")'>"+(window._bettedFixtures&&window._bettedFixtures.indexOf(r.match.id)!==-1?"✅ Betted":"+ Bet")+"</button>"+
 "<button class='btn btn-ghost btn-sm' onclick='"+(window._trackedFixtures&&window._trackedFixtures.indexOf(r.match.id)!==-1?"":"trackPaperBet("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+","+r.result.marketEdge+","+r.result.score+",\""+r.result.confidence+"\",\""+(r.match.league_name||"")+"\",\""+(r.match._kickoff||"")+"\")")+"'>"+(window._trackedFixtures&&window._trackedFixtures.indexOf(r.match.id)!==-1?"📋 Tracked":"📋 Track")+"</button>"+
       "</td>";
     h+="</tr>";
@@ -2010,7 +2012,7 @@ function calcManualById(fixtureId,matchName,leagueId){
   document.getElementById("calc-manual-btn").disabled=false;
   calcManual();
 }
-function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName,calcScore){
+function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName,calcScore,confidence,category){
   openAddBet();
   setTimeout(function(){
     document.getElementById("bet-match").value=matchName;
@@ -2020,6 +2022,8 @@ function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName,calcScore){
     document.getElementById("bet-league").value=leagueName||"";
     if(ourProb)document.getElementById("bet-myprob").value=ourProb;
     if(calcScore)document.getElementById("bet-calc-score").value=calcScore;
+    document.getElementById("bet-confidence").value=confidence||"";
+    document.getElementById("bet-category").value=category||"";
     calcBetFields();
   },100);
 }
@@ -2776,6 +2780,8 @@ if(type==="patent"){legs.forEach(function(l){rows.push({slip_id:slipId,date:date
   var martStep=isMart?parseInt(document.getElementById("bet-mart-step").value)||1:1;
   var fixtureId=parseInt(document.getElementById("bet-fixture-id").value)||null;
   var calcScoreVal=parseInt(document.getElementById("bet-calc-score").value)||null;
+  var confidenceVal=document.getElementById("bet-confidence").value||null;
+  var categoryVal=document.getElementById("bet-category").value||null;
   var todayMatchKo=fixtureId&&window._todaysMatches?window._todaysMatches.find(function(m){return m.id===fixtureId;}):null;
 var kickoffVal=todayMatchKo&&todayMatchKo.date_unix?new Date(todayMatchKo.date_unix*1000).toISOString():null;
 if(!kickoffVal&&fixtureId){
@@ -2788,8 +2794,9 @@ if(!kickoffVal&&fixtureId){
     }
   });
 }
-  var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:martId,martingale_step:martStep,notes:notes,fixture_id:fixtureId,calc_score:calcScoreVal,kickoff:kickoffVal};
-  var newEff=settledEffect(status,amt,payout);
+var confidenceVal=document.getElementById("bet-confidence").value||null;
+var categoryVal=document.getElementById("bet-category").value||null;
+var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:martId,martingale_step:martStep,notes:notes,fixture_id:fixtureId,calc_score:calcScoreVal,kickoff:kickoffVal,confidence:confidenceVal,category:categoryVal};  var newEff=settledEffect(status,amt,payout);
   row.balance_applied=true;
   var p;
   if(stakeId){row.notes="stake:"+stakeId;row.bookmaker="Stake";p=id?sbPatch("bets?id=eq."+id,row):sbPost("bets",row);}
