@@ -1993,7 +1993,7 @@ function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName,calcScore,c
     calcBetFields();
   },100);
 }
-function trackPaperBet(fixtureId,matchName,odds,ourProb,marketEdge,calcScore,confidence,leagueName,kickoff){
+function trackPaperBet(fixtureId,matchName,odds,ourProb,marketEdge,calcScore,confidence,leagueName,kickoff,category){
   if(window._trackedFixtures&&window._trackedFixtures.indexOf(fixtureId)!==-1){
     showToast("Already tracked!",true);
     return;
@@ -2008,6 +2008,7 @@ function trackPaperBet(fixtureId,matchName,odds,ourProb,marketEdge,calcScore,con
     market_edge:marketEdge,
     calc_score:calcScore,
     confidence:confidence||"",
+    category:category||"",
     stake:10,
     status:"pending"
   }).then(function(){
@@ -2136,7 +2137,7 @@ function _buildCalcCards(results){
     h+="<button class='btn btn-ghost btn-sm' style='width:100%' onclick='toggleCalcDetails(\""+detailsId+"\")'>Details</button>";
     h+="<button class='btn btn-ghost btn-sm' style='width:100%' onclick='calcManualById("+r.match.id+",\""+matchName+"\","+r.match.competition_id+")'>Calc</button>";
     h+="<button class='btn btn-green btn-sm' style='width:100%' onclick='addBetFromMatch("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+",\""+(r.match.league_name||"")+"\","+r.result.score+",\""+r.result.confidence+"\",\""+r.result.verdict+"\")'>"+(isBetted?"✅ Betted":"+ Bet")+"</button>";
-    h+="<button class='btn btn-ghost btn-sm' style='width:100%;margin-top:6px;grid-column:span 3' onclick='"+(isTracked?"":"trackPaperBet("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+","+r.result.marketEdge+","+r.result.score+",\""+r.result.confidence+"\",\""+(r.match.league_name||"")+"\",\""+(r.match._kickoff||"")+"\")")+"'>"+(isTracked?"📋 Tracked":"📋 Track")+"</button>";
+    h+="<button class='btn btn-ghost btn-sm' style='width:100%;margin-top:6px;grid-column:span 3' onclick='"+(isTracked?"":"trackPaperBet("+r.match.id+",\""+matchName+"\","+r.data.odds+","+r.result.ourProb+","+r.result.marketEdge+","+r.result.score+",\""+r.result.confidence+"\",\""+(r.match.league_name||"")+"\",\""+(r.match._kickoff||"")+"\",\""+r.result.verdict+"\")")+"'>"+(isTracked?"📋 Tracked":"📋 Track")+"</button>";
     h+='</div>';
     h+='<div id="'+detailsId+'" style="display:none;margin-top:12px">';
     h+=r.result.reasons.map(function(reason){return"<div style='font-size:11px;color:var(--text2);background:var(--bg3);padding:5px 8px;border-radius:5px;margin-bottom:4px'>"+reason+"</div>";}).join("");
