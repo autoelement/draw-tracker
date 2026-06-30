@@ -2015,7 +2015,8 @@ function trackPaperBet(fixtureId,matchName,odds,ourProb,marketEdge,calcScore,con
     showToast("📋 Tracked!");
     window._trackedFixtures=window._trackedFixtures||[];
     window._trackedFixtures.push(fixtureId);
-    loadDrawPredictions();
+    var trackBtn=document.querySelector('[onclick*="trackPaperBet("+fixtureId+","]');
+    if(trackBtn)trackBtn.innerHTML="📋 Tracked";
   });
 }
 function fmtDate(ts){
@@ -2737,8 +2738,12 @@ var row={date:date,match:document.getElementById("bet-match").value,league:docum
   }
   p.then(function(){
   }).then(function(){closeM("modal-bet");showToast("Bet saved!");loadBets();loadBookmakers();
-    if(fixtureId){window._bettedFixtures=window._bettedFixtures||[];window._bettedFixtures.push(fixtureId);}
-    loadDrawPredictions();if(isMart){loadMartSeries();var sel=document.getElementById("m-series-sel");if(sel&&sel.value)updateSeriesPreview(sel.value);}})
+    if(fixtureId){
+      window._bettedFixtures=window._bettedFixtures||[];
+      window._bettedFixtures.push(fixtureId);
+      var betBtn=document.querySelector('[onclick*="addBetFromMatch("+fixtureId+","]');
+      if(betBtn)betBtn.innerHTML="✅ Betted";
+    }if(isMart){loadMartSeries();var sel=document.getElementById("m-series-sel");if(sel&&sel.value)updateSeriesPreview(sel.value);}})
   .catch(function(e){showToast("Error: "+e.message,true);}).finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
 }
 
