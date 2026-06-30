@@ -709,7 +709,9 @@ function showApp(email){
   initSettings();
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
-  showPage('dashboard', document.querySelector('.nav-tab'));
+  var savedPage=localStorage.getItem("dt_current_page")||"dashboard";
+  var savedTab=document.querySelector('.nav-tab[onclick*="\''+savedPage+'\'"]')||document.querySelector('.nav-tab');
+  showPage(savedPage,savedTab);
   var nu=document.getElementById("nav-user");if(nu)nu.textContent=email?email.split("@")[0]:"";
   var emailEl=document.getElementById("set-email");if(emailEl){if(emailEl.tagName==="INPUT")emailEl.value=email||"";else emailEl.textContent=email||"";}
 loadBookmakers().then(function(){loadSettings().then(function(){
@@ -988,6 +990,7 @@ function showPage(name,el){
   document.querySelectorAll(".nav-tab").forEach(function(t){t.classList.remove("active");});
   document.getElementById("page-"+name).classList.add("active");
   if(el)el.classList.add("active");
+  localStorage.setItem("dt_current_page",name);
   if (name === "dashboard") loadDashboard();
   if (name === "predictions") { loadCalcThresholds(); if(window._lastCalcResults&&window._lastCalcResults.length){renderCalcResultsWithDate(window._lastCalcResults);}else{loadDrawPredictions();} }
   if (name === "bets") loadBets();
