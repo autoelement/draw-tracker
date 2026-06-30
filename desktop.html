@@ -740,11 +740,11 @@ loadBookmakers().then(function(){loadSettings().then(function(){
     });
   }
     loadDashboard();
+    loadDrawPredictions();
   },100);
 });});
   loadMartSeries();
   loadUpcomingMatches();
-  loadDrawPredictions();
 }
 function syncResults(){
   var btn=document.getElementById("sync-btn");
