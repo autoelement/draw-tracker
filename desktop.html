@@ -2507,7 +2507,7 @@ function onBetTypeChange() {
 }
 function buildTrixLegs(type) {
   var h="";
-  for(var i=0;i<3;i++){h+='<div class="trix-leg"><div class="trix-leg-title">Selection '+(i+1)+'</div><div class="fg"><label class="fl">Match</label><input type="text" class="fi trix-match" placeholder="Team A vs B" oninput="searchTrixMatch(this)"></div><div class="fr"><div class="fg"><label class="fl">Odds</label><input type="number" class="fi trix-odds" placeholder="2.50" step="0.01" oninput="calcTrixie()"></div><div class="fg"><label class="fl">My Prob %</label><input type="number" class="fi trix-myprob" placeholder="35" min="0" max="100"></div></div><div class="fr"><div class="fg"><label class="fl">Selection</label><select class="fs trix-sel"><option value="Draw (X)">Draw (X)</option><option value="Home Win (1)">Home Win (1)</option><option value="Away Win (2)">Away Win (2)</option></select></div><div class="fg"><label class="fl">League</label><input type="text" class="fi trix-league" placeholder="League"></div></div></div>';}
+  for(var i=0;i<3;i++){h+='<div class="trix-leg"><div class="trix-leg-title">Selection '+(i+1)+'</div><div class="fg"><label class="fl">Match</label><input type="text" class="fi trix-match" placeholder="Team A vs B" oninput="searchTrixMatch(this)"></div><div class="fr"><div class="fg"><label class="fl">Odds</label><input type="number" class="fi trix-odds" placeholder="2.50" step="0.01" oninput="calcTrixie()"></div><div class="fg"><label class="fl">My Prob %</label><input type="number" class="fi trix-myprob" placeholder="35" min="0" max="100"></div></div><div class="fr"><div class="fg"><label class="fl">Selection</label><select class="fs trix-sel"><option value="Draw (X)">Draw (X)</option><option value="Home Win (1)">Home Win (1)</option><option value="Away Win (2)">Away Win (2)</option></select></div><div class="fg"><label class="fl">League</label><input type="text" class="fi trix-league" placeholder="League"></div></div><input type="hidden" class="trix-fixture-id"><input type="hidden" class="trix-confidence"><input type="hidden" class="trix-category"></div>';}
   document.getElementById("trix-legs").innerHTML=h;
   calcTrixie();
 }
@@ -2575,6 +2575,12 @@ function selectTrixMatchFromDd(item){
       if(leagueInput){leagueInput.value=(calcResult&&calcResult.match.league_name)||(todayM&&todayM.league_name)||"";}
       var probInput=leg.querySelector(".trix-myprob");
       if(probInput&&calcResult)probInput.value=calcResult.result.ourProb||"";
+      var fixtureInput=leg.querySelector(".trix-fixture-id");
+      if(fixtureInput)fixtureInput.value=(calcResult&&calcResult.match.id)||(todayM&&todayM.id)||"";
+      var confInput=leg.querySelector(".trix-confidence");
+      if(confInput&&calcResult)confInput.value=calcResult.result.confidence||"";
+      var catInput=leg.querySelector(".trix-category");
+      if(catInput&&calcResult)catInput.value=calcResult.result.verdict||"";
     }
   }
   dd.style.display="none";
@@ -2761,8 +2767,10 @@ function saveBet() {
     var selEls=document.querySelectorAll(".trix-sel");
     var legueEls=document.querySelectorAll(".trix-league");
     var myprobEls=document.querySelectorAll(".trix-myprob");
+    var confEls=document.querySelectorAll(".trix-confidence");
+    var catEls=document.querySelectorAll(".trix-category");
     var legs=[];
-    matchEls.forEach(function(el,i){legs.push({match:el.value,odds:parseFloat(oddsEls[i].value)||0,sel:selEls[i].value,league:legueEls[i].value,myprob:parseFloat(myprobEls[i].value)||null});});
+    matchEls.forEach(function(el,i){legs.push({match:el.value,odds:parseFloat(oddsEls[i].value)||0,sel:selEls[i].value,league:legueEls[i].value,myprob:parseFloat(myprobEls[i].value)||null,confidence:confEls[i]?confEls[i].value:"",category:catEls[i]?catEls[i].value:""});});
     var n=legs.length,rows=[];
 if(type==="patent"){legs.forEach(function(l){rows.push({slip_id:slipId,date:date,match:l.match,league:l.league,selection:l.sel,odds:l.odds,amount:unitSingle,payout:+(unitSingle*l.odds).toFixed(2),bookmaker:bk,status:status,bet_type:"single",my_probability:l.myprob,edge:calcEdge(l.myprob,l.odds),martingale_series_id:martId,notes:"patent:single"});});}
     for(var i=0;i<n;i++)for(var j=i+1;j<n;j++){var combo=[legs[i],legs[j]],co=+(combo[0].odds*combo[1].odds).toFixed(2);var comboProb=compoundProb([combo[0].myprob,combo[1].myprob]);rows.push({slip_id:slipId,date:date,match:combo[0].match+" + "+combo[1].match,league:combo[0].league+"/"+combo[1].league,selection:combo[0].sel+" + "+combo[1].sel,odds:co,amount:unit,payout:+(unit*co).toFixed(2),bookmaker:bk,status:status,bet_type:type==="patent"?"trixie":type,my_probability:comboProb,edge:calcEdge(comboProb,co),martingale_series_id:martId,notes:type==="patent"?"patent:double":"trix:double"});}
