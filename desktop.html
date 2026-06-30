@@ -315,7 +315,7 @@ tr:hover td{background:var(--bg3)}
         <button class="btn btn-ghost" onclick="loadBets()">Refresh</button>
 <button class="btn btn-ghost" id="paper-toggle-btn" onclick="togglePaperFilter(this)"><span id="paper-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;margin-right:4px"></span>📋 Paper</button>
 <button class="btn btn-ghost" onclick="document.getElementById('b-type').value==='paper'?exportPaperBets():exportBets()">⬇ CSV</button>
-<button class="btn btn-ghost" onclick="document.getElementById('b-type').value==='paper'?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync Results</button>
+<button class="btn btn-ghost" onclick="(document.getElementById('b-type').value==='paper'||window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync Results</button>
 <button class="btn btn-green" onclick="openAddBet()">+ Add Bet</button>
       </div>
     </div>

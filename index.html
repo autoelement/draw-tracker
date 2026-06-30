@@ -367,7 +367,7 @@ canvas{width:100%!important}
 </select>
 <button class="btn btn-ghost btn-sm" onclick="loadBets()">Refresh</button>
 <button class="filter-pill" id="paper-toggle-btn" onclick="togglePaperFilter(this)"><span id="paper-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;margin-right:4px"></span>📋 Paper</button>
-<button class="btn btn-ghost btn-sm" onclick="document.getElementById('b-type').value==='paper'?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync</button>  </div>
+<button class="btn btn-ghost btn-sm" onclick="(document.getElementById('b-type').value==='paper'||window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync</button>  </div>
   <div id="bets-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
 </div>
 
