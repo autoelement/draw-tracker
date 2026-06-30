@@ -2376,7 +2376,7 @@ function renderPaperBets(){
     h+='<div><div class="bet-num-label">Score</div><div class="bet-num-val" style="color:var(--purple)">'+b.calc_score+'/15</div></div>';
     h+='</div>';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)">';
-    h+='<div style="font-size:11px;color:var(--text3)">'+b.confidence+'</div>';
+    h+='<div style="font-size:11px;color:var(--text3)">'+b.confidence+(b.category?' · '+b.category:'')+'</div>';
     if(isPending){
       h+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">';
       h+='<select class="inline-sel" onchange="savePaperStatus(\''+b.id+'\',this.value)"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>';
