@@ -1014,7 +1014,7 @@ function showPage(name,el){
   if(el)el.classList.add("active");
   closeSidebar();
   if(name==="dashboard")loadDashboard();
-  if (name === "predictions") { loadCalcThresholds(); loadDrawPredictions(); }
+  if (name === "predictions") { loadCalcThresholds(); if(window._lastCalcResults&&window._lastCalcResults.length){renderCalcResultsWithDate(window._lastCalcResults);}else{loadDrawPredictions();} }
   if(name==="bets")loadBets();
   if(name==="balances")loadBalances();
   if(name==="martingale"){calcMartingale();loadMartSeries().then(function(){loadMartingaleHistory();});document.getElementById("calc-fab").style.display="flex";} else{var cf=document.getElementById("calc-fab");if(cf)cf.style.display="none";}  if(name==="settings"){loadSettings();updateSettingsPreview();}

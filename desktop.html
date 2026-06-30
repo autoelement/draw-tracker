@@ -988,7 +988,7 @@ function showPage(name,el){
   document.getElementById("page-"+name).classList.add("active");
   if(el)el.classList.add("active");
   if (name === "dashboard") loadDashboard();
-  if (name === "predictions") { loadCalcThresholds(); loadDrawPredictions(); }
+  if (name === "predictions") { loadCalcThresholds(); if(window._lastCalcResults&&window._lastCalcResults.length){renderCalcResultsWithDate(window._lastCalcResults);}else{loadDrawPredictions();} }
   if (name === "bets") loadBets();
   if (name === "balances") loadBalances();
   if (name === "martingale") { calcMartingale(); loadMartSeries().then(function() { loadMartingaleHistory(); }); }
