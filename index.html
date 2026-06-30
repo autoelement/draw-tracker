@@ -764,7 +764,9 @@ if(sswGrid)sswGrid.style.gridTemplateColumns=(savedType==="trixie")?"1fr":"1fr 1
     var savedSeries=localStorage.getItem("db_series");
     if(savedSeries)seriesSel.value=savedSeries;
   }
-  loadDashboard();
+  var savedPage=localStorage.getItem("dt_current_page")||"dashboard";
+  var savedTab=document.getElementById("nav-"+savedPage)||document.getElementById("nav-dashboard");
+  showPage(savedPage,savedTab);
   loadDrawPredictions();
 });});
   loadMartSeries();
@@ -1013,6 +1015,7 @@ function showPage(name,el){
   document.querySelectorAll(".nav-item").forEach(function(t){t.classList.remove("active");});
   document.getElementById("page-"+name).classList.add("active");
   if(el)el.classList.add("active");
+  localStorage.setItem("dt_current_page",name);
   closeSidebar();
   if(name==="dashboard")loadDashboard();
   if (name === "predictions") { loadCalcThresholds(); if(window._lastCalcResults&&window._lastCalcResults.length){renderCalcResultsWithDate(window._lastCalcResults);}else{loadDrawPredictions();} }
