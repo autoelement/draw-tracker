@@ -3070,6 +3070,14 @@ function searchMatches(q){
     } else {
       allMatches=upcomingMatches.slice();
     }
+    if(window._lastCalcResults&&window._lastCalcResults.length){
+      window._lastCalcResults.forEach(function(r){
+        var exists=allMatches.some(function(m){return m.home===r.match.home_name&&m.away===r.match.away_name;});
+        if(!exists){
+          allMatches.push({home:r.match.home_name,away:r.match.away_name,league:r.match.league_name||"",fixture_id:r.match.id,kickoff:r.match._kickoff||"",competition_id:r.match.competition_id});
+        }
+      });
+    }
     var results=allMatches.filter(function(m){
       return (m.home||"").toLowerCase().indexOf(ql)!==-1||(m.away||"").toLowerCase().indexOf(ql)!==-1;
     }).slice(0,8);
