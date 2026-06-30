@@ -1545,9 +1545,11 @@ function calcScore(data,t){
   // Confidence
   var homeMatches=data.home_matches||0;
   var awayMatches=data.away_matches||0;
+  var minMatches=Math.min(homeMatches,awayMatches);
+  var leagueProgress=data.league_progress||0;
   var confidence="";
-  if(homeMatches>=30&&awayMatches>=30){confidence="🟢 HIGH";}
-  else if(homeMatches>=15&&awayMatches>=15){confidence="🟡 MEDIUM";}
+  if(leagueProgress>=80&&minMatches>=15){confidence="🟢 HIGH";}
+  else if(leagueProgress>=50&&minMatches>=10){confidence="🟡 MEDIUM";}
   else{confidence="🔴 LOW";}
 
  // Confidence penalty
@@ -1700,6 +1702,7 @@ if(md.h2h&&md.h2h.previous_matches_results&&md.h2h.previous_matches_results.tota
     m._kickoff=m.date_unix?new Date(m.date_unix*1000).toISOString():null;
     var data={
       league_draw_rate:league.drawPercentage||0,
+      league_progress:league.progress||0,
       home_draw_pct:homePct,
       away_draw_pct:awayPct,
       avg_potential:m.avg_potential||0,
@@ -1770,7 +1773,8 @@ var requests=[
         m.league_name=league.english_name||league.name||"";
         var data={
       league_draw_rate:league.drawPercentage||0,
-      home_draw_pct:homePct,
+      league_progress:league.progress||0,
+      home_draw_pct:homeData.pct,
       away_draw_pct:awayPct,
       home_matches:homeMatches||0,
       away_matches:awayMatches||0,
@@ -2071,9 +2075,10 @@ function calcRecalculate(){
       Object.values(m.odds_comparison["FT Result"]["Draw"]).forEach(function(v){var f=parseFloat(v);if(f>bestOdds)bestOdds=f;});
     }
     m._kickoff=m.date_unix?new Date(m.date_unix*1000).toISOString():null;
-    var data={
+   var data={
       league_draw_rate:league.drawPercentage||0,
-      home_draw_pct:m._homePct||0,
+      league_progress:league.progress||0,
+      home_draw_pct:homeData.pct,
       away_draw_pct:m._awayPct||0,
       home_matches:m._homeMatches||0,
       away_matches:m._awayMatches||0,
