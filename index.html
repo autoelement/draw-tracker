@@ -365,6 +365,11 @@ canvas{width:100%!important}
   <option value="single">Single</option>
   <option value="trixie">Trixie</option>
 </select>
+    <select class="filter-sel" id="b-conf" onchange="renderCurrentBets()"><option value="">All Conf.</option><option value="HIGH">🟢 HIGH</option><option value="MEDIUM">🟡 MEDIUM</option><option value="LOW">🔴 LOW</option></select>
+    <select class="filter-sel" id="b-category" onchange="renderCurrentBets()"><option value="">All Cat.</option></select>
+    <select class="filter-sel" id="b-edge" onchange="renderCurrentBets()"><option value="">All Edge</option><option value="pos">Positive</option><option value="neg">Negative</option></select>
+    <select class="filter-sel" id="b-clv" onchange="renderCurrentBets()"><option value="">All CLV</option><option value="pos">Positive</option><option value="neg">Negative</option></select>
+    <input type="number" class="filter-sel" id="b-score-min" placeholder="Score min" step="1" min="0" max="15" oninput="renderCurrentBets()" style="width:90px">
 <button class="btn btn-ghost btn-sm" onclick="loadBets()">Refresh</button>
 <button class="filter-pill" id="paper-toggle-btn" onclick="togglePaperFilter(this)"><span id="paper-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;margin-right:4px"></span>📋 Paper</button>
 <button class="btn btn-ghost btn-sm" onclick="(document.getElementById('b-type').value==='paper'||window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync</button>  </div>
@@ -2291,6 +2296,7 @@ if(tp==="paper"||window._paperFilterOn){
   if(psearch)pq+="&match=ilike.*"+encodeURIComponent(psearch)+"*";
   sbGet(pq).then(function(rows){
     betsAll=rows||[];
+    populateCategoryFilter(betsAll);
     betsPage=1;
     renderPaperBets();
   }).catch(function(){
@@ -2301,18 +2307,53 @@ if(tp==="paper"||window._paperFilterOn){
 }
 sbGet(q).then(function(manual){
   betsAll=manual.filter(function(b){return!b.notes||b.notes.indexOf("stake:")!==0;});
+    populateCategoryFilter(betsAll);
     betsPage=1;renderBetsPage();
   });
 }
+function renderCurrentBets(){if(window._paperFilterOn)renderPaperBets();else renderBetsPage();}
+function applyClientFilters(all){
+  var conf=document.getElementById("b-conf").value;
+  var cat=document.getElementById("b-category").value;
+  var edge=document.getElementById("b-edge").value;
+  var clv=document.getElementById("b-clv").value;
+  var scoreMin=parseFloat(document.getElementById("b-score-min").value);
+  if(conf)all=all.filter(function(b){return b.confidence&&b.confidence.toUpperCase().indexOf(conf)!==-1;});
+  if(cat)all=all.filter(function(b){return b.category===cat;});
+  if(edge==="pos")all=all.filter(function(b){return b.edge!=null&&b.edge>0;});
+  if(edge==="neg")all=all.filter(function(b){return b.edge!=null&&b.edge<0;});
+  if(clv==="pos")all=all.filter(function(b){return b.closing_odds&&b.odds&&(b.odds/b.closing_odds-1)>0;});
+  if(clv==="neg")all=all.filter(function(b){return b.closing_odds&&b.odds&&(b.odds/b.closing_odds-1)<0;});
+  if(!isNaN(scoreMin))all=all.filter(function(b){return(b.calc_score||b.score||0)>=scoreMin;});
+  return all;
+}
+function populateCategoryFilter(all){
+  var sel=document.getElementById("b-category");
+  var cur=sel.value;
+  var cats=[...new Set(all.map(function(b){return b.category||"";}).filter(Boolean))].sort();
+  sel.innerHTML='<option value="">All Cat.</option>'+cats.map(function(c){return'<option value="'+c+'"'+(c===cur?' selected':'')+'>'+c+'</option>';}).join("");
+}
 function renderBetsPage(){
   var el=document.getElementById("bets-body");
-  var all=betsAll;
+  var all=applyClientFilters(betsAll.slice());
   if(!all.length){el.innerHTML='<div class="empty">No bets found</div>';return;}
+  var wins=all.filter(function(b){return b.status==="win";});
+  var losses=all.filter(function(b){return b.status==="loss";});
+  var settled=wins.concat(losses);
+  var totalStaked=settled.reduce(function(s,b){return s+(b.amount||0);},0);
+  var totalReturn=wins.reduce(function(s,b){return s+(b.payout||0);},0);
+  var pnl=totalReturn-totalStaked;
+  var roi=totalStaked?((pnl/totalStaked)*100).toFixed(1):0;
+  var clvBets=settled.filter(function(b){return b.closing_odds&&b.odds;});
+  var avgClv=clvBets.length?+(clvBets.reduce(function(s,b){return s+((b.odds/b.closing_odds-1)*100);},0)/clvBets.length).toFixed(1):null;
+  var avgEdge=settled.length?(settled.reduce(function(s,b){return s+(b.edge||0);},0)/settled.length).toFixed(1):0;
+  var h='<div class="stats-1" style="margin-bottom:8px"><div class="stat-card"><div class="stat-label">P&L</div><div class="stat-val '+(pnl>=0?"green":"red")+'">'+(pnl>=0?"+":"")+pnl.toFixed(2)+'</div></div></div>';
+  h+='<div class="stats-2" style="margin-bottom:8px"><div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val '+(parseFloat(roi)>=0?"amber":"red")+'">'+(parseFloat(roi)>=0?"+":"")+roi+'%</div></div><div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val">'+(settled.length?(wins.length/settled.length*100).toFixed(0):0)+'%<div class="stat-sub">'+wins.length+"/"+settled.length+'</div></div></div>';
+  h+='<div class="stats-2" style="margin-bottom:12px"><div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue">'+(parseFloat(avgEdge)>=0?"+":"")+avgEdge+'%</div></div><div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val green">'+(avgClv!=null?(avgClv>=0?"+":"")+avgClv+'%':"—")+'<div class="stat-sub">'+clvBets.length+' tracked</div></div></div>';
   var totalPages=Math.ceil(all.length/betsPerPage);
   if(betsPage>totalPages)betsPage=totalPages;
   var start=(betsPage-1)*betsPerPage;
   var pageItems=all.slice(start,start+betsPerPage);
-  var h="";
   pageItems.forEach(function(b){
     b._src="manual";
     var isPending=b.status==="pending";
@@ -2355,7 +2396,7 @@ h+='<div style="font-size:11px;color:var(--text3)">'+(b.bookmaker?'<span class="
 }
 function renderPaperBets(){
   var el=document.getElementById("bets-body");
-  var all=betsAll;
+  var all=applyClientFilters(betsAll.slice());
   if(!all.length){el.innerHTML='<div class="empty">No paper bets found</div>';return;}
   
   var wins=all.filter(function(b){return b.status==="win";});
