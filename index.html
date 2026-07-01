@@ -353,33 +353,29 @@ canvas{width:100%!important}
 </div>
 <!-- MY BETS -->
 <div class="page" id="page-bets">
-  <div class="filters" style="flex-wrap:wrap;gap:6px">
-    <input type="text" class="filter-sel" id="b-search" placeholder="Search match..." oninput="loadBets()" style="width:140px">
+  <div class="filters" style="gap:6px;margin-bottom:6px">
+    <input type="text" class="filter-sel" id="b-search" placeholder="Search match..." oninput="loadBets()" style="width:140px;flex-shrink:0">
     <select class="filter-sel" id="b-bk" onchange="loadBets()"><option value="">All BK</option></select>
     <select class="filter-sel" id="b-status" onchange="loadBets()">
       <option value="">All</option><option value="win">Win</option>
       <option value="loss">Loss</option><option value="pending">Pending</option>
     </select>
     <select class="filter-sel" id="b-type" onchange="loadBets()">
-      <option value="">All Types</option>
-      <option value="single">Single</option>
-      <option value="trixie">Trixie</option>
+      <option value="">All Types</option><option value="single">Single</option><option value="trixie">Trixie</option>
     </select>
     <select class="filter-sel" id="b-model" onchange="renderCurrentBets()">
-      <option value="">All Model</option>
-      <option value="regular">Regular</option>
-      <option value="martingale">Martingale</option>
+      <option value="">All Model</option><option value="regular">Regular</option><option value="martingale">Martingale</option>
     </select>
-    <button class="btn btn-ghost btn-sm" onclick="loadBets()">↻</button>
-    <button class="filter-pill" id="paper-toggle-btn" onclick="togglePaperFilter(this)"><span id="paper-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;margin-right:4px"></span>📋 Paper</button>
-    <button class="btn btn-ghost btn-sm" onclick="(document.getElementById('b-type').value==='paper'||window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync</button>
-  </div>
-  <div class="filters" style="flex-wrap:wrap;gap:6px;margin-top:0;padding-top:0">
     <select class="filter-sel" id="b-conf" onchange="renderCurrentBets()"><option value="">All Conf.</option></select>
     <select class="filter-sel" id="b-category" onchange="renderCurrentBets()"><option value="">All Cat.</option></select>
-    <select class="filter-sel" id="b-edge" onchange="renderCurrentBets()"><option value="">All Edge</option><option value="pos">Positive</option><option value="neg">Negative</option></select>
-    <select class="filter-sel" id="b-clv" onchange="renderCurrentBets()"><option value="">All CLV</option><option value="pos">Positive</option><option value="neg">Negative</option></select>
-    <input type="number" class="filter-sel" id="b-score-min" placeholder="Score min" step="1" min="0" max="15" oninput="renderCurrentBets()" style="width:90px">
+    <select class="filter-sel" id="b-edge" onchange="renderCurrentBets()"><option value="">All Edge</option><option value="pos">Edge+</option><option value="neg">Edge-</option></select>
+    <select class="filter-sel" id="b-clv" onchange="renderCurrentBets()"><option value="">All CLV</option><option value="pos">CLV+</option><option value="neg">CLV-</option></select>
+    <input type="number" class="filter-sel" id="b-score-min" placeholder="Score≥" step="1" min="0" max="15" oninput="renderCurrentBets()" style="width:72px;flex-shrink:0">
+    <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:22px;overflow:hidden;flex-shrink:0">
+      <button id="mode-real" onclick="setPaperMode('real')" style="padding:7px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:var(--green-dim);color:var(--green);font-family:'Outfit',sans-serif;transition:all .2s">Real</button>
+      <button id="mode-paper" onclick="setPaperMode('paper')" style="padding:7px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--text3);font-family:'Outfit',sans-serif;transition:all .2s">Paper</button>
+    </div>
+    <button onclick="(window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn" style="padding:7px 16px;border-radius:22px;font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Outfit',sans-serif">⟳ Sync</button>
   </div>
   <div id="bets-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
 </div>
@@ -705,19 +701,15 @@ function confirmAction(msg,fn){
 
 function toggleSidebar(){var s=document.getElementById("sidebar"),o=document.getElementById("sidebar-overlay"),h=document.getElementById("hamburger");s.classList.toggle("open");o.classList.toggle("open");h.classList.toggle("open");}
 function closeSidebar(){document.getElementById("sidebar").classList.remove("open");document.getElementById("sidebar-overlay").classList.remove("open");document.getElementById("hamburger").classList.remove("open");}
-function togglePaperFilter(el){
-  var dot=document.getElementById("paper-dot");
-  if(window._paperFilterOn){
-    window._paperFilterOn=false;
-    el.classList.remove("active");
-    dot.style.background="var(--text3)";
-  } else {
-    window._paperFilterOn=true;
-    el.classList.add("active");
-    dot.style.background="var(--green)";
-  }
+function setPaperMode(mode){
+  window._paperFilterOn=(mode==="paper");
+  var real=document.getElementById("mode-real");
+  var paper=document.getElementById("mode-paper");
+  if(real){real.style.background=mode==="real"?"var(--green-dim)":"transparent";real.style.color=mode==="real"?"var(--green)":"var(--text3)";}
+  if(paper){paper.style.background=mode==="paper"?"var(--blue-dim)":"transparent";paper.style.color=mode==="paper"?"var(--blue)":"var(--text3)";}
   loadBets();
 }
+function togglePaperFilter(el){setPaperMode(window._paperFilterOn?"real":"paper");}
 function refreshAuthToken(){
   var refresh=localStorage.getItem("dt_refresh");
   if(!refresh)return;
