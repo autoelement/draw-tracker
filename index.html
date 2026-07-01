@@ -670,6 +670,7 @@ var martSeries=[];
 var settings={single_pct:2,trixie_pct:1,patent_pct:0.5,stake_mode:"pct",single_fix:0,trixie_fix:0};
 function setStakeMode(mode){
   settings.stake_mode=mode;
+  localStorage.setItem("dt_stake_mode",mode);
   document.getElementById("stake-pct-fields").style.display=mode==="pct"?"":"none";
   document.getElementById("stake-fix-fields").style.display=mode==="fix"?"":"none";
   document.getElementById("stake-mode-pct").className="btn btn-sm "+(mode==="pct"?"btn-green":"btn-ghost");
@@ -995,7 +996,12 @@ function openNewSeriesForm(){
 }
 function loadSettings(){
   return sbGet("settings?select=*&limit=1").then(function(rows){
-    if(rows.length){settings=rows[0];document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;document.getElementById("set-single-fix").value=settings.single_fix||0;document.getElementById("set-trixie-fix").value=settings.trixie_fix||0;setStakeMode(settings.stake_mode||"pct");}
+    if(rows.length){settings=rows[0];
+      var lsMode=localStorage.getItem("dt_stake_mode");var lsSingleFix=localStorage.getItem("dt_single_fix");var lsTrixFix=localStorage.getItem("dt_trixie_fix");
+      if(lsMode)settings.stake_mode=lsMode;
+      if(lsSingleFix)settings.single_fix=parseFloat(lsSingleFix)||0;
+      if(lsTrixFix)settings.trixie_fix=parseFloat(lsTrixFix)||0;
+      document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;document.getElementById("set-single-fix").value=settings.single_fix||0;document.getElementById("set-trixie-fix").value=settings.trixie_fix||0;setStakeMode(settings.stake_mode||"pct");}
     updateSettingsPreview();
   }).catch(function(){});
 }
@@ -1030,6 +1036,9 @@ function saveSettings() {
     edge_threshold: parseFloat(document.getElementById("set-edge-thresh").value) || 10
   };
   settings = row;
+  localStorage.setItem("dt_stake_mode",row.stake_mode);
+  localStorage.setItem("dt_single_fix",row.single_fix);
+  localStorage.setItem("dt_trixie_fix",row.trixie_fix);
   sbGet("settings?select=id&limit=1").then(function(rows) {
     if (rows.length) return sbPatch("settings?id=eq." + rows[0].id, row);
     else return sbPost("settings", row);
@@ -2354,9 +2363,17 @@ function renderBetsPage(){
   var clvBets=settled.filter(function(b){return b.closing_odds&&b.odds;});
   var avgClv=clvBets.length?+(clvBets.reduce(function(s,b){return s+((b.odds/b.closing_odds-1)*100);},0)/clvBets.length).toFixed(1):null;
   var avgEdge=settled.length?(settled.reduce(function(s,b){return s+(b.edge||0);},0)/settled.length).toFixed(1):0;
-  var h='<div class="stats-1" style="margin-bottom:8px"><div class="stat-card"><div class="stat-label">P&L</div><div class="stat-val '+(pnl>=0?"green":"red")+'">'+(pnl>=0?"+":"")+pnl.toFixed(2)+'</div></div></div>';
-  h+='<div class="stats-2" style="margin-bottom:8px"><div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val '+(parseFloat(roi)>=0?"amber":"red")+'">'+(parseFloat(roi)>=0?"+":"")+roi+'%</div></div><div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val">'+(settled.length?(wins.length/settled.length*100).toFixed(0):0)+'%<div class="stat-sub">'+wins.length+"/"+settled.length+'</div></div></div>';
-  h+='<div class="stats-2" style="margin-bottom:12px"><div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue">'+(parseFloat(avgEdge)>=0?"+":"")+avgEdge+'%</div></div><div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val green">'+(avgClv!=null?(avgClv>=0?"+":"")+avgClv+'%':"—")+'<div class="stat-sub">'+clvBets.length+' tracked</div></div></div>';
+  var h='<div class="stats-1" style="margin-bottom:8px">';
+  h+='<div class="stat-card"><div class="stat-label">P&L</div><div class="stat-val '+(pnl>=0?"green":"red")+'">'+(pnl>=0?"+":"")+pnl.toFixed(2)+'</div></div>';
+  h+='</div>';
+  h+='<div class="stats-2" style="margin-bottom:8px">';
+  h+='<div class="stat-card"><div class="stat-label">ROI</div><div class="stat-val '+(parseFloat(roi)>=0?"amber":"red")+'">'+(parseFloat(roi)>=0?"+":"")+roi+'%</div></div>';
+  h+='<div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val">'+(settled.length?(wins.length/settled.length*100).toFixed(0):0)+'%</div><div class="stat-sub">'+wins.length+"/"+settled.length+'</div></div>';
+  h+='</div>';
+  h+='<div class="stats-2" style="margin-bottom:12px">';
+  h+='<div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue">'+(parseFloat(avgEdge)>=0?"+":"")+avgEdge+'%</div></div>';
+  h+='<div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val green">'+(avgClv!=null?(avgClv>=0?"+":"")+avgClv+'%':"—")+'</div><div class="stat-sub">'+clvBets.length+' tracked</div></div>';
+  h+='</div>';
   var totalPages=Math.ceil(all.length/betsPerPage);
   if(betsPage>totalPages)betsPage=totalPages;
   var start=(betsPage-1)*betsPerPage;
