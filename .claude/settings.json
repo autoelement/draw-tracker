@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/user/draw-tracker/.claude/auto-pr.sh",
+            "timeout": 30,
+            "statusMessage": "Checking for PR..."
+          }
+        ]
+      }
+    ]
+  }
+}
