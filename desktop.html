@@ -49,7 +49,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,12,15,.97);backdrop-filt
 .stat-val.purple{color:var(--purple)}
 .stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
 .filters-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.filter-sel{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer}
+.filter-sel{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;transition:border-color .2s,color .2s}
+.filter-sel.filter-active{border-color:var(--green);color:var(--green)}
 .filter-sel:focus{border-color:var(--green)}
 .type-tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px}
 .type-tab{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text3);transition:all .2s;border:none;background:none}
@@ -295,38 +296,36 @@ tr:hover td{background:var(--bg3)}
 </div>
 <!-- MY BETS -->
 <div class="page" id="page-bets">
-  <div class="filters-bar">
+  <div class="filters-bar" style="gap:6px">
     <input type="text" class="filter-sel" id="b-search" placeholder="Search match..." oninput="loadBets()" style="width:160px">
-    <select class="filter-sel" id="b-bk" onchange="loadBets()"><option value="">All Bookmakers</option></select>
+    <select class="filter-sel" id="b-bk" onchange="loadBets()"><option value="">All BK</option></select>
     <select class="filter-sel" id="b-status" onchange="loadBets()">
-      <option value="">All Status</option><option value="win">Win</option>
+      <option value="">All</option><option value="win">Win</option>
       <option value="loss">Loss</option><option value="pending">Pending</option>
     </select>
     <select class="filter-sel" id="b-type" onchange="loadBets()">
-      <option value="">All Types</option>
-      <option value="single">Single</option>
-      <option value="trixie">Trixie</option>
+      <option value="">All Types</option><option value="single">Single</option><option value="trixie">Trixie</option>
     </select>
     <select class="filter-sel" id="b-model" onchange="renderCurrentBets()">
-      <option value="">All Model</option>
-      <option value="regular">Regular</option>
-      <option value="martingale">Martingale</option>
+      <option value="">All Model</option><option value="regular">Regular</option><option value="martingale">Martingale</option>
     </select>
     <select class="filter-sel" id="b-conf" onchange="renderCurrentBets()"><option value="">All Conf.</option></select>
     <select class="filter-sel" id="b-category" onchange="renderCurrentBets()"><option value="">All Category</option></select>
-    <select class="filter-sel" id="b-edge" onchange="renderCurrentBets()"><option value="">All Edge</option><option value="pos">Positive</option><option value="neg">Negative</option></select>
-    <select class="filter-sel" id="b-clv" onchange="renderCurrentBets()"><option value="">All CLV</option><option value="pos">Positive</option><option value="neg">Negative</option></select>
-    <input type="number" class="filter-sel" id="b-score-min" placeholder="Score min" step="1" min="0" max="15" oninput="renderCurrentBets()" style="width:90px">
+    <select class="filter-sel" id="b-edge" onchange="renderCurrentBets()"><option value="">All Edge</option><option value="pos">Edge+</option><option value="neg">Edge-</option></select>
+    <select class="filter-sel" id="b-clv" onchange="renderCurrentBets()"><option value="">All CLV</option><option value="pos">CLV+</option><option value="neg">CLV-</option></select>
+    <input type="number" class="filter-sel" id="b-score-min" placeholder="Score≥" step="1" min="0" max="15" oninput="renderCurrentBets()" style="width:80px">
+    <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <button id="mode-real" onclick="setPaperMode('real')" style="padding:7px 16px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:var(--green-dim);color:var(--green);font-family:'Outfit',sans-serif;transition:all .2s">Real</button>
+      <button id="mode-paper" onclick="setPaperMode('paper')" style="padding:7px 16px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--text3);font-family:'Outfit',sans-serif;transition:all .2s">Paper</button>
+    </div>
   </div>
   <div class="table-card">
     <div class="table-hd">
       <div class="table-title">Bet History</div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost" onclick="loadBets()">Refresh</button>
-<button class="btn btn-ghost" id="paper-toggle-btn" onclick="togglePaperFilter(this)"><span id="paper-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;margin-right:4px"></span>📋 Paper</button>
-<button class="btn btn-ghost" onclick="document.getElementById('b-type').value==='paper'?exportPaperBets():exportBets()">⬇ CSV</button>
-<button class="btn btn-ghost" onclick="(document.getElementById('b-type').value==='paper'||window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn">⟳ Sync Results</button>
-<button class="btn btn-green" onclick="openAddBet()">+ Add Bet</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-ghost" onclick="(window._paperFilterOn)?exportPaperBets():exportBets()">⬇ CSV</button>
+        <button class="btn btn-ghost" onclick="(window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn" style="border-radius:8px">⟳ Sync Results</button>
+        <button class="btn btn-green" onclick="openAddBet()">+ Add Bet</button>
       </div>
     </div>
     <div id="bets-body"><div class="loading"><div class="sp"></div>Loading...</div></div>
@@ -1040,19 +1039,15 @@ function showPage(name,el){
   if (name === "martingale") { calcMartingale(); loadMartSeries().then(function() { loadMartingaleHistory(); }); }
   if (name === "settings") { loadSettings(); updateSettingsPreview(); }
 }
-function togglePaperFilter(el){
-  var dot=document.getElementById("paper-dot");
-  if(window._paperFilterOn){
-    window._paperFilterOn=false;
-    el.classList.remove("active");
-    dot.style.background="var(--text3)";
-  } else {
-    window._paperFilterOn=true;
-    el.classList.add("active");
-    dot.style.background="var(--green)";
-  }
+function setPaperMode(mode){
+  window._paperFilterOn=(mode==="paper");
+  var real=document.getElementById("mode-real");
+  var paper=document.getElementById("mode-paper");
+  if(real){real.style.background=mode==="real"?"var(--green-dim)":"transparent";real.style.color=mode==="real"?"var(--green)":"var(--text3)";}
+  if(paper){paper.style.background=mode==="paper"?"var(--blue-dim)":"transparent";paper.style.color=mode==="paper"?"var(--blue)":"var(--text3)";}
   loadBets();
 }
+function togglePaperFilter(el){setPaperMode(window._paperFilterOn?"real":"paper");}
 function setDbType(t, el) {
   dbType = t;
   document.querySelectorAll(".type-tab").forEach(function(x) { x.classList.remove("active"); });
@@ -1073,6 +1068,7 @@ loadDashboard();
 }
 
 function loadDashboard(){
+  updateFilterHighlights();
   var savedRange=localStorage.getItem("db_range");
   var savedBk=localStorage.getItem("db_bk");
   if(savedRange)document.getElementById("db-range").value=savedRange;
@@ -2387,7 +2383,14 @@ function exportTx(){
     {key:"type",label:"Type"},{key:"amount",label:"Amount"},{key:"note",label:"Note"}
   ],"transactions_"+new Date().toISOString().slice(0,10)+".csv");
 }
+function updateFilterHighlights(){
+  document.querySelectorAll(".filter-sel").forEach(function(el){
+    var empty=(el.type==="number")?(el.value===""||el.value===null):(el.value==="");
+    el.classList.toggle("filter-active",!empty);
+  });
+}
 function loadBets(){
+  updateFilterHighlights();
   var el=document.getElementById("bets-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
   var bk=document.getElementById("b-bk").value;
@@ -2424,6 +2427,7 @@ sbGet(q).then(function(manual){
   });
 }
 function renderCurrentBets(){
+  updateFilterHighlights();
   if(window._paperFilterOn)renderPaperBets();else renderBetsPage();
 }
 function applyClientFilters(all){
