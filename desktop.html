@@ -3346,6 +3346,15 @@ function selectMatch(el){
   document.getElementById("bet-league").value=(todayMatch&&todayMatch.league_name)||el.getAttribute("data-league")||"";
   document.getElementById("bet-fixture-id").value=fixtureId;
   document.getElementById("match-dropdown").style.display="none";
+  var calcRes=window._lastCalcResults&&window._lastCalcResults.find(function(r){return String(r.match&&r.match.id)===String(fixtureId);});
+  if(calcRes){
+    if(!document.getElementById("bet-odds").value&&calcRes.data&&calcRes.data.odds)document.getElementById("bet-odds").value=calcRes.data.odds;
+    if(calcRes.result&&calcRes.result.ourProb)document.getElementById("bet-myprob").value=calcRes.result.ourProb;
+    if(calcRes.result&&calcRes.result.score)document.getElementById("bet-calc-score").value=calcRes.result.score;
+    if(calcRes.result&&calcRes.result.confidence)document.getElementById("bet-confidence").value=calcRes.result.confidence;
+    if(calcRes.result&&calcRes.result.verdict)document.getElementById("bet-category").value=calcRes.result.verdict;
+    calcBetFields();
+  }
 }
 
 // Settings table init
