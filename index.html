@@ -434,9 +434,16 @@ canvas{width:100%!important}
 <!-- SETTINGS -->
 <div class="page" id="page-settings">
   <div class="settings-card">
-    <div class="settings-title">Stake % of Bankroll</div>
+    <div class="settings-title">Stake Settings</div>
+    <div class="fg" style="margin-bottom:12px"><label class="fl">Mode</label><div style="display:flex;gap:8px"><button id="stake-mode-pct" class="btn btn-green btn-sm" onclick="setStakeMode('pct')">% Bankroll</button><button id="stake-mode-fix" class="btn btn-ghost btn-sm" onclick="setStakeMode('fix')">Fixed $</button></div></div>
+    <div id="stake-pct-fields">
     <div class="fg"><label class="fl">Single Bet %</label><input type="number" class="fi" id="set-single" placeholder="0" step="0.1" oninput="updateSettingsPreview();onStakeChange()"></div>
     <div class="fg"><label class="fl">Trixie Unit %</label><input type="number" class="fi" id="set-trixie" placeholder="0" step="0.1" oninput="updateSettingsPreview();onStakeChange()"></div>
+    </div>
+    <div id="stake-fix-fields" style="display:none">
+    <div class="fg"><label class="fl">Single Fix $</label><input type="number" class="fi" id="set-single-fix" placeholder="0" step="0.01" min="0" oninput="updateSettingsPreview();onStakeChange()"></div>
+    <div class="fg"><label class="fl">Trixie Fix $</label><input type="number" class="fi" id="set-trixie-fix" placeholder="0" step="0.01" min="0" oninput="updateSettingsPreview();onStakeChange()"></div>
+    </div>
     <div class="settings-preview" id="settings-preview"></div>
     <button class="btn btn-green" style="width:100%;opacity:.4;cursor:not-allowed" id="save-stake-btn" disabled onclick="saveSettings()">Save</button>
   </div>
@@ -655,7 +662,15 @@ var bookmakers=[];
 var dbType="all";
 var payoutManual=false;
 var martSeries=[];
-var settings={single_pct:2,trixie_pct:1,patent_pct:0.5};
+var settings={single_pct:2,trixie_pct:1,patent_pct:0.5,stake_mode:"pct",single_fix:0,trixie_fix:0};
+function setStakeMode(mode){
+  settings.stake_mode=mode;
+  document.getElementById("stake-pct-fields").style.display=mode==="pct"?"":"none";
+  document.getElementById("stake-fix-fields").style.display=mode==="fix"?"":"none";
+  document.getElementById("stake-mode-pct").className="btn btn-sm "+(mode==="pct"?"btn-green":"btn-ghost");
+  document.getElementById("stake-mode-fix").className="btn btn-sm "+(mode==="fix"?"btn-green":"btn-ghost");
+  updateSettingsPreview();onStakeChange();
+}
 var bankroll=0;
 
 function sbGet(p){return fetch(SB_URL+"/rest/v1/"+p,{headers:authH}).then(function(r){return r.json();}).then(function(j){return Array.isArray(j)?j:(j&&!j.code?[j]:[]);});}
@@ -975,7 +990,7 @@ function openNewSeriesForm(){
 }
 function loadSettings(){
   return sbGet("settings?select=*&limit=1").then(function(rows){
-    if(rows.length){settings=rows[0];document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;}
+    if(rows.length){settings=rows[0];document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;document.getElementById("set-single-fix").value=settings.single_fix||0;document.getElementById("set-trixie-fix").value=settings.trixie_fix||0;setStakeMode(settings.stake_mode||"pct");}
     updateSettingsPreview();
   }).catch(function(){});
 }
@@ -990,7 +1005,10 @@ function updateSettingsPreview(){
   var tp=document.getElementById("thresholds-preview");
 if(tp)tp.innerHTML="PF Min: <strong>"+(settings.pf_threshold||1.2)+"</strong> | Odds Min: <strong>"+(settings.odds_threshold||2.0)+"</strong> | Steps Max: <strong>"+(settings.steps_threshold||5)+"</strong> | Edge Min: <strong>"+(settings.edge_threshold||10)+"%</strong>";
   var br=bankroll||0;
-  document.getElementById('settings-preview').innerHTML='Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*trixPct/100).toFixed(2)+'</strong> ('+trixPct+'%)';
+  var isFix=(settings.stake_mode||"pct")==="fix";
+  var singleFix=parseFloat(document.getElementById("set-single-fix").value)||0;
+  var trixFix=parseFloat(document.getElementById("set-trixie-fix").value)||0;
+  document.getElementById('settings-preview').innerHTML=isFix?('Single: <strong>$'+singleFix.toFixed(2)+'</strong> | Trixie unit: <strong>$'+trixFix.toFixed(2)+'</strong>'):('Single: <strong>$'+(br*sp/100).toFixed(2)+'</strong> ('+sp+'%) | Trixie unit: <strong>$'+(br*trixPct/100).toFixed(2)+'</strong> ('+trixPct+'%)');
 }
 function onStakeChange(){var b=document.getElementById("save-stake-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}}
 function onThreshChange(){   var b=document.getElementById("save-thresh-btn");if(b){b.disabled=false;b.style.opacity="1";b.style.cursor="pointer";}   var tp=document.getElementById("thresholds-preview");   if(tp)tp.innerHTML="PF Min: <strong>"+(document.getElementById("set-pf").value||1.2)+"</strong> | Odds Min: <strong>"+(document.getElementById("set-odds").value||2.0)+"</strong> | Steps Max: <strong>"+(document.getElementById("set-steps").value||5)+"</strong> | Edge Min: <strong>"+(document.getElementById("set-edge-thresh").value||10)+"%</strong>"; }
@@ -998,6 +1016,9 @@ function saveSettings() {
   var row = {
     single_pct: parseFloat(document.getElementById("set-single").value) || 0,
     trixie_pct: parseFloat(document.getElementById("set-trixie").value) || 0,
+    single_fix: parseFloat(document.getElementById("set-single-fix").value) || 0,
+    trixie_fix: parseFloat(document.getElementById("set-trixie-fix").value) || 0,
+    stake_mode: settings.stake_mode || "pct",
     pf_threshold: parseFloat(document.getElementById("set-pf").value) || 1.2,
     odds_threshold: parseFloat(document.getElementById("set-odds").value) || 2.0,
     steps_threshold: parseFloat(document.getElementById("set-steps").value) || 5,
@@ -2443,12 +2464,14 @@ function onBetTypeChange(){
     if(t==="patent"){
       document.getElementById("trix-unit-wrap").style.display="none";
       document.getElementById("trix-unit-single-wrap").style.display="block";
-      document.getElementById("trix-unit-single").value=parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
-      document.getElementById("trix-unit-trix").value=parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
+      var isFix=(settings.stake_mode||"pct")==="fix";
+      document.getElementById("trix-unit-single").value=isFix?(settings.single_fix||0):parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
+      document.getElementById("trix-unit-trix").value=isFix?(settings.trixie_fix||0):parseFloat((bankroll*(settings.patent_pct||0.5)/100).toFixed(2));
     } else {
+      var isFix=(settings.stake_mode||"pct")==="fix";
       document.getElementById("trix-unit-wrap").style.display="block";
       document.getElementById("trix-unit-single-wrap").style.display="none";
-      document.getElementById("trix-unit").value=parseFloat((bankroll*(settings.trixie_pct||1)/100).toFixed(2));
+      document.getElementById("trix-unit").value=isFix?(settings.trixie_fix||0):parseFloat((bankroll*(settings.trixie_pct||1)/100).toFixed(2));
     }
   }
   else{document.getElementById("bet-amount").value=+(bankroll*(settings.single_pct||2)/100).toFixed(2);calcBetFields();}
@@ -2575,7 +2598,8 @@ function openAddBet(){
   document.getElementById("bet-date").value=new Date().toISOString().slice(0,10);
   document.getElementById("bet-status").value="pending";document.getElementById("bet-type").value=defaultType;document.getElementById("bet-sel").value="Draw (X)";
   ["bet-match","bet-league","bet-odds","bet-payout","bet-myprob","bet-impl","bet-edge","bet-notes"].forEach(function(id){document.getElementById(id).value="";});
-  document.getElementById("bet-amount").value=+(bankroll*(settings.single_pct||2)/100).toFixed(2);
+  var isFix=(settings.stake_mode||"pct")==="fix";
+  document.getElementById("bet-amount").value=isFix?(settings.single_fix||0):+(bankroll*(settings.single_pct||2)/100).toFixed(2);
 document.getElementById("single-fields").style.display=(defaultType==="trixie"||defaultType==="patent")?"none":"block";
   document.getElementById("trixie-fields").style.display=(defaultType==="trixie"||defaultType==="patent")?"block":"none";
   if(defaultType==="trixie"||defaultType==="patent"){
@@ -2583,12 +2607,12 @@ document.getElementById("single-fields").style.display=(defaultType==="trixie"||
     if(defaultType==="patent"){
       document.getElementById("trix-unit-wrap").style.display="none";
       document.getElementById("trix-unit-single-wrap").style.display="block";
-      document.getElementById("trix-unit-single").value=parseFloat((bankroll*(settings.single_pct||2)/100).toFixed(2));
-      document.getElementById("trix-unit-trix").value=parseFloat((bankroll*(settings.trixie_pct||1)/100).toFixed(2));
+      document.getElementById("trix-unit-single").value=isFix?(settings.single_fix||0):parseFloat((bankroll*(settings.single_pct||2)/100).toFixed(2));
+      document.getElementById("trix-unit-trix").value=isFix?(settings.trixie_fix||0):parseFloat((bankroll*(settings.trixie_pct||1)/100).toFixed(2));
     } else {
       document.getElementById("trix-unit-wrap").style.display="block";
       document.getElementById("trix-unit-single-wrap").style.display="none";
-      document.getElementById("trix-unit").value=parseFloat((bankroll*(settings.trixie_pct||1)/100).toFixed(2));
+      document.getElementById("trix-unit").value=isFix?(settings.trixie_fix||0):parseFloat((bankroll*(settings.trixie_pct||1)/100).toFixed(2));
     }
   }  document.getElementById("mart-bet-info").style.display="none";document.getElementById("mart-extra-fields").style.display="none";
   if(window._dbTypeForFab==="martingale"){
