@@ -303,11 +303,16 @@ tr:hover td{background:var(--bg3)}
       <option value="loss">Loss</option><option value="pending">Pending</option>
     </select>
     <select class="filter-sel" id="b-type" onchange="loadBets()">
-  <option value="">All Types</option>
-  <option value="single">Single</option>
-  <option value="trixie">Trixie</option>
-</select>
-    <select class="filter-sel" id="b-conf" onchange="renderCurrentBets()"><option value="">All Conf.</option><option value="HIGH">🟢 HIGH</option><option value="MEDIUM">🟡 MEDIUM</option><option value="LOW">🔴 LOW</option></select>
+      <option value="">All Types</option>
+      <option value="single">Single</option>
+      <option value="trixie">Trixie</option>
+    </select>
+    <select class="filter-sel" id="b-model" onchange="renderCurrentBets()">
+      <option value="">All Model</option>
+      <option value="regular">Regular</option>
+      <option value="martingale">Martingale</option>
+    </select>
+    <select class="filter-sel" id="b-conf" onchange="renderCurrentBets()"><option value="">All Conf.</option></select>
     <select class="filter-sel" id="b-category" onchange="renderCurrentBets()"><option value="">All Category</option></select>
     <select class="filter-sel" id="b-edge" onchange="renderCurrentBets()"><option value="">All Edge</option><option value="pos">Positive</option><option value="neg">Negative</option></select>
     <select class="filter-sel" id="b-clv" onchange="renderCurrentBets()"><option value="">All CLV</option><option value="pos">Positive</option><option value="neg">Negative</option></select>
@@ -2427,8 +2432,11 @@ function applyClientFilters(all){
   var edge=document.getElementById("b-edge").value;
   var clv=document.getElementById("b-clv").value;
   var scoreMin=parseFloat(document.getElementById("b-score-min").value);
+  var model=document.getElementById("b-model").value;
   if(conf)all=all.filter(function(b){return b.confidence===conf;});
   if(cat)all=all.filter(function(b){return b.category===cat;});
+  if(model==="martingale")all=all.filter(function(b){return !!b.martingale_series_id;});
+  if(model==="regular")all=all.filter(function(b){return !b.martingale_series_id;});
   if(edge==="pos")all=all.filter(function(b){return b.edge!=null&&b.edge>0;});
   if(edge==="neg")all=all.filter(function(b){return b.edge!=null&&b.edge<0;});
   if(clv==="pos")all=all.filter(function(b){return b.closing_odds&&b.odds&&(b.odds/b.closing_odds-1)>0;});
