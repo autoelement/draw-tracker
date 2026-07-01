@@ -49,7 +49,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,12,15,.97);backdrop-filt
 .stat-val.purple{color:var(--purple)}
 .stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
 .filters-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.filter-sel{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer}
+.filter-sel{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;transition:border-color .2s,color .2s}
+.filter-sel.filter-active{border-color:var(--green);color:var(--green)}
 .filter-sel:focus{border-color:var(--green)}
 .type-tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px}
 .type-tab{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text3);transition:all .2s;border:none;background:none}
@@ -1067,6 +1068,7 @@ loadDashboard();
 }
 
 function loadDashboard(){
+  updateFilterHighlights();
   var savedRange=localStorage.getItem("db_range");
   var savedBk=localStorage.getItem("db_bk");
   if(savedRange)document.getElementById("db-range").value=savedRange;
@@ -2381,7 +2383,14 @@ function exportTx(){
     {key:"type",label:"Type"},{key:"amount",label:"Amount"},{key:"note",label:"Note"}
   ],"transactions_"+new Date().toISOString().slice(0,10)+".csv");
 }
+function updateFilterHighlights(){
+  document.querySelectorAll(".filter-sel").forEach(function(el){
+    var empty=(el.type==="number")?(el.value===""||el.value===null):(el.value==="");
+    el.classList.toggle("filter-active",!empty);
+  });
+}
 function loadBets(){
+  updateFilterHighlights();
   var el=document.getElementById("bets-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
   var bk=document.getElementById("b-bk").value;
@@ -2418,6 +2427,7 @@ sbGet(q).then(function(manual){
   });
 }
 function renderCurrentBets(){
+  updateFilterHighlights();
   if(window._paperFilterOn)renderPaperBets();else renderBetsPage();
 }
 function applyClientFilters(all){

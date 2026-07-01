@@ -74,7 +74,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(8,12,15,.97)
 .filters::-webkit-scrollbar{display:none}
 .filter-pill{padding:9px 18px;border-radius:22px;font-size:13px;font-weight:600;font-weight:500;color:var(--text2);border:1px solid var(--border);background:var(--bg2);cursor:pointer;white-space:nowrap;transition:all .2s}
 .filter-pill.active{color:var(--green);border-color:var(--green);background:var(--green-dim)}
-.filter-sel{padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:22px;color:var(--text2);font-size:13px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;white-space:nowrap}
+.filter-sel{padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:22px;color:var(--text2);font-size:13px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;white-space:nowrap;transition:border-color .2s,color .2s}
+.filter-sel.filter-active{border-color:var(--green);color:var(--green)}
 
 /* SECTION */
 .section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
@@ -1084,6 +1085,7 @@ if(sswGrid)sswGrid.style.gridTemplateColumns=(t==="trixie")?"1fr":"1fr 1fr";
 }
 
 function loadDashboard(){
+  updateFilterHighlights();
   var savedRange=localStorage.getItem("db_range");
   var savedBk=localStorage.getItem("db_bk");
   var savedSeries=localStorage.getItem("db_series");
@@ -2287,7 +2289,16 @@ function saveInline(id,src,field,val,extraId){
 }
 
 var betsPage=1;var betsPerPage=20;var betsAll=[];
+function updateFilterHighlights(){
+  document.querySelectorAll(".filter-sel").forEach(function(el){
+    var val=el.value!==undefined?el.value:el.value;
+    var empty=(val===""||val===null||val===undefined);
+    if(el.type==="number")empty=(el.value===""||el.value===null);
+    el.classList.toggle("filter-active",!empty);
+  });
+}
 function loadBets(){
+  updateFilterHighlights();
   var el=document.getElementById("bets-body");
   el.innerHTML='<div class="loading"><div class="sp"></div>Loading...</div>';
   var bk=document.getElementById("b-bk").value;var st=document.getElementById("b-status").value;var tp=document.getElementById("b-type").value;
@@ -2320,7 +2331,7 @@ sbGet(q).then(function(manual){
     betsPage=1;renderBetsPage();
   });
 }
-function renderCurrentBets(){if(window._paperFilterOn)renderPaperBets();else renderBetsPage();}
+function renderCurrentBets(){updateFilterHighlights();if(window._paperFilterOn)renderPaperBets();else renderBetsPage();}
 function applyClientFilters(all){
   var conf=document.getElementById("b-conf").value;
   var cat=document.getElementById("b-category").value;
