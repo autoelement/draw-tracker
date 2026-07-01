@@ -354,12 +354,12 @@ canvas{width:100%!important}
 </div>
 <!-- MY BETS -->
 <div class="page" id="page-bets">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-    <button onclick="(window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn" style="width:36px;height:36px;border-radius:50%;font-size:16px;font-weight:600;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif">⟳</button>
+  <div style="display:flex;justify-content:flex-end;gap:6px;align-items:center;margin-bottom:6px">
     <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:22px;overflow:hidden">
       <button id="mode-real" onclick="setPaperMode('real')" style="padding:7px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:var(--green-dim);color:var(--green);font-family:'Outfit',sans-serif;transition:all .2s">Real</button>
       <button id="mode-paper" onclick="setPaperMode('paper')" style="padding:7px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--text3);font-family:'Outfit',sans-serif;transition:all .2s">Paper</button>
     </div>
+    <button onclick="(window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn" style="height:34px;width:34px;border-radius:50%;font-size:17px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;transition:color .2s"><span id="sync-icon">⟳</span></button>
   </div>
   <div class="filters" style="gap:6px;margin-bottom:6px">
     <input type="text" class="filter-sel" id="b-search" placeholder="Search match..." oninput="loadBets()" style="width:140px;flex-shrink:0">
@@ -814,9 +814,10 @@ function refreshToken(){
 }
 function syncResults(){
   var btn=document.getElementById("sync-btn");
-  btn.textContent="Running...";btn.disabled=true;
+  var icon=document.getElementById("sync-icon");
+  btn.disabled=true;if(icon)icon.style.animation="spin .7s linear infinite";
   sbGet("bets?select=*&status=eq.pending&fixture_id=not.is.null").then(function(rows){
-    if(!rows.length){showToast("No pending bets with fixture",true);btn.textContent="⟳ Sync Results";btn.disabled=false;return;}
+    if(!rows.length){showToast("No pending bets with fixture",true);btn.disabled=false;if(icon){icon.style.animation=""}return;}
     var done=0;
     rows.forEach(function(b){
       fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+b.fixture_id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
@@ -835,16 +836,17 @@ sbPatch("bets?id=eq."+b.id,{status:status,payout:payout,balance_applied:true}).t
 });
         }
         done++;
-        if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync Results";btn.disabled=false;loadBets();loadBookmakers();}
-      }).catch(function(){done++;if(done===rows.length){btn.textContent="⟳ Sync Results";btn.disabled=false;loadBets();}});
+        if(done===rows.length){showToast("Synced!");btn.disabled=false;if(icon)icon.style.animation="";loadBets();loadBookmakers();}
+      }).catch(function(){done++;if(done===rows.length){btn.disabled=false;if(icon)icon.style.animation="";loadBets();}});
     });
   });
 }
 function syncPaperResults(){
   var btn=document.getElementById("sync-btn");
-  btn.textContent="Running...";btn.disabled=true;
+  var icon=document.getElementById("sync-icon");
+  btn.disabled=true;if(icon)icon.style.animation="spin .7s linear infinite";
   sbGet("paper_bets?select=*&status=eq.pending").then(function(rows){
-    if(!rows.length){showToast("No pending paper bets",true);btn.textContent="⟳ Sync";btn.disabled=false;return;}
+    if(!rows.length){showToast("No pending paper bets",true);btn.disabled=false;if(icon)icon.style.animation="";return;}
     var done=0;
     rows.forEach(function(b){
       if(!b.fixture_id){done++;if(done===rows.length){btn.textContent="⟳ Sync";btn.disabled=false;loadBets();}return;}
@@ -857,8 +859,8 @@ function syncPaperResults(){
           sbPatch("paper_bets?id=eq."+b.id,{status:status});
         }
         done++;
-        if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync";btn.disabled=false;loadBets();loadBookmakers();}
-      }).catch(function(){done++;if(done===rows.length){btn.textContent="⟳ Sync";btn.disabled=false;loadBets();}});
+        if(done===rows.length){showToast("Synced!");btn.disabled=false;if(icon)icon.style.animation="";loadBets();loadBookmakers();}
+      }).catch(function(){done++;if(done===rows.length){btn.disabled=false;if(icon)icon.style.animation="";loadBets();}});
     });
   });
 }
