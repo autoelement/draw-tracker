@@ -2318,7 +2318,7 @@ function applyClientFilters(all){
   var edge=document.getElementById("b-edge").value;
   var clv=document.getElementById("b-clv").value;
   var scoreMin=parseFloat(document.getElementById("b-score-min").value);
-  if(conf)all=all.filter(function(b){return b.confidence&&b.confidence.toUpperCase().indexOf(conf)!==-1;});
+  if(conf)all=all.filter(function(b){return b.confidence===conf;});
   if(cat)all=all.filter(function(b){return b.category===cat;});
   if(edge==="pos")all=all.filter(function(b){return b.edge!=null&&b.edge>0;});
   if(edge==="neg")all=all.filter(function(b){return b.edge!=null&&b.edge<0;});
@@ -2328,10 +2328,17 @@ function applyClientFilters(all){
   return all;
 }
 function populateCategoryFilter(all){
-  var sel=document.getElementById("b-category");
-  var cur=sel.value;
+  var catSel=document.getElementById("b-category");
+  var curCat=catSel.value;
   var cats=[...new Set(all.map(function(b){return b.category||"";}).filter(Boolean))].sort();
-  sel.innerHTML='<option value="">All Cat.</option>'+cats.map(function(c){return'<option value="'+c+'"'+(c===cur?' selected':'')+'>'+c+'</option>';}).join("");
+  catSel.innerHTML='<option value="">All Cat.</option>'+cats.map(function(c){return'<option value="'+c+'"'+(c===curCat?' selected':'')+'>'+c+'</option>';}).join("");
+
+  var confSel=document.getElementById("b-conf");
+  var curConf=confSel.value;
+  var confOrder=["🟢 HIGH","🟡 MEDIUM","🔴 LOW","🔴 SKIP","✅ CONSIDER"];
+  var confs=[...new Set(all.map(function(b){return b.confidence||"";}).filter(Boolean))];
+  confs.sort(function(a,b){var ai=confOrder.indexOf(a),bi=confOrder.indexOf(b);return(ai===-1?99:ai)-(bi===-1?99:bi);});
+  confSel.innerHTML='<option value="">All Conf.</option>'+confs.map(function(c){return'<option value="'+c+'"'+(c===curConf?' selected':'')+'>'+c+'</option>';}).join("");
 }
 function renderBetsPage(){
   var el=document.getElementById("bets-body");
@@ -2810,8 +2817,6 @@ var row={date:date,match:document.getElementById("bet-match").value,league:docum
     if(fixtureId){
       window._bettedFixtures=window._bettedFixtures||[];
       window._bettedFixtures.push(fixtureId);
-      var betBtn=document.querySelector('[onclick*="addBetFromMatch("+fixtureId+","]');
-      if(betBtn)betBtn.innerHTML="✅ Betted";
     }if(window._lastCalcResults&&window._lastCalcResults.length){renderCalcResultsWithDate(window._lastCalcResults);}if(isMart){loadMartSeries();var sel=document.getElementById("m-series-sel");if(sel&&sel.value)updateSeriesPreview(sel.value);}})
   .catch(function(e){showToast("Error: "+e.message,true);}).finally(function(){btn.textContent="Save Bet";btn.disabled=false;});
 }
@@ -3184,6 +3189,15 @@ function selectMatch(el){
   document.getElementById("bet-league").value=(todayMatch&&todayMatch.league_name)||el.getAttribute("data-league")||"";
   document.getElementById("bet-fixture-id").value=fixtureId;
   document.getElementById("match-dropdown").style.display="none";
+  var calcRes=window._lastCalcResults&&window._lastCalcResults.find(function(r){return String(r.match&&r.match.id)===String(fixtureId);});
+  if(calcRes){
+    if(!document.getElementById("bet-odds").value&&calcRes.data&&calcRes.data.odds)document.getElementById("bet-odds").value=calcRes.data.odds;
+    if(calcRes.result&&calcRes.result.ourProb)document.getElementById("bet-myprob").value=calcRes.result.ourProb;
+    if(calcRes.result&&calcRes.result.score)document.getElementById("bet-calc-score").value=calcRes.result.score;
+    if(calcRes.result&&calcRes.result.confidence)document.getElementById("bet-confidence").value=calcRes.result.confidence;
+    if(calcRes.result&&calcRes.result.verdict)document.getElementById("bet-category").value=calcRes.result.verdict;
+    calcBetFields();
+  }
 }
 (function(){var pc=document.getElementById("pnlChart");if(pc){pc.addEventListener("mousemove",pnlHover);pc.addEventListener("mouseleave",pnlLeave);}var ec=document.getElementById("edgeChart");if(ec){ec.addEventListener("mousemove",seriesChartHover);ec.addEventListener("mouseleave",seriesChartLeave);}var etc=document.getElementById("edgeTimeChart");if(etc){etc.addEventListener("mousemove",edgeTimeHover);etc.addEventListener("mouseleave",edgeTimeLeave);}var sc=document.getElementById("scoreChart");if(sc){sc.addEventListener("mousemove",scoreChartHover);sc.addEventListener("mouseleave",scoreChartLeave);}})();
 checkAuth();
