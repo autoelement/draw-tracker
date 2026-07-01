@@ -355,11 +355,11 @@ canvas{width:100%!important}
 <!-- MY BETS -->
 <div class="page" id="page-bets">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <button onclick="(window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn" style="width:36px;height:36px;border-radius:50%;font-size:16px;font-weight:600;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif">⟳</button>
     <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:22px;overflow:hidden">
       <button id="mode-real" onclick="setPaperMode('real')" style="padding:7px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:var(--green-dim);color:var(--green);font-family:'Outfit',sans-serif;transition:all .2s">Real</button>
       <button id="mode-paper" onclick="setPaperMode('paper')" style="padding:7px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--text3);font-family:'Outfit',sans-serif;transition:all .2s">Paper</button>
     </div>
-    <button onclick="(window._paperFilterOn)?syncPaperResults():syncResults()" id="sync-btn" style="padding:7px 16px;border-radius:22px;font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;white-space:nowrap;font-family:'Outfit',sans-serif">⟳ Sync</button>
   </div>
   <div class="filters" style="gap:6px;margin-bottom:6px">
     <input type="text" class="filter-sel" id="b-search" placeholder="Search match..." oninput="loadBets()" style="width:140px;flex-shrink:0">
