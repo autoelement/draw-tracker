@@ -674,7 +674,7 @@ var bookmakers=[];
 var dbType="all";
 var payoutManual=false;
 var martSeries=[];
-var settings={single_pct:2,trixie_pct:1,patent_pct:0.5,stake_mode:"pct",single_fix:0,trixie_fix:0};
+var settings={single_pct:2,trixie_pct:1,patent_pct:0.5,stake_mode:localStorage.getItem("dt_stake_mode")||"pct",single_fix:parseFloat(localStorage.getItem("dt_single_fix"))||0,trixie_fix:parseFloat(localStorage.getItem("dt_trixie_fix"))||0};
 function setStakeMode(mode){
   settings.stake_mode=mode;
   localStorage.setItem("dt_stake_mode",mode);
