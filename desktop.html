@@ -176,7 +176,7 @@ tr:hover td{background:var(--bg3)}
 <nav>
   <div class="logo" onclick="showPage('dashboard',document.querySelector('.nav-tab'))" style="cursor:pointer">X<span>/</span>CAP</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('dashboard',this)">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('dashboard',this)">Dashboard</button>
     <button class="nav-tab" onclick="showPage('predictions',this)">Draw Selection</button>
     <button class="nav-tab" onclick="showPage('bets',this)">My Bets</button>
     <button class="nav-tab" onclick="showPage('balances',this)">Balances</button>
@@ -191,7 +191,7 @@ tr:hover td{background:var(--bg3)}
 </nav>
 
 <!-- DASHBOARD -->
-<div class="page active" id="page-dashboard">
+<div class="page" id="page-dashboard">
   <div class="filters-bar">
     <select class="filter-sel" id="db-bk" onchange="localStorage.setItem('db_bk',this.value);loadDashboard()"><option value="">All Bookmakers</option></select>
     <select class="filter-sel" id="db-range" onchange="localStorage.setItem('db_range',this.value);loadDashboard()">
@@ -969,15 +969,18 @@ function loadSettings(){
   return sbGet("settings?select=*&limit=1").then(function(rows){
     if (rows.length) {
       settings = rows[0];
-      var lsMode=localStorage.getItem("dt_stake_mode");var lsSingleFix=localStorage.getItem("dt_single_fix");var lsTrixFix=localStorage.getItem("dt_trixie_fix");
-      if(lsMode)settings.stake_mode=lsMode;
-      if(lsSingleFix)settings.single_fix=parseFloat(lsSingleFix)||0;
-      if(lsTrixFix)settings.trixie_fix=parseFloat(lsTrixFix)||0;
+    }
+    // Always apply localStorage stake overrides — these win regardless of Supabase
+    var lsMode=localStorage.getItem("dt_stake_mode");var lsSingleFix=localStorage.getItem("dt_single_fix");var lsTrixFix=localStorage.getItem("dt_trixie_fix");
+    if(lsMode)settings.stake_mode=lsMode;
+    if(lsSingleFix)settings.single_fix=parseFloat(lsSingleFix)||0;
+    if(lsTrixFix)settings.trixie_fix=parseFloat(lsTrixFix)||0;
+    setStakeMode(settings.stake_mode||"pct");
+    if (rows.length) {
       document.getElementById("set-single").value = settings.single_pct || 0;
       document.getElementById("set-trixie").value = settings.trixie_pct || 0;
       document.getElementById("set-single-fix").value = settings.single_fix || 0;
       document.getElementById("set-trixie-fix").value = settings.trixie_fix || 0;
-      setStakeMode(settings.stake_mode||"pct");
       document.getElementById("set-pf").value=settings.pf_threshold||1.2;
       document.getElementById("set-odds").value=settings.odds_threshold||2.0;
       document.getElementById("set-steps").value=settings.steps_threshold||5;
@@ -1509,10 +1512,12 @@ function searchCalcMatch(q){
       }).slice(0,8);
       showCalcDropdown(results);
     } else {
-      fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        window._todaysMatches=d.data||[];
+      Promise.all([
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=3",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
+      ]).then(function(pages){
+        window._todaysMatches=(pages[0].data||[]).concat(pages[1].data||[]).concat(pages[2].data||[]);
         results=window._todaysMatches.filter(function(m){
           return (m.home_name||"").toLowerCase().indexOf(ql)!==-1||(m.away_name||"").toLowerCase().indexOf(ql)!==-1;
         }).slice(0,8);
@@ -1780,7 +1785,8 @@ function calcAuto(){
   el.innerHTML='<div class="loading"><div class="sp"></div>Fetching matches...</div>';
 var requests=[
     fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
-    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
+    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=3",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
   ];
   if(hours>48){
     for(var di=2;di<=Math.ceil(hours/24);di++){
