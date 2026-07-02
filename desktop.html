@@ -1509,10 +1509,12 @@ function searchCalcMatch(q){
       }).slice(0,8);
       showCalcDropdown(results);
     } else {
-      fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        window._todaysMatches=d.data||[];
+      Promise.all([
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=3",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
+      ]).then(function(pages){
+        window._todaysMatches=(pages[0].data||[]).concat(pages[1].data||[]).concat(pages[2].data||[]);
         results=window._todaysMatches.filter(function(m){
           return (m.home_name||"").toLowerCase().indexOf(ql)!==-1||(m.away_name||"").toLowerCase().indexOf(ql)!==-1;
         }).slice(0,8);
@@ -1780,7 +1782,8 @@ function calcAuto(){
   el.innerHTML='<div class="loading"><div class="sp"></div>Fetching matches...</div>';
 var requests=[
     fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
-    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
+    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=3",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
   ];
   if(hours>48){
     for(var di=2;di<=Math.ceil(hours/24);di++){
