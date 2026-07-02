@@ -230,112 +230,261 @@ canvas{width:100%!important}
 <div id="app" style="display:none">
 <div id="page-skeleton" style="padding:14px 14px 90px;display:none">
 
-  <!-- sk: dashboard -->
+  <!-- ═══ DASHBOARD ═══
+       .filters (5 pills + 2 selects, h36, overflow-x)
+       .stats-2 2×4 grid (8 stat-cards, h90 each)
+       score-stat-wrap: .stats-2 2×1 grid (2 stat-cards)
+       3× .chart-card (title + canvas h140 → ~186px each)
+  -->
   <div id="sk-dashboard">
     <div style="display:flex;gap:8px;margin-bottom:16px;overflow:hidden">
-      <div class="skeleton" style="height:36px;width:52px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:46px;border-radius:22px;flex-shrink:0"></div>
       <div class="skeleton" style="height:36px;width:72px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:60px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:64px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:102px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:84px;border-radius:22px;flex-shrink:0"></div>
       <div class="skeleton" style="height:36px;width:62px;border-radius:22px;flex-shrink:0"></div>
-      <div class="skeleton" style="height:36px;width:72px;border-radius:22px;flex-shrink:0"></div>
-      <div class="skeleton" style="height:36px;width:80px;border-radius:22px;flex-shrink:0"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div class="skeleton" style="height:76px;border-radius:14px"></div>
-      <div class="skeleton" style="height:76px;border-radius:14px"></div>
-      <div class="skeleton" style="height:76px;border-radius:14px"></div>
-      <div class="skeleton" style="height:76px;border-radius:14px"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div class="skeleton" style="height:76px;border-radius:14px"></div>
-      <div class="skeleton" style="height:76px;border-radius:14px"></div>
-      <div class="skeleton" style="height:76px;border-radius:14px"></div>
-      <div class="skeleton" style="height:76px;border-radius:14px"></div>
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
     </div>
-    <div class="skeleton" style="height:170px;width:100%;border-radius:14px;margin-bottom:14px"></div>
-    <div class="skeleton" style="height:170px;width:100%;border-radius:14px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
+      <div class="skeleton" style="height:80px;border-radius:14px"></div>
+    </div>
+    <!-- P&L chart: padding(16)+title(12+mb14)+canvas(140)+padding(16) = ~198px -->
+    <div class="skeleton" style="height:198px;width:100%;border-radius:14px;margin-bottom:14px"></div>
+    <!-- Edge chart: same height -->
+    <div class="skeleton" style="height:198px;width:100%;border-radius:14px;margin-bottom:14px"></div>
+    <!-- Score chart: same -->
+    <div class="skeleton" style="height:198px;width:100%;border-radius:14px"></div>
   </div>
 
-  <!-- sk: predictions -->
+  <!-- ═══ PREDICTIONS ═══
+       mart-card 1 (no CSS card on mobile, just padding:20px):
+         title + label+input (Match Search) + label+select (Time Range) + 2 btns → ~226px
+       mart-card 2: title + 3×(label+input) → ~196px
+       margin-bottom:20px
+       table-card (plain div):
+         section-hd (margin-top:20 margin-bottom:12 padding:0 20px): title + 3 btns
+         pred-body: 3× pred-card (h~110px each, margin-bottom:10px)
+  -->
   <div id="sk-predictions" style="display:none">
-    <div class="skeleton" style="height:220px;width:100%;border-radius:14px;margin-bottom:16px"></div>
-    <div class="skeleton" style="height:160px;width:100%;border-radius:14px;margin-bottom:20px"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="skeleton" style="height:16px;width:120px;border-radius:6px"></div>
+    <!-- calc card: title(13px+mb14) + label+input(11+5+44+12) + label+select(11+5+44) + mt12 + btn(44) + gap8 + ghost-btn(32) -->
+    <div style="padding:20px;margin-bottom:16px">
+      <div class="skeleton" style="height:13px;width:180px;border-radius:6px;margin-bottom:14px"></div>
+      <div class="skeleton" style="height:11px;width:90px;border-radius:4px;margin-bottom:5px"></div>
+      <div class="skeleton" style="height:44px;width:100%;border-radius:8px;margin-bottom:12px"></div>
+      <div class="skeleton" style="height:11px;width:80px;border-radius:4px;margin-bottom:5px"></div>
+      <div class="skeleton" style="height:44px;width:100%;border-radius:8px;margin-bottom:12px"></div>
+      <div class="skeleton" style="height:44px;width:100%;border-radius:8px;margin-bottom:8px"></div>
+      <div class="skeleton" style="height:32px;width:100%;border-radius:8px"></div>
+    </div>
+    <!-- thresholds card: title + 3×(label+input) -->
+    <div style="padding:20px;margin-bottom:20px">
+      <div class="skeleton" style="height:13px;width:100px;border-radius:6px;margin-bottom:14px"></div>
+      <div class="skeleton" style="height:11px;width:70px;border-radius:4px;margin-bottom:5px"></div>
+      <div class="skeleton" style="height:44px;width:100%;border-radius:8px;margin-bottom:12px"></div>
+      <div class="skeleton" style="height:11px;width:100px;border-radius:4px;margin-bottom:5px"></div>
+      <div class="skeleton" style="height:44px;width:100%;border-radius:8px;margin-bottom:12px"></div>
+      <div class="skeleton" style="height:11px;width:130px;border-radius:4px;margin-bottom:5px"></div>
+      <div class="skeleton" style="height:44px;width:100%;border-radius:8px"></div>
+    </div>
+    <!-- section-hd: margin-top:20px margin-bottom:12px padding:0 20px -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 12px;padding:0 20px">
+      <div class="skeleton" style="height:13px;width:110px;border-radius:6px"></div>
       <div style="display:flex;gap:6px">
-        <div class="skeleton" style="height:28px;width:52px;border-radius:8px"></div>
-        <div class="skeleton" style="height:28px;width:60px;border-radius:8px"></div>
-        <div class="skeleton" style="height:28px;width:52px;border-radius:8px"></div>
+        <div class="skeleton" style="height:26px;width:26px;border-radius:8px"></div>
+        <div class="skeleton" style="height:26px;width:64px;border-radius:8px"></div>
+        <div class="skeleton" style="height:26px;width:48px;border-radius:8px"></div>
       </div>
     </div>
-    <div class="skeleton" style="height:90px;width:100%;border-radius:14px;margin-bottom:10px"></div>
-    <div class="skeleton" style="height:90px;width:100%;border-radius:14px;margin-bottom:10px"></div>
-    <div class="skeleton" style="height:90px;width:100%;border-radius:14px"></div>
+    <!-- pred-cards: padding:16px + pred-match(~18) + pred-meta(~16) + pred-bottom(border-top pt8 ~36) → ~114px -->
+    <div class="skeleton" style="height:114px;width:100%;border-radius:14px;margin-bottom:10px"></div>
+    <div class="skeleton" style="height:114px;width:100%;border-radius:14px;margin-bottom:10px"></div>
+    <div class="skeleton" style="height:114px;width:100%;border-radius:14px"></div>
   </div>
 
-  <!-- sk: bets -->
+  <!-- ═══ MY BETS ═══
+       flex-end row: Real/Paper toggle (border-radius:22px, 38px tall) + sync circle (38×38)
+       .filters row (overflow-x, gap:6, mb:6): Search(140px) + 9 selects/inputs → h36 each
+       bets-body: 3× bet-card
+         bet-card: pad14 + top(match+badge ~20) + meta(tags ~16) + nums(3-col py12 ~54) + actions(~32) + pad14 → ~164px
+  -->
   <div id="sk-bets" style="display:none">
     <div style="display:flex;justify-content:flex-end;gap:6px;align-items:center;margin-bottom:6px">
-      <div class="skeleton" style="height:38px;width:130px;border-radius:22px"></div>
+      <div class="skeleton" style="height:38px;width:132px;border-radius:22px"></div>
       <div class="skeleton" style="height:38px;width:38px;border-radius:50%"></div>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:6px;overflow:hidden">
-      <div class="skeleton" style="height:36px;width:130px;border-radius:22px;flex-shrink:0"></div>
-      <div class="skeleton" style="height:36px;width:80px;border-radius:22px;flex-shrink:0"></div>
-      <div class="skeleton" style="height:36px;width:80px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:140px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:66px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:52px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:84px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:82px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:78px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:72px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:72px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:72px;border-radius:22px;flex-shrink:0"></div>
+      <div class="skeleton" style="height:36px;width:60px;border-radius:22px;flex-shrink:0"></div>
     </div>
-    <div class="skeleton" style="height:150px;width:100%;border-radius:14px;margin-bottom:10px"></div>
-    <div class="skeleton" style="height:150px;width:100%;border-radius:14px;margin-bottom:10px"></div>
-    <div class="skeleton" style="height:150px;width:100%;border-radius:14px"></div>
+    <div class="skeleton" style="height:164px;width:100%;border-radius:14px;margin-bottom:10px"></div>
+    <div class="skeleton" style="height:164px;width:100%;border-radius:14px;margin-bottom:10px"></div>
+    <div class="skeleton" style="height:164px;width:100%;border-radius:14px"></div>
   </div>
 
-  <!-- sk: balances -->
+  <!-- ═══ BALANCES ═══
+       bankroll-card: bg green-dim border green, pad18, mb16 → h82
+       section-hd "Bookmakers" (mb8): title + ⟳ Recalc + + Add
+       2-3× bal-card (pad14, mb10, border-radius:12) → h62
+       section-hd "Transactions" (mt16 mb8): title + + New
+       settings-card (pad:0 14px, border-radius:12): tx-items (pad10 0, border-bottom) → h55 each
+  -->
   <div id="sk-balances" style="display:none">
     <div class="skeleton" style="height:82px;width:100%;border-radius:14px;margin-bottom:16px"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div class="skeleton" style="height:16px;width:110px;border-radius:6px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="skeleton" style="height:13px;width:100px;border-radius:6px"></div>
       <div style="display:flex;gap:6px">
-        <div class="skeleton" style="height:28px;width:70px;border-radius:8px"></div>
-        <div class="skeleton" style="height:28px;width:52px;border-radius:8px"></div>
+        <div class="skeleton" style="height:26px;width:76px;border-radius:8px"></div>
+        <div class="skeleton" style="height:26px;width:48px;border-radius:8px"></div>
       </div>
     </div>
     <div class="skeleton" style="height:62px;width:100%;border-radius:12px;margin-bottom:10px"></div>
     <div class="skeleton" style="height:62px;width:100%;border-radius:12px;margin-bottom:10px"></div>
     <div class="skeleton" style="height:62px;width:100%;border-radius:12px;margin-bottom:16px"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div class="skeleton" style="height:16px;width:110px;border-radius:6px"></div>
-      <div class="skeleton" style="height:28px;width:60px;border-radius:8px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="skeleton" style="height:13px;width:100px;border-radius:6px"></div>
+      <div class="skeleton" style="height:26px;width:56px;border-radius:8px"></div>
     </div>
-    <div class="skeleton" style="height:48px;width:100%;border-radius:8px;margin-bottom:8px"></div>
-    <div class="skeleton" style="height:48px;width:100%;border-radius:8px;margin-bottom:8px"></div>
-    <div class="skeleton" style="height:48px;width:100%;border-radius:8px"></div>
-  </div>
-
-  <!-- sk: martingale -->
-  <div id="sk-martingale" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div class="skeleton" style="height:16px;width:110px;border-radius:6px"></div>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <div class="skeleton" style="height:38px;width:110px;border-radius:8px"></div>
-      <div class="skeleton" style="height:38px;width:110px;border-radius:8px"></div>
-    </div>
-    <div class="skeleton" style="height:76px;width:100%;border-radius:14px;margin-bottom:12px"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div class="skeleton" style="height:16px;width:120px;border-radius:6px"></div>
-      <div style="display:flex;gap:6px">
-        <div class="skeleton" style="height:28px;width:70px;border-radius:8px"></div>
-        <div class="skeleton" style="height:28px;width:60px;border-radius:8px"></div>
+    <!-- settings-card wrapper: padding:0 14px, border-radius:12px -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:0 14px">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div class="skeleton" style="width:34px;height:34px;border-radius:50%;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div class="skeleton" style="height:13px;width:55%;border-radius:6px;margin-bottom:4px"></div>
+          <div class="skeleton" style="height:11px;width:35%;border-radius:4px"></div>
+        </div>
+        <div class="skeleton" style="height:14px;width:60px;border-radius:6px"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div class="skeleton" style="width:34px;height:34px;border-radius:50%;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div class="skeleton" style="height:13px;width:50%;border-radius:6px;margin-bottom:4px"></div>
+          <div class="skeleton" style="height:11px;width:30%;border-radius:4px"></div>
+        </div>
+        <div class="skeleton" style="height:14px;width:60px;border-radius:6px"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0">
+        <div class="skeleton" style="width:34px;height:34px;border-radius:50%;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div class="skeleton" style="height:13px;width:60%;border-radius:6px;margin-bottom:4px"></div>
+          <div class="skeleton" style="height:11px;width:40%;border-radius:4px"></div>
+        </div>
+        <div class="skeleton" style="height:14px;width:60px;border-radius:6px"></div>
       </div>
     </div>
+  </div>
+
+  <!-- ═══ MARTINGALE ═══
+       section-hd "Active Series" (mb8): title only
+       flex-wrap row (mb16): series chip buttons (~38px each)
+       next-bet-display: empty on first load
+       mart-seq: step chips (empty on first load)
+       section-hd "Series History" (mb8): title + select + Refresh btn
+       mart-history: 2× series-card (pad16, border-radius:14, mb10)
+         each: series-name(16px mb8) + series-config(11px mb10) + steps(flex-wrap mb10) + actions → ~130px
+  -->
+  <div id="sk-martingale" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="skeleton" style="height:13px;width:110px;border-radius:6px"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <div class="skeleton" style="height:36px;width:100px;border-radius:8px"></div>
+      <div class="skeleton" style="height:36px;width:120px;border-radius:8px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="skeleton" style="height:13px;width:120px;border-radius:6px"></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="skeleton" style="height:26px;width:70px;border-radius:8px"></div>
+        <div class="skeleton" style="height:26px;width:62px;border-radius:8px"></div>
+      </div>
+    </div>
+    <!-- series-card: name(16px mb8) + config(11px mb10) + steps row(mb10, 6×chip ~24px) + 2 buttons → ~130px -->
+    <div class="skeleton" style="height:130px;width:100%;border-radius:14px;margin-bottom:10px"></div>
     <div class="skeleton" style="height:130px;width:100%;border-radius:14px;margin-bottom:10px"></div>
     <div class="skeleton" style="height:130px;width:100%;border-radius:14px"></div>
   </div>
 
-  <!-- sk: settings -->
+  <!-- ═══ SETTINGS ═══
+       settings-card 1 "Stake Settings" (pad16 mb12 border-radius:12):
+         title(13px mb14) + mode-row(label+2btns mb12) + 2×fg(label+input mb12) + preview(~42px mb0) + save-btn(44px)
+         → ~16+14+29+12+2×(16+44+12)+42+44+16 = ~289px
+       settings-card 2 "Alert Thresholds" (pad16 mb12):
+         title(mb14) + 4×fg(label+input mb12) + preview(~60px mb16) + save(44px) → ~360px
+       settings-card 3 "Account" (pad16):
+         title(mb14) + fg(label+input mb12) + logout-btn(38px) → ~150px
+  -->
   <div id="sk-settings" style="display:none">
-    <div class="skeleton" style="height:190px;width:100%;border-radius:12px;margin-bottom:12px"></div>
-    <div class="skeleton" style="height:230px;width:100%;border-radius:12px;margin-bottom:12px"></div>
-    <div class="skeleton" style="height:110px;width:100%;border-radius:12px"></div>
+    <!-- Stake Settings card -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+      <div class="skeleton" style="height:13px;width:120px;border-radius:6px;margin-bottom:14px"></div>
+      <div style="margin-bottom:12px">
+        <div class="skeleton" style="height:11px;width:40px;border-radius:4px;margin-bottom:5px"></div>
+        <div style="display:flex;gap:8px">
+          <div class="skeleton" style="height:28px;width:100px;border-radius:8px"></div>
+          <div class="skeleton" style="height:28px;width:72px;border-radius:8px"></div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="skeleton" style="height:11px;width:90px;border-radius:4px;margin-bottom:5px"></div>
+        <div class="skeleton" style="height:44px;width:100%;border-radius:8px"></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="skeleton" style="height:11px;width:90px;border-radius:4px;margin-bottom:5px"></div>
+        <div class="skeleton" style="height:44px;width:100%;border-radius:8px"></div>
+      </div>
+      <div class="skeleton" style="height:42px;width:100%;border-radius:8px;margin-bottom:12px"></div>
+      <div class="skeleton" style="height:38px;width:100%;border-radius:8px"></div>
+    </div>
+    <!-- Alert Thresholds card -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+      <div class="skeleton" style="height:13px;width:150px;border-radius:6px;margin-bottom:14px"></div>
+      <div style="margin-bottom:12px">
+        <div class="skeleton" style="height:11px;width:110px;border-radius:4px;margin-bottom:5px"></div>
+        <div class="skeleton" style="height:44px;width:100%;border-radius:8px"></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="skeleton" style="height:11px;width:90px;border-radius:4px;margin-bottom:5px"></div>
+        <div class="skeleton" style="height:44px;width:100%;border-radius:8px"></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="skeleton" style="height:11px;width:100px;border-radius:4px;margin-bottom:5px"></div>
+        <div class="skeleton" style="height:44px;width:100%;border-radius:8px"></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="skeleton" style="height:11px;width:110px;border-radius:4px;margin-bottom:5px"></div>
+        <div class="skeleton" style="height:44px;width:100%;border-radius:8px"></div>
+      </div>
+      <div class="skeleton" style="height:56px;width:100%;border-radius:8px;margin-bottom:16px"></div>
+      <div class="skeleton" style="height:38px;width:100%;border-radius:8px"></div>
+    </div>
+    <!-- Account card -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div class="skeleton" style="height:13px;width:70px;border-radius:6px;margin-bottom:14px"></div>
+      <div style="margin-bottom:12px">
+        <div class="skeleton" style="height:11px;width:40px;border-radius:4px;margin-bottom:5px"></div>
+        <div class="skeleton" style="height:44px;width:100%;border-radius:8px"></div>
+      </div>
+      <div class="skeleton" style="height:38px;width:100%;border-radius:8px;margin-top:6px"></div>
+    </div>
   </div>
 
 </div>
