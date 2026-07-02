@@ -1091,7 +1091,7 @@ function syncResults(){
           var isDraw=m.homeGoalCount===m.awayGoalCount;
           var status=isDraw?"win":"loss";
 var payout=isDraw?+(b.amount*b.odds).toFixed(2):0;
-sbPatch("bets?id=eq."+b.id,{status:status,payout:payout,balance_applied:true}).then(function(){
+sbPatch("bets?id=eq."+b.id,{status:status,payout:payout,balance_applied:true,notes:"auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount}).then(function(){
   var oldEff=b.balance_applied?settledEffect("pending",b.amount,0):0;
   var newEff=settledEffect(status,b.amount,payout);
   adjustBalance(b.bookmaker,newEff-oldEff);
@@ -1119,7 +1119,7 @@ function syncPaperResults(){
         var m=d.data;
         if(m&&m.status==="complete"){
           var status=m.homeGoalCount===m.awayGoalCount?"win":"loss";
-          sbPatch("paper_bets?id=eq."+b.id,{status:status});
+          sbPatch("paper_bets?id=eq."+b.id,{status:status,notes:"auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount});
         }
         done++;
         if(done===rows.length){showToast("Synced!");btn.disabled=false;if(icon)icon.style.animation="";loadBets();loadBookmakers();}
@@ -2702,7 +2702,7 @@ function renderBetsPage(){
     var editId=b.id;
     var eStr=b.edge!=null?'<span class="'+(b.edge>=0?"edge-pos":"edge-neg")+'">'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'';
     var selS=(b.selection||"").replace(" Win","").replace("Draw (X)","X").replace("(1)","1").replace("(2)","2");
-    var matchDisplay=(b.match||"—")+(autoScore?' <span style="color:var(--text3);font-size:13px">'+b.notes.split("auto:FT:")[1]+'</span>':"");
+    var matchDisplay=(b.match||"—")+autoScore;
 var koDate=b.kickoff?new Date(b.kickoff):"";
 var koStr=koDate?(String(koDate.getDate()).padStart(2,"0")+"-"+koDate.toLocaleString("en-GB",{month:"short"})+" "+String(koDate.getHours()).padStart(2,"0")+":"+String(koDate.getMinutes()).padStart(2,"0")):"";
 h+='<div class="bet-card"><div class="bet-card-top"><div class="bet-match">'+matchDisplay+'</div>'+oc+'</div>';

@@ -1186,7 +1186,7 @@ function syncResults(){
           var isDraw=m.homeGoalCount===m.awayGoalCount;
           var status=isDraw?"win":"loss";
 var payout=isDraw?+(b.amount*b.odds).toFixed(2):0;
-sbPatch("bets?id=eq."+b.id,{status:status,payout:payout,balance_applied:true}).then(function(){
+sbPatch("bets?id=eq."+b.id,{status:status,payout:payout,balance_applied:true,notes:"auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount}).then(function(){
   var oldEff=b.balance_applied?settledEffect("pending",b.amount,0):0;
   var newEff=settledEffect(status,b.amount,payout);
   adjustBalance(b.bookmaker,newEff-oldEff);
@@ -1213,7 +1213,7 @@ function syncPaperResults(){
         var m=d.data;
         if(m&&m.status==="complete"){
           var status=m.homeGoalCount===m.awayGoalCount?"win":"loss";
-          sbPatch("paper_bets?id=eq."+b.id,{status:status});
+          sbPatch("paper_bets?id=eq."+b.id,{status:status,notes:"auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount});
         }
         done++;
         if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync";btn.disabled=false;loadBets();loadBookmakers();}
@@ -2934,7 +2934,7 @@ function renderBetsPage(){
     var eStr2=b.edge!=null?'<span class="'+edgeColor+'" '+edgeStyle+'>'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'<span style="color:var(--text3)">-</span>';
     var koDate=b.kickoff?new Date(b.kickoff):"";
     var koStr=koDate?(String(koDate.getDate()).padStart(2,"0")+"-"+koDate.toLocaleString("en-GB",{month:"short"})+" "+String(koDate.getHours()).padStart(2,"0")+":"+String(koDate.getMinutes()).padStart(2,"0")):"";
-    h+="<tr data-id='"+b.id+"'><td class='mono' style='white-space:nowrap'>"+(b.date||"")+(koStr?"<br><span style='color:var(--text3);font-size:11px'>"+koStr+"</span>":"")+"</td><td style='color:var(--text);font-weight:500;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default' title='"+(b.match||"")+"'>"+(b.match||"")+autoScore+"</td><td style='font-size:11px;color:var(--text3)'>"+(b.selection||"")+"</td><td>"+tp2+mart+"</td><td><span class='odds-badge bet-odds-val'>"+(b.odds||0)+"</span></td><td class='mono'>$"+(b.amount||0).toFixed(2)+"</td><td class='mono'>"+(isPending&&b.odds&&b.amount?"<span style='color:var(--text3)'>$"+(b.amount*b.odds).toFixed(2)+"</span>":"$"+(b.payout||0).toFixed(2))+"</td><td class='"+(isPending?"":(pnl>=0?"pnl-pos":"pnl-neg"))+"' style='"+(isPending?"color:var(--text3)":"")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+myPctCell+"</td><td>"+eStr2+"</td><td style='font-size:10px;color:var(--text3)'>"+((b.bet_type==="trixie"||b.bet_type==="patent")?"-":(b.confidence||"-"))+"</td><td style='font-size:10px;color:var(--text3)'>"+((b.bet_type==="trixie"||b.bet_type==="patent")?"-":(b.category||"-"))+"</td><td>"+bkCell+"</td><td>"+statusCell+"</td><td>"+closingOddsCell+"</td><td style='white-space:nowrap'><button class='btn btn-ghost btn-sm' onclick=\"openEditBet('"+editId+"','manual','',"+(b.odds||0)+")\">Edit</button><button class='btn btn-red btn-sm' onclick=\"deleteBet('"+b.id+"')\">x</button></td></tr>";
+    h+="<tr data-id='"+b.id+"'><td class='mono' style='white-space:nowrap'>"+(b.date||"")+(koStr?"<br><span style='color:var(--text3);font-size:11px'>"+koStr+"</span>":"")+"</td><td style='color:var(--text);font-weight:500;min-width:160px'>"+(b.match||"")+(autoScore?"<br>"+autoScore:"")+"</td><td style='font-size:11px;color:var(--text3)'>"+(b.selection||"")+"</td><td>"+tp2+mart+"</td><td><span class='odds-badge bet-odds-val'>"+(b.odds||0)+"</span></td><td class='mono'>$"+(b.amount||0).toFixed(2)+"</td><td class='mono'>"+(isPending&&b.odds&&b.amount?"<span style='color:var(--text3)'>$"+(b.amount*b.odds).toFixed(2)+"</span>":"$"+(b.payout||0).toFixed(2))+"</td><td class='"+(isPending?"":(pnl>=0?"pnl-pos":"pnl-neg"))+"' style='"+(isPending?"color:var(--text3)":"")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(pnl).toFixed(2)+"</td><td>"+myPctCell+"</td><td>"+eStr2+"</td><td style='font-size:10px;color:var(--text3)'>"+((b.bet_type==="trixie"||b.bet_type==="patent")?"-":(b.confidence||"-"))+"</td><td style='font-size:10px;color:var(--text3)'>"+((b.bet_type==="trixie"||b.bet_type==="patent")?"-":(b.category||"-"))+"</td><td>"+bkCell+"</td><td>"+statusCell+"</td><td>"+closingOddsCell+"</td><td style='white-space:nowrap'><button class='btn btn-ghost btn-sm' onclick=\"openEditBet('"+editId+"','manual','',"+(b.odds||0)+")\">Edit</button><button class='btn btn-red btn-sm' onclick=\"deleteBet('"+b.id+"')\">x</button></td></tr>";
   });
   h+="</tbody></table></div>";
   h+=pagControls(betsPage,totalPages,"gotoBetsPage");
@@ -2982,7 +2982,7 @@ function renderPaperBets(){
       '<select class="inline-sel" onchange="savePaperStatus(\''+b.id+'\',this.value)"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="loss">Loss</option></select>':
       (b.status==="win"?'<span class="badge bw">WIN</span>':'<span class="badge bl">LOSS</span>');
     var closeCell='<input class="inline-input" style="width:70px" type="number" placeholder="Close" step="0.01" value="'+(b.closing_odds||"")+'" onchange="savePaperClosingOdds(\''+b.id+'\',this.value)">';
-    h+="<tr><td class='mono'>"+koStr+"</td><td style='font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' title='"+b.match+"'>"+b.match+"</td><td><span class='odds-badge'>"+b.odds+"</span></td><td class='mono'>$"+(b.stake||10).toFixed(2)+"</td><td style='"+edgeColor+"'>"+(b.market_edge>=0?"+":"")+b.market_edge+"%</td><td style='color:var(--purple)'>"+b.calc_score+"/15</td><td style='font-size:11px'>"+b.confidence+"</td><td style='font-size:11px'>"+(b.category||"-")+"</td><td class='"+(pnlB>=0?"pnl-pos":"pnl-neg")+"'>"+(isPending?"—":(pnlB>=0?"+":"")+pnlB.toFixed(2))+"</td><td>"+clvCell+"</td><td>"+statusCell+"</td><td>"+closeCell+"</td><td><button class='btn btn-red btn-sm' onclick='deletePaperBet(\""+b.id+"\")'>x</button></td></tr>";
+    h+="<tr><td class='mono'>"+koStr+"</td><td style='font-weight:500;min-width:160px'>"+b.match+"</td><td><span class='odds-badge'>"+b.odds+"</span></td><td class='mono'>$"+(b.stake||10).toFixed(2)+"</td><td style='"+edgeColor+"'>"+(b.market_edge>=0?"+":"")+b.market_edge+"%</td><td style='color:var(--purple)'>"+b.calc_score+"/15</td><td style='font-size:11px'>"+b.confidence+"</td><td style='font-size:11px'>"+(b.category||"-")+"</td><td class='"+(pnlB>=0?"pnl-pos":"pnl-neg")+"'>"+(isPending?"—":(pnlB>=0?"+":"")+pnlB.toFixed(2))+"</td><td>"+clvCell+"</td><td>"+statusCell+"</td><td>"+closeCell+"</td><td><button class='btn btn-red btn-sm' onclick='deletePaperBet(\""+b.id+"\")'>x</button></td></tr>";
   });
   
   h+="</tbody></table></div>";
