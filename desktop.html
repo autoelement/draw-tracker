@@ -176,7 +176,7 @@ tr:hover td{background:var(--bg3)}
 <nav>
   <div class="logo" onclick="showPage('dashboard',document.querySelector('.nav-tab'))" style="cursor:pointer">X<span>/</span>CAP</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('dashboard',this)">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('dashboard',this)">Dashboard</button>
     <button class="nav-tab" onclick="showPage('predictions',this)">Draw Selection</button>
     <button class="nav-tab" onclick="showPage('bets',this)">My Bets</button>
     <button class="nav-tab" onclick="showPage('balances',this)">Balances</button>
@@ -191,7 +191,7 @@ tr:hover td{background:var(--bg3)}
 </nav>
 
 <!-- DASHBOARD -->
-<div class="page active" id="page-dashboard">
+<div class="page" id="page-dashboard">
   <div class="filters-bar">
     <select class="filter-sel" id="db-bk" onchange="localStorage.setItem('db_bk',this.value);loadDashboard()"><option value="">All Bookmakers</option></select>
     <select class="filter-sel" id="db-range" onchange="localStorage.setItem('db_range',this.value);loadDashboard()">
