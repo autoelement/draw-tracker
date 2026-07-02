@@ -1312,7 +1312,7 @@ function recalcBalances(){
     });
     Promise.all(updates).then(function(){
       showToast("Balances recalculated!");
-      loadBookmakers();
+      loadBookmakers().then(function(){loadBalances();});
     });
   });
 }
@@ -3455,7 +3455,9 @@ function saveTx(){
 function saveBookmaker(){
   var name=document.getElementById("bk-name").value.trim(),bal=parseFloat(document.getElementById("bk-balance").value)||0;
   if(!name){showToast("Enter name",true);return;}
-  sbPost("balances",{bookmaker:name,balance:bal}).then(function(){closeM("modal-add-bk");document.getElementById("bk-name").value="";document.getElementById("bk-balance").value="";showToast("Added!");return loadBookmakers();}).then(function(){loadBalances();});
+  var p=sbPost("balances",{bookmaker:name,balance:bal});
+  if(bal>0)p=p.then(function(){return sbPost("transactions",{bookmaker:name,type:"deposit",amount:bal,note:"Initial balance"});});
+  p.then(function(){closeM("modal-add-bk");document.getElementById("bk-name").value="";document.getElementById("bk-balance").value="";showToast("Added!");return loadBookmakers();}).then(function(){loadBalances();});
 }
 
 function deleteBookmaker(name){
