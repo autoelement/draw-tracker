@@ -1763,7 +1763,8 @@ if(md.h2h&&md.h2h.previous_matches_results&&md.h2h.previous_matches_results.tota
     var t=getCalcThresholds();
     var result=calcScore(data,t);
     var matchName=(m.home_name||"Home")+" vs "+(m.away_name||"Away");
-    showCalcResult(matchName,data,result);
+    var leagueName=league.english_name||league.name||m.competition||m.league_name||"";
+    showCalcResult(matchName,data,result,leagueName);
     saveDrawPrediction(m,data,result);
     btn.textContent="Calculate Selected";btn.disabled=false;
   })
@@ -1893,7 +1894,7 @@ var requests=[
   });
 }
 
-function showCalcResult(matchName,data,result){
+function showCalcResult(matchName,data,result,leagueName){leagueName=leagueName||"";
   var el=document.getElementById("pred-body");
   var color=result.score>=13?"var(--green)":result.score>=10?"var(--amber)":"var(--red)";
   var edgeColor=result.marketEdge>0?"var(--green)":result.marketEdge<0?"var(--red)":"var(--text2)";
@@ -1917,7 +1918,7 @@ function showCalcResult(matchName,data,result){
   result.reasons.forEach(function(r){h+='<div style="font-size:12px;color:var(--text2);background:var(--bg3);padding:6px 10px;border-radius:6px">'+r+'</div>';});
   h+='</div>';
   h+='<div style="margin-top:12px;display:flex;justify-content:flex-end">';
-  h+='<button class="btn btn-green" onclick="addBetFromMatch('+_calcFixtureId+',\''+matchName+'\','+data.odds+','+result.ourProb+',\'\','+result.score+')">+ Add Bet</button>';
+  h+='<button class="btn btn-green" onclick="addBetFromMatch('+_calcFixtureId+',\''+matchName.replace(/'/g,"\\'")+'\','+data.odds+','+result.ourProb+',\''+leagueName.replace(/'/g,"\\'")+'\','+result.score+',\''+result.confidence+'\',\''+result.verdict+'\')">+ Add Bet</button>';
   h+='</div>';
   h+='</div>';
   el.innerHTML=h;
