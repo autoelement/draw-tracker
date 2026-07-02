@@ -172,8 +172,8 @@ tr:hover td{background:var(--bg3)}
 </div>
 
 <!-- MAIN APP -->
-<div id="app" style="display:none">
-<div id="page-skeleton" style="padding:24px;display:none">
+<div id="app" style="display:none"></div>
+<div id="page-skeleton" style="position:fixed;top:52px;left:0;right:0;bottom:0;overflow-y:auto;background:var(--bg);z-index:50;display:none"><div style="padding:20px;max-width:1400px;margin:0 auto">
 
   <!-- ═══ DASHBOARD ═══
        .filters-bar (flex wrap gap:8 mb:16):
@@ -568,7 +568,7 @@ tr:hover td{background:var(--bg3)}
     </div>
   </div>
 
-</div>
+</div></div>
 <nav>
   <div class="logo" onclick="showPage('dashboard',document.querySelector('.nav-tab'))" style="cursor:pointer">X<span>/</span>CAP</div>
   <div class="nav-tabs">
@@ -1133,9 +1133,9 @@ function showApp(email){
   initSettings();
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
-  var savedPage=localStorage.getItem("dt_current_page")||"dashboard";
   var savedTab=document.querySelector('.nav-tab[onclick*="\''+savedPage+'\'"]')||document.querySelector('.nav-tab');
-  showPage(savedPage,savedTab);
+  document.querySelectorAll(".nav-tab").forEach(function(t){t.classList.remove("active");});
+  if(savedTab)savedTab.classList.add("active");
   var nu=document.getElementById("nav-user");if(nu)nu.textContent=email?email.split("@")[0]:"";
   var emailEl=document.getElementById("set-email");if(emailEl){if(emailEl.tagName==="INPUT")emailEl.value=email||"";else emailEl.textContent=email||"";}
 loadBookmakers().then(function(){loadSettings().then(function(){
@@ -1165,8 +1165,7 @@ loadBookmakers().then(function(){loadSettings().then(function(){
       if(savedSeries)seriesSel.value=savedSeries;
     });
   }
-    loadDashboard();
-    loadDrawPredictions();
+    showPage(savedPage, savedTab);
   },100);
 });});
   loadMartSeries();
