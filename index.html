@@ -228,6 +228,20 @@ canvas{width:100%!important}
 
 <!-- APP -->
 <div id="app" style="display:none">
+<div id="page-skeleton" style="padding:16px;display:none">
+  <div style="display:flex;gap:10px;margin-bottom:16px">
+    <div class="skeleton" style="height:72px;flex:1;border-radius:12px"></div>
+    <div class="skeleton" style="height:72px;flex:1;border-radius:12px"></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:16px">
+    <div class="skeleton" style="height:72px;flex:1;border-radius:12px"></div>
+    <div class="skeleton" style="height:72px;flex:1;border-radius:12px"></div>
+  </div>
+  <div class="skeleton" style="height:120px;width:100%;border-radius:12px;margin-bottom:16px"></div>
+  <div class="skeleton" style="height:80px;width:100%;border-radius:12px;margin-bottom:10px"></div>
+  <div class="skeleton" style="height:80px;width:100%;border-radius:12px;margin-bottom:10px"></div>
+  <div class="skeleton" style="height:80px;width:100%;border-radius:12px"></div>
+</div>
 
 <nav>
   <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
@@ -757,6 +771,7 @@ function showApp(email){
   setInterval(refreshAuthToken, 10*60*1000);
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
+  document.getElementById("page-skeleton").style.display="block";
   document.getElementById("nav-user").textContent=email?email.split("@")[0]:"";
   document.getElementById("set-email").value=email||"";
   loadBookmakers().then(function(){loadSettings().then(function(){
@@ -1060,6 +1075,7 @@ function saveSettings() {
 }
 
 function showPage(name,el){
+  var sk=document.getElementById("page-skeleton");if(sk)sk.style.display="none";
   document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");});
   document.querySelectorAll(".nav-item").forEach(function(t){t.classList.remove("active");});
   document.getElementById("page-"+name).classList.add("active");
