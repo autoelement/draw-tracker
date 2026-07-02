@@ -2694,15 +2694,17 @@ function renderBetsPage(){
     b._src="manual";
     var isPending=b.status==="pending";
     var pnl=isPending?-(b.amount||0):(b.payout||0)-(b.amount||0);
+    var _sc=b.notes&&b.notes.indexOf("auto:FT:")===0?b.notes.split("auto:FT:")[1]:null;
+    var _hasVs=(b.match||"").indexOf(" vs ")!==-1;
+    var _matchFmt=_hasVs?(_sc?(b.match.replace(" vs "," "+_sc+" ")):(b.status==="win"||b.status==="loss"?(b.match.replace(" vs "," -- ")):(b.match||"—"))):(b.match||"—");
     var autoScore="";
-    if(b.notes&&b.notes.indexOf("auto:FT:")===0){autoScore='<span style="font-size:11px;color:var(--text3);margin-left:6px;display:inline-block;vertical-align:middle">'+b.notes.split("auto:FT:")[1]+'</span>';}
     var oc=b.status==="win"?'<span class="bet-badge bw">WIN</span>':b.status==="loss"?'<span class="bet-badge bl">LOSS</span>':'<span class="bet-badge bp">PEND</span>';
     var tp2=b.bet_type==="trixie"?'<span class="bet-badge bm">TRIX</span>':b.bet_type==="patent"?'<span class="bet-badge bm">PAT</span>':"";
     var mart=b.martingale_series_id?'<span class="bet-badge" style="background:var(--purple-dim);color:var(--purple)">M'+(b.martingale_step||"")+"</span>":"";
     var editId=b.id;
     var eStr=b.edge!=null?'<span class="'+(b.edge>=0?"edge-pos":"edge-neg")+'">'+(b.edge>=0?"+":"")+parseFloat(b.edge).toFixed(1)+"%</span>":'';
     var selS=(b.selection||"").replace(" Win","").replace("Draw (X)","X").replace("(1)","1").replace("(2)","2");
-    var matchDisplay=(b.match||"—")+autoScore;
+    var matchDisplay=_matchFmt;
 var koDate=b.kickoff?new Date(b.kickoff):"";
 var koStr=koDate?(String(koDate.getDate()).padStart(2,"0")+"-"+koDate.toLocaleString("en-GB",{month:"short"})+" "+String(koDate.getHours()).padStart(2,"0")+":"+String(koDate.getMinutes()).padStart(2,"0")):"";
 h+='<div class="bet-card"><div class="bet-card-top"><div class="bet-match">'+matchDisplay+'</div>'+oc+'</div>';
@@ -2765,13 +2767,16 @@ function renderPaperBets(){
   pageItems.forEach(function(b){
     var isPending=b.status==="pending";
     var pnlB=b.status==="win"?(b.stake||10)*(b.odds||0)-(b.stake||10):b.status==="loss"?-(b.stake||10):0;
+    var _sc=b.notes&&b.notes.indexOf("auto:FT:")===0?b.notes.split("auto:FT:")[1]:null;
+    var _hasVs=(b.match||"").indexOf(" vs ")!==-1;
+    var _matchFmt=_hasVs?(_sc?(b.match.replace(" vs "," "+_sc+" ")):(b.status==="win"||b.status==="loss"?(b.match.replace(" vs "," -- ")):(b.match||"—"))):(b.match||"—");
     var koDate=b.kickoff?new Date(b.kickoff):"";
     var koStr=koDate?(String(koDate.getDate()).padStart(2,"0")+"/"+String(koDate.getMonth()+1).padStart(2,"0")+"/"+String(koDate.getFullYear()).slice(2)+" "+String(koDate.getHours()).padStart(2,"0")+":"+String(koDate.getMinutes()).padStart(2,"0")):"";
     var edgeColor=(b.market_edge||0)>0?"var(--green)":"var(--red)";
     var oc=isPending?'<span class="bet-badge bp">PEND</span>':b.status==="win"?'<span class="bet-badge bw">WIN</span>':'<span class="bet-badge bl">LOSS</span>';
 
     h+='<div class="bet-card">';
-    h+='<div class="bet-card-top"><div class="bet-match">'+b.match+'</div>'+oc+'</div>';
+    h+='<div class="bet-card-top"><div class="bet-match">'+_matchFmt+'</div>'+oc+'</div>';
     h+='<div class="bet-meta"><span class="bet-tag">'+koStr+'</span><span class="bet-tag">'+(b.league||"")+'</span></div>';
     h+='<div class="bet-nums">';
     h+='<div><div class="bet-num-label">Odds</div><div class="bet-num-val"><span class="odds-badge">'+b.odds+'</span></div></div>';
