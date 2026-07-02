@@ -1512,19 +1512,30 @@ function searchCalcMatch(q){
   clearTimeout(_calcMatchTimeout);
   _calcMatchTimeout=setTimeout(function(){
     var ql=q.toLowerCase();
-    var results=[];
-    if(window._todaysMatches&&window._todaysMatches.length){
-      results=window._todaysMatches.filter(function(m){
+    function doSearch(){
+      var results=window._todaysMatches.filter(function(m){
         return(m.home_name||"").toLowerCase().indexOf(ql)!==-1||(m.away_name||"").toLowerCase().indexOf(ql)!==-1;
       }).slice(0,8);
+      if(!results.length){dd.style.display="none";return;}
+      dd.innerHTML=results.map(function(m){
+        var kd=m.date_unix?new Date(m.date_unix*1000):"";
+        var ko=kd?(String(kd.getDate()).padStart(2,"0")+"/"+String(kd.getMonth()+1).padStart(2,"0")+" "+String(kd.getHours()).padStart(2,"0")+":"+String(kd.getMinutes()).padStart(2,"0")):"";
+        return '<div onclick="selectCalcMatch('+m.id+',\''+m.home_name+' vs '+m.away_name+'\','+m.competition_id+')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.home_name+' vs '+m.away_name+'</div><div style="color:var(--text3);font-size:11px">'+ko+'</div></div>';
+      }).join("");
+      dd.style.display="block";
     }
-    if(!results.length){dd.style.display="none";return;}
-    dd.innerHTML=results.map(function(m){
-      var kd=m.date_unix?new Date(m.date_unix*1000):"";
-      var ko=kd?(String(kd.getDate()).padStart(2,"0")+"/"+String(kd.getMonth()+1).padStart(2,"0")+" "+String(kd.getHours()).padStart(2,"0")+":"+String(kd.getMinutes()).padStart(2,"0")):"";
-      return '<div onclick="selectCalcMatch('+m.id+',\''+m.home_name+' vs '+m.away_name+'\','+m.competition_id+')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:600;color:var(--text)">'+m.home_name+' vs '+m.away_name+'</div><div style="color:var(--text3);font-size:11px">'+ko+'</div></div>';
-    }).join("");
-    dd.style.display="block";
+    if(window._todaysMatches&&window._todaysMatches.length){
+      doSearch();
+    } else {
+      Promise.all([
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+        fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=3",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
+      ]).then(function(pages){
+        window._todaysMatches=(pages[0].data||[]).concat(pages[1].data||[]).concat(pages[2].data||[]);
+        doSearch();
+      });
+    }
   },400);
 }
 
@@ -1747,7 +1758,8 @@ function calcAuto(){
   el.innerHTML='<div class="loading"><div class="sp"></div>Fetching matches...</div>';
     var requests=[
     fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
-    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
+    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=2",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();}),
+    fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=todays-matches&page=3",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}}).then(function(r){return r.json();})
   ];
   var hours=parseInt(document.getElementById("calc-time-range").value)||48;
   if(hours>48){
@@ -1761,7 +1773,15 @@ function calcAuto(){
     var d={data:allData};
     if(!d.data||!d.data.length){el.innerHTML='<div class="empty">No matches found</div>';return;}
     window._todaysMatches=d.data||[];
-    var matches=window._todaysMatches.filter(function(m){return m.date_unix<=until&&m.odds_ft_x>=(parseFloat(document.getElementById("calc-min-odds").value)||2.80);});
+    var minOddsFilter=parseFloat(document.getElementById("calc-min-odds").value)||2.80;
+    var matches=window._todaysMatches.filter(function(m){
+      var best=m.odds_ft_x||0;
+      if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]){
+        Object.values(m.odds_comparison["FT Result"]["Draw"]).forEach(function(v){var f=parseFloat(v);if(f>best)best=f;});
+      }
+      m._bestOddsPrefilter=best;
+      return m.date_unix<=until&&best>=minOddsFilter;
+    });
     el.innerHTML='<div class="loading"><div class="sp"></div>Calculating '+matches.length+' matches...</div>';
     if(!matches.length){el.innerHTML='<div class="empty">No qualifying matches found</div>';return;}
     var leagueCache={};
