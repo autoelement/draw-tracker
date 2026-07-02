@@ -239,7 +239,7 @@ canvas{width:100%!important}
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <div class="sidebar" id="sidebar">
-  <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</button>
+  <button class="nav-item" id="nav-dashboard" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</button>
   <button class="nav-item" id="nav-predictions" onclick="showPage('predictions',this)"><i class="ti ti-target"></i>Draw Selection</button>
   <button class="nav-item" id="nav-bets" onclick="showPage('bets',this)"><i class="ti ti-cards"></i>My Bets</button>
   <button class="nav-item" id="nav-balances" onclick="showPage('balances',this)"><i class="ti ti-wallet"></i>Balances</button>
@@ -252,7 +252,7 @@ canvas{width:100%!important}
 <div class="app">
 
 <!-- DASHBOARD -->
-<div class="page active" id="page-dashboard">
+<div class="page" id="page-dashboard">
   <div class="filters" id="db-type-filters">
     <button class="filter-pill active" onclick="setDbType('all',this)">All</button>
     <button class="filter-pill" onclick="setDbType('single',this)">Singles</button>
@@ -1001,14 +1001,23 @@ function openNewSeriesForm(){
 }
 function loadSettings(){
   return sbGet("settings?select=*&limit=1").then(function(rows){
-    if(rows.length){settings=rows[0];
-      var lsMode=localStorage.getItem("dt_stake_mode");var lsSingleFix=localStorage.getItem("dt_single_fix");var lsTrixFix=localStorage.getItem("dt_trixie_fix");
-      if(lsMode)settings.stake_mode=lsMode;
-      if(lsSingleFix)settings.single_fix=parseFloat(lsSingleFix)||0;
-      if(lsTrixFix)settings.trixie_fix=parseFloat(lsTrixFix)||0;
-      document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;document.getElementById("set-single-fix").value=settings.single_fix||0;document.getElementById("set-trixie-fix").value=settings.trixie_fix||0;setStakeMode(settings.stake_mode||"pct");}
+    if(rows.length){settings=rows[0];}
+    var lsMode=localStorage.getItem("dt_stake_mode");var lsSingleFix=localStorage.getItem("dt_single_fix");var lsTrixFix=localStorage.getItem("dt_trixie_fix");
+    if(lsMode)settings.stake_mode=lsMode;
+    if(lsSingleFix)settings.single_fix=parseFloat(lsSingleFix)||0;
+    if(lsTrixFix)settings.trixie_fix=parseFloat(lsTrixFix)||0;
+    setStakeMode(settings.stake_mode||"pct");
+    if(rows.length){
+      document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;document.getElementById("set-single-fix").value=settings.single_fix||0;document.getElementById("set-trixie-fix").value=settings.trixie_fix||0;
+    }
     updateSettingsPreview();
-  }).catch(function(){});
+  }).catch(function(){
+    var lsMode=localStorage.getItem("dt_stake_mode");var lsSingleFix=localStorage.getItem("dt_single_fix");var lsTrixFix=localStorage.getItem("dt_trixie_fix");
+    if(lsMode)settings.stake_mode=lsMode;
+    if(lsSingleFix)settings.single_fix=parseFloat(lsSingleFix)||0;
+    if(lsTrixFix)settings.trixie_fix=parseFloat(lsTrixFix)||0;
+    setStakeMode(settings.stake_mode||"pct");
+  });
 }
 
 function updateSettingsPreview(){

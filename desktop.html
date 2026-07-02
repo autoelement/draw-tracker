@@ -988,7 +988,13 @@ function loadSettings(){
       var tp=document.getElementById("thresholds-preview");
 if(tp)tp.innerHTML="PF Min: <strong>"+(settings.pf_threshold||1.2)+"</strong> | Odds Min: <strong>"+(settings.odds_threshold||2.0)+"</strong> | Steps Max: <strong>"+(settings.steps_threshold||5)+"</strong> | Edge Min: <strong>"+(settings.edge_threshold||10)+"%</strong>";
     }
-  }).catch(function() {});
+  }).catch(function(){
+    var lsMode=localStorage.getItem("dt_stake_mode");var lsSingleFix=localStorage.getItem("dt_single_fix");var lsTrixFix=localStorage.getItem("dt_trixie_fix");
+    if(lsMode)settings.stake_mode=lsMode;
+    if(lsSingleFix)settings.single_fix=parseFloat(lsSingleFix)||0;
+    if(lsTrixFix)settings.trixie_fix=parseFloat(lsTrixFix)||0;
+    setStakeMode(settings.stake_mode||"pct");
+  });
   updateSettingsPreview();
 }
 
