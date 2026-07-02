@@ -1737,7 +1737,7 @@ if(md.h2h&&md.h2h.previous_matches_results&&md.h2h.previous_matches_results.tota
       ppg_away:m.pre_match_away_ppg||m.away_ppg||0,
       h2h_draw_rate:h2hDraw,
       h2h_matches:h2hMatches,
-      odds:m.odds_ft_x||0,
+      odds:m._bestOddsPrefilter||m.odds_ft_x||0,
       best_odds:bestOdds
     };
     var t=getCalcThresholds();
@@ -1819,7 +1819,7 @@ function calcAuto(){
           ppg_away:m.pre_match_away_ppg||m.away_ppg||0,
           h2h_draw_rate:h2hDraw,
           h2h_matches:h2hMatches,
-          odds:m.odds_ft_x||0,
+          odds:m._bestOddsPrefilter||m.odds_ft_x||0,
           best_odds:bestOdds
         };
         var t=getCalcThresholds();
@@ -1901,7 +1901,7 @@ function calcRecalculate(){
       ppg_away:m.pre_match_away_ppg||m.away_ppg||0,
       h2h_draw_rate:h2hDraw,
       h2h_matches:h2hMatches,
-      odds:m.odds_ft_x||0,
+      odds:m._bestOddsPrefilter||m.odds_ft_x||0,
       best_odds:bestOdds
     };
     var result=calcScore(data,getCalcThresholds());
