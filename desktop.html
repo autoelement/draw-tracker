@@ -1793,7 +1793,15 @@ var requests=[
     var allData=[];pages.forEach(function(p){allData=allData.concat(p.data||[]);});
     var d={data:allData};if(!d.data||!d.data.length){el.innerHTML='<div class="empty">No matches found</div>';return;}
     window._todaysMatches=d.data||[];
-    var matches=window._todaysMatches.filter(function(m){return m.date_unix<=until&&m.odds_ft_x>=(parseFloat(document.getElementById("calc-min-odds").value)||2.80);});
+    var minOddsFilter=parseFloat(document.getElementById("calc-min-odds").value)||2.80;
+    var matches=window._todaysMatches.filter(function(m){
+      var best=m.odds_ft_x||0;
+      if(m.odds_comparison&&m.odds_comparison["FT Result"]&&m.odds_comparison["FT Result"]["Draw"]){
+        Object.values(m.odds_comparison["FT Result"]["Draw"]).forEach(function(v){var f=parseFloat(v);if(f>best)best=f;});
+      }
+      m._bestOddsPrefilter=best;
+      return m.date_unix<=until&&best>=minOddsFilter;
+    });
     el.innerHTML='<div class="loading"><div class="sp"></div>Calculating '+matches.length+' matches...</div>';
     if(!matches.length){el.innerHTML='<div class="empty">No qualifying matches found</div>';return;}
     var leagueCache={};
@@ -1830,7 +1838,7 @@ var requests=[
       ppg_away:m.pre_match_away_ppg||m.away_ppg||0,
       h2h_draw_rate:h2hDraw,
       h2h_matches:h2hMatches,
-      odds:m.odds_ft_x||0,
+      odds:m._bestOddsPrefilter||m.odds_ft_x||0,
       best_odds:bestOdds
     };
         var t=getCalcThresholds();
