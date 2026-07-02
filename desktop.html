@@ -174,21 +174,136 @@ tr:hover td{background:var(--bg3)}
 <!-- MAIN APP -->
 <div id="app" style="display:none">
 <div id="page-skeleton" style="padding:24px;display:none">
-  <div style="display:flex;gap:16px;margin-bottom:24px">
-    <div class="skeleton" style="height:80px;flex:1;border-radius:12px"></div>
-    <div class="skeleton" style="height:80px;flex:1;border-radius:12px"></div>
-    <div class="skeleton" style="height:80px;flex:1;border-radius:12px"></div>
-    <div class="skeleton" style="height:80px;flex:1;border-radius:12px"></div>
-    <div class="skeleton" style="height:80px;flex:1;border-radius:12px"></div>
+
+  <!-- sk: dashboard -->
+  <div id="sk-dashboard">
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px">
+      <div class="skeleton" style="height:34px;width:130px;border-radius:8px"></div>
+      <div class="skeleton" style="height:34px;width:130px;border-radius:8px"></div>
+      <div style="display:flex;gap:6px;margin-left:auto">
+        <div class="skeleton" style="height:34px;width:52px;border-radius:8px"></div>
+        <div class="skeleton" style="height:34px;width:60px;border-radius:8px"></div>
+        <div class="skeleton" style="height:34px;width:60px;border-radius:8px"></div>
+        <div class="skeleton" style="height:34px;width:72px;border-radius:8px"></div>
+        <div class="skeleton" style="height:34px;width:84px;border-radius:8px"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
+      <div class="skeleton" style="height:82px;border-radius:14px"></div>
+      <div class="skeleton" style="height:82px;border-radius:14px"></div>
+      <div class="skeleton" style="height:82px;border-radius:14px"></div>
+      <div class="skeleton" style="height:82px;border-radius:14px"></div>
+      <div class="skeleton" style="height:82px;border-radius:14px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px">
+      <div class="skeleton" style="height:72px;border-radius:14px"></div>
+      <div class="skeleton" style="height:72px;border-radius:14px"></div>
+      <div class="skeleton" style="height:72px;border-radius:14px"></div>
+      <div class="skeleton" style="height:72px;border-radius:14px"></div>
+      <div class="skeleton" style="height:72px;border-radius:14px"></div>
+      <div class="skeleton" style="height:72px;border-radius:14px"></div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div class="skeleton" style="height:200px;flex:1;border-radius:14px"></div>
+      <div class="skeleton" style="height:200px;flex:1;border-radius:14px"></div>
+      <div class="skeleton" style="height:200px;flex:1;border-radius:14px"></div>
+    </div>
   </div>
-  <div class="skeleton" style="height:48px;width:100%;border-radius:8px;margin-bottom:16px"></div>
-  <div style="display:flex;flex-direction:column;gap:10px">
-    <div class="skeleton" style="height:52px;width:100%;border-radius:8px"></div>
-    <div class="skeleton" style="height:52px;width:100%;border-radius:8px"></div>
-    <div class="skeleton" style="height:52px;width:100%;border-radius:8px"></div>
-    <div class="skeleton" style="height:52px;width:100%;border-radius:8px"></div>
+
+  <!-- sk: predictions -->
+  <div id="sk-predictions" style="display:none">
+    <div style="display:flex;gap:16px;margin-bottom:20px">
+      <div class="skeleton" style="height:200px;flex:1;border-radius:14px"></div>
+      <div class="skeleton" style="height:200px;flex:1;border-radius:14px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:0 4px">
+      <div class="skeleton" style="height:18px;width:160px;border-radius:6px"></div>
+      <div style="display:flex;gap:8px">
+        <div class="skeleton" style="height:32px;width:52px;border-radius:8px"></div>
+        <div class="skeleton" style="height:32px;width:70px;border-radius:8px"></div>
+        <div class="skeleton" style="height:32px;width:60px;border-radius:8px"></div>
+      </div>
+    </div>
+    <div class="skeleton" style="height:48px;width:100%;border-radius:8px;margin-bottom:8px"></div>
+    <div class="skeleton" style="height:48px;width:100%;border-radius:8px;margin-bottom:8px"></div>
+    <div class="skeleton" style="height:48px;width:100%;border-radius:8px;margin-bottom:8px"></div>
+    <div class="skeleton" style="height:48px;width:100%;border-radius:8px"></div>
+  </div>
+
+  <!-- sk: bets -->
+  <div id="sk-bets" style="display:none">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+      <div class="skeleton" style="height:34px;width:150px;border-radius:8px"></div>
+      <div class="skeleton" style="height:34px;width:90px;border-radius:8px"></div>
+      <div class="skeleton" style="height:34px;width:90px;border-radius:8px"></div>
+      <div class="skeleton" style="height:34px;width:100px;border-radius:8px"></div>
+      <div class="skeleton" style="height:34px;width:100px;border-radius:8px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);margin-bottom:4px">
+      <div class="skeleton" style="height:18px;width:100px;border-radius:6px"></div>
+      <div style="display:flex;gap:8px">
+        <div class="skeleton" style="height:32px;width:110px;border-radius:8px"></div>
+        <div class="skeleton" style="height:32px;width:80px;border-radius:8px"></div>
+        <div class="skeleton" style="height:32px;width:110px;border-radius:8px"></div>
+        <div class="skeleton" style="height:32px;width:90px;border-radius:8px"></div>
+      </div>
+    </div>
+    <div class="skeleton" style="height:52px;width:100%;border-radius:8px;margin-bottom:6px"></div>
+    <div class="skeleton" style="height:52px;width:100%;border-radius:8px;margin-bottom:6px"></div>
+    <div class="skeleton" style="height:52px;width:100%;border-radius:8px;margin-bottom:6px"></div>
+    <div class="skeleton" style="height:52px;width:100%;border-radius:8px;margin-bottom:6px"></div>
     <div class="skeleton" style="height:52px;width:100%;border-radius:8px"></div>
   </div>
+
+  <!-- sk: balances -->
+  <div id="sk-balances" style="display:none">
+    <div class="skeleton" style="height:90px;width:100%;border-radius:14px;margin-bottom:14px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px">
+      <div class="skeleton" style="height:34px;width:90px;border-radius:8px"></div>
+      <div class="skeleton" style="height:34px;width:140px;border-radius:8px"></div>
+      <div class="skeleton" style="height:34px;width:120px;border-radius:8px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div class="skeleton" style="height:100px;border-radius:12px"></div>
+      <div class="skeleton" style="height:100px;border-radius:12px"></div>
+      <div class="skeleton" style="height:100px;border-radius:12px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);margin-bottom:4px">
+      <div class="skeleton" style="height:18px;width:160px;border-radius:6px"></div>
+      <div class="skeleton" style="height:32px;width:80px;border-radius:8px"></div>
+    </div>
+    <div class="skeleton" style="height:44px;width:100%;border-radius:8px;margin-bottom:6px"></div>
+    <div class="skeleton" style="height:44px;width:100%;border-radius:8px;margin-bottom:6px"></div>
+    <div class="skeleton" style="height:44px;width:100%;border-radius:8px"></div>
+  </div>
+
+  <!-- sk: martingale -->
+  <div id="sk-martingale" style="display:none">
+    <div style="display:flex;gap:16px;margin-bottom:20px">
+      <div class="skeleton" style="height:220px;flex:1;border-radius:14px"></div>
+      <div class="skeleton" style="height:220px;flex:1;border-radius:14px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="skeleton" style="height:18px;width:130px;border-radius:6px"></div>
+      <div style="display:flex;gap:8px">
+        <div class="skeleton" style="height:32px;width:90px;border-radius:8px"></div>
+        <div class="skeleton" style="height:32px;width:80px;border-radius:8px"></div>
+        <div class="skeleton" style="height:32px;width:70px;border-radius:8px"></div>
+      </div>
+    </div>
+    <div class="skeleton" style="height:52px;width:100%;border-radius:8px;margin-bottom:6px"></div>
+    <div class="skeleton" style="height:52px;width:100%;border-radius:8px;margin-bottom:6px"></div>
+    <div class="skeleton" style="height:52px;width:100%;border-radius:8px"></div>
+  </div>
+
+  <!-- sk: settings -->
+  <div id="sk-settings" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="skeleton" style="height:300px;border-radius:12px"></div>
+      <div class="skeleton" style="height:300px;border-radius:12px"></div>
+    </div>
+  </div>
+
 </div>
 <nav>
   <div class="logo" onclick="showPage('dashboard',document.querySelector('.nav-tab'))" style="cursor:pointer">X<span>/</span>CAP</div>
@@ -748,7 +863,9 @@ function doLogout() {
 
 function showApp(email){
   setInterval(refreshAuthToken, 10*60*1000);
+  var savedPage=localStorage.getItem("dt_current_page")||"dashboard";
   document.getElementById("page-skeleton").style.display="block";
+  ["dashboard","predictions","bets","balances","martingale","settings"].forEach(function(p){var el=document.getElementById("sk-"+p);if(el)el.style.display=(p===savedPage)?"block":"none";});
   initSettings();
   document.getElementById("login-page").style.display="none";
   document.getElementById("app").style.display="block";
