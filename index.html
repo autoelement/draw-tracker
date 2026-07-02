@@ -1271,7 +1271,7 @@ function loadSettings(){
     if(lsTrixFix)settings.trixie_fix=parseFloat(lsTrixFix)||0;
     setStakeMode(settings.stake_mode||"pct");
     if(rows.length){
-      document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;document.getElementById("set-patent").value=settings.patent_pct;document.getElementById("set-single-fix").value=settings.single_fix||0;document.getElementById("set-trixie-fix").value=settings.trixie_fix||0;
+      document.getElementById("set-single").value=settings.single_pct;document.getElementById("set-trixie").value=settings.trixie_pct;var spEl=document.getElementById("set-patent");if(spEl)spEl.value=settings.patent_pct;document.getElementById("set-single-fix").value=settings.single_fix||0;document.getElementById("set-trixie-fix").value=settings.trixie_fix||0;
     }
     updateSettingsPreview();
   }).catch(function(){
