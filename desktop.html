@@ -2803,6 +2803,7 @@ function exportBets(){
 function exportPaperBets(){
   betsAll.forEach(function(b){
     b._clv=b.closing_odds&&b.odds?+((b.odds/b.closing_odds-1)*100).toFixed(1):null;
+    b._pnl=b.status==="win"?+((b.stake||10)*(b.odds||0)-(b.stake||10)).toFixed(2):b.status==="loss"?-(b.stake||10):"";
   });
   exportCSV(betsAll,[
     {key:"kickoff",label:"Date"},
@@ -2817,7 +2818,7 @@ function exportPaperBets(){
     {key:"status",label:"Status"},
     {key:"closing_odds",label:"Closing Odds"},
     {key:"_clv",label:"CLV%"},
-    {key:"pnl",label:"P&L"}
+    {key:"_pnl",label:"P&L"}
   ],"paper_bets_"+new Date().toISOString().slice(0,10)+".csv");
 }
 function exportTx(){
