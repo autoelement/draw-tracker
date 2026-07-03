@@ -1171,7 +1171,20 @@ loadBookmakers().then(function(){loadSettings().then(function(){
   loadMartSeries();
   loadUpcomingMatches();
 }
+function backfillClosingOdds(tbl){
+  sbGet(tbl+"?select=id,fixture_id&closing_odds=is.null&fixture_id=not.is.null&status=in.(win,loss)").then(function(rows){
+    rows.forEach(function(b){
+      fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+b.fixture_id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var m=d.data;
+        if(m&&m.odds_ft_x)sbPatch(tbl+"?id=eq."+b.id,{closing_odds:m.odds_ft_x});
+      }).catch(function(){});
+    });
+  });
+}
 function syncResults(){
+  backfillClosingOdds("bets");
   var btn=document.getElementById("sync-btn");
   btn.textContent="Running...";btn.disabled=true;
   sbGet("bets?select=*&status=eq.pending&fixture_id=not.is.null").then(function(rows){
@@ -1186,7 +1199,9 @@ function syncResults(){
           var isDraw=m.homeGoalCount===m.awayGoalCount;
           var status=isDraw?"win":"loss";
 var payout=isDraw?+(b.amount*b.odds).toFixed(2):0;
-sbPatch("bets?id=eq."+b.id,{status:status,payout:payout,balance_applied:true,notes:"auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount}).then(function(){
+var patch={status:status,payout:payout,balance_applied:true,notes:"auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount};
+if(!b.closing_odds&&m.odds_ft_x)patch.closing_odds=m.odds_ft_x;
+sbPatch("bets?id=eq."+b.id,patch).then(function(){
   var oldEff=b.balance_applied?settledEffect("pending",b.amount,0):0;
   var newEff=settledEffect(status,b.amount,payout);
   adjustBalance(b.bookmaker,newEff-oldEff);
@@ -1200,6 +1215,7 @@ sbPatch("bets?id=eq."+b.id,{status:status,payout:payout,balance_applied:true,not
   });
 }
 function syncPaperResults(){
+  backfillClosingOdds("paper_bets");
   var btn=document.getElementById("sync-btn");
   btn.textContent="Running...";btn.disabled=true;
   sbGet("paper_bets?select=*&status=eq.pending").then(function(rows){
@@ -1213,7 +1229,9 @@ function syncPaperResults(){
         var m=d.data;
         if(m&&m.status==="complete"){
           var status=m.homeGoalCount===m.awayGoalCount?"win":"loss";
-          sbPatch("paper_bets?id=eq."+b.id,{status:status,notes:"auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount});
+          var ppatch={status:status,notes:"auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount};
+          if(!b.closing_odds&&m.odds_ft_x)ppatch.closing_odds=m.odds_ft_x;
+          sbPatch("paper_bets?id=eq."+b.id,ppatch);
         }
         done++;
         if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync";btn.disabled=false;loadBets();loadBookmakers();}
