@@ -2949,7 +2949,7 @@ function renderBetsPage(){
       bkCell=b.bookmaker||"";
       statusCell=oc;
       var clv=b.closing_odds&&b.odds?+((b.odds/b.closing_odds-1)*100).toFixed(1):null;
-      closingOddsCell=clv!=null?'<span style="color:'+(clv>=0?'var(--green)':'var(--red)')+'">CLV: '+(clv>=0?'+':'')+clv+'%</span>':"";
+      closingOddsCell=clv!=null?'<span style="color:var(--text3);font-size:11px">'+b.closing_odds+'</span> <span style="color:'+(clv>=0?'var(--green)':'var(--red)')+'">CLV: '+(clv>=0?'+':'')+clv+'%</span>':"";
     }
     var edgeColor=b.status==="win"?"edge-pos":b.status==="loss"?"edge-neg":"";
     var edgeStyle=isPending?'style="color:var(--text3)"':'';
