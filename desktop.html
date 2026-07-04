@@ -1220,8 +1220,8 @@ function syncPaperResults(){
   btn.textContent="Running...";btn.disabled=true;
   sbGet("paper_bets?select=*&status=eq.pending").then(function(rows){
     if(!rows.length){showToast("No pending paper bets",true);btn.textContent="⟳ Sync";btn.disabled=false;return;}
-    var done=0,_updated=0,_notDone=0,_noFixture=0;
-    var _finish=function(){showToast("Synced! "+_updated+" updated"+(_notDone?", "+_notDone+" not finished yet":"")+(_noFixture?", "+_noFixture+" without fixture":""));btn.textContent="⟳ Sync";btn.disabled=false;loadBets();loadBookmakers();};
+    var done=0,_updated=0,_notDone=0,_noFixture=0,_notDoneInfo=[];
+    var _finish=function(){showToast("Synced! "+_updated+" updated"+(_notDone?", not finished: "+_notDoneInfo.join("; "):"")+(_noFixture?", "+_noFixture+" without fixture":""));btn.textContent="⟳ Sync";btn.disabled=false;loadBets();loadBookmakers();};
     rows.forEach(function(b){
       if(!b.fixture_id){_noFixture++;done++;if(done===rows.length){_finish();}return;}
       fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+b.fixture_id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
@@ -1236,7 +1236,7 @@ function syncPaperResults(){
             if(st>=300){delete ppatch.notes;return sbPatch("paper_bets?id=eq."+b.id,ppatch).then(function(st2){if(st2>=300)showToast("DB write failed ("+st2+") — check paper_bets columns/permissions",true);else loadBets();});}
           });
           _updated++;
-        }else{_notDone++;}
+        }else{_notDone++;_notDoneInfo.push((b.match||b.fixture_id)+" [API: "+(m?(m.status||"?")+" "+(m.homeGoalCount!=null?m.homeGoalCount+"-"+m.awayGoalCount:""):"no data")+"]");}
         done++;
         if(done===rows.length){_finish();}
       }).catch(function(){done++;if(done===rows.length){_finish();}});
