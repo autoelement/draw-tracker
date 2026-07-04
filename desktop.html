@@ -153,7 +153,7 @@ tr:hover td{background:var(--bg3)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--border2) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px;display:inline-block}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--green);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--green);z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast{position:fixed;bottom:20px;right:20px;max-width:420px;white-space:normal;word-break:break-word;background:var(--bg2);border:1px solid var(--green);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--green);z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s}
 .toast.show{transform:translateY(0);opacity:1}
 </style>
 </head>
@@ -1058,7 +1058,8 @@ function showToast(msg, isErr) {
   t.style.borderColor = isErr ? "var(--red)" : "var(--green)";
   t.style.color = isErr ? "var(--red)" : "var(--green)";
   t.classList.add("show");
-  setTimeout(function() { t.classList.remove("show"); }, 3000);
+  clearTimeout(t._hideT);
+  t._hideT=setTimeout(function() { t.classList.remove("show"); }, msg.length>60?9000:3000);
 }
 function openM(id) { document.getElementById(id).classList.add("open"); }
 function closeM(id) { document.getElementById(id).classList.remove("open"); }
@@ -1236,7 +1237,7 @@ function syncPaperResults(){
             if(st>=300){delete ppatch.notes;return sbPatch("paper_bets?id=eq."+b.id,ppatch).then(function(st2){if(st2>=300)showToast("DB write failed ("+st2+") — check paper_bets columns/permissions",true);else loadBets();});}
           });
           _updated++;
-        }else{_notDone++;_notDoneInfo.push((b.match||b.fixture_id)+" [API: "+(m?(m.status||"?")+" "+(m.homeGoalCount!=null?m.homeGoalCount+"-"+m.awayGoalCount:""):"no data")+"]");}
+        }else{_notDone++;console.log("SYNC not complete:",b.match,d);_notDoneInfo.push((b.match||b.fixture_id)+" [API: "+(m?(m.status||"?")+" "+(m.homeGoalCount!=null?m.homeGoalCount+"-"+m.awayGoalCount:""):"no data")+"]");}
         done++;
         if(done===rows.length){_finish();}
       }).catch(function(){done++;if(done===rows.length){_finish();}});
