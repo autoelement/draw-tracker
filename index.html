@@ -1076,13 +1076,19 @@ function refreshToken(){
   }).catch(function(){});
 }
 function backfillClosingOdds(tbl){
-  sbGet(tbl+"?select=id,fixture_id&closing_odds=is.null&fixture_id=not.is.null&status=in.(win,loss)").then(function(rows){
+  sbGet(tbl+"?select=id,fixture_id,closing_odds,notes&or=(closing_odds.is.null,notes.is.null)&fixture_id=not.is.null&status=in.(win,loss)").then(function(rows){
     rows.forEach(function(b){
       fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+b.fixture_id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
       .then(function(r){return r.json();})
       .then(function(d){
         var m=d.data;
-        if(m&&m.odds_ft_x)sbPatch(tbl+"?id=eq."+b.id,{closing_odds:m.odds_ft_x});
+        if(!m)return;
+        var patch={};
+        if(!b.closing_odds&&m.odds_ft_x)patch.closing_odds=m.odds_ft_x;
+        if(!b.notes&&m.status==="complete"&&m.homeGoalCount!=null)patch.notes="auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount;
+        if(Object.keys(patch).length)sbPatch(tbl+"?id=eq."+b.id,patch).then(function(st){
+          if(st>=300&&patch.notes&&patch.closing_odds){return sbPatch(tbl+"?id=eq."+b.id,{closing_odds:patch.closing_odds});}
+        });
       }).catch(function(){});
     });
   });
