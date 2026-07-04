@@ -1233,7 +1233,7 @@ function syncPaperResults(){
           var ppatch={status:status,notes:"auto:FT:"+m.homeGoalCount+"-"+m.awayGoalCount};
           if(!b.closing_odds&&m.odds_ft_x)ppatch.closing_odds=m.odds_ft_x;
           sbPatch("paper_bets?id=eq."+b.id,ppatch).then(function(st){
-            if(st>=300){delete ppatch.notes;return sbPatch("paper_bets?id=eq."+b.id,ppatch).then(function(){loadBets();});}
+            if(st>=300){delete ppatch.notes;return sbPatch("paper_bets?id=eq."+b.id,ppatch).then(function(st2){if(st2>=300)showToast("DB write failed ("+st2+") — check paper_bets columns/permissions",true);else loadBets();});}
           });
           _updated++;
         }else{_notDone++;}
