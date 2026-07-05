@@ -1459,7 +1459,7 @@ if(clvEl)clvEl.textContent=avgClv!=null?(avgClv>=0?"+":"")+avgClv+"%":"—";
 var clvSub=document.getElementById("s-clv-sub");
 if(clvSub)clvSub.textContent=clvBets.length+" bets tracked";
 var clvEl2=document.getElementById("s-clv2");
-if(clvEl2)clvEl2.textContent=avgClv!=null?(avgClv>=0?"+":"")+avgClv+"%":"—";
+if(clvEl2)clvEl2.textContent=avgClv!=null?(avgClv>=0?"+":"")+avgClv+"%":"—";if(clvEl2)clvEl2.className="stat-val "+(avgClv!=null&&avgClv<0?"red":"green");
 var clvSub2=document.getElementById("s-clv-sub2");
 if(clvSub2)clvSub2.textContent=clvBets.length+" bets tracked";
     document.getElementById("s-pf").className="stat-val "+(parseFloat(pf)>=1||pf==="∞"?"green":"red");
@@ -2712,7 +2712,7 @@ function renderBetsPage(){
   h+='</div>';
   h+='<div class="stats-2" style="margin-bottom:12px">';
   h+='<div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue">'+(parseFloat(avgEdge)>=0?"+":"")+avgEdge+'%</div></div>';
-  h+='<div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val green">'+(avgClv!=null?(avgClv>=0?"+":"")+avgClv+'%':"—")+'</div><div class="stat-sub">'+clvBets.length+' tracked</div></div>';
+  h+='<div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val '+(avgClv!=null&&avgClv<0?"red":"green")+'">'+(avgClv!=null?(avgClv>=0?"+":"")+avgClv+'%':"—")+'</div><div class="stat-sub">'+clvBets.length+' tracked</div></div>';
   h+='</div>';
   var totalPages=Math.ceil(all.length/betsPerPage);
   if(betsPage>totalPages)betsPage=totalPages;
@@ -2785,7 +2785,7 @@ function renderPaperBets(){
   h+='</div>';
   h+='<div class="stats-2" style="margin-bottom:14px">';
   h+='<div class="stat-card"><div class="stat-label">Avg Edge</div><div class="stat-val blue">'+(avgEdge>=0?"+":"")+avgEdge+'%</div></div>';
-  h+='<div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val green">'+(avgClv!=null?(avgClv>=0?"+":"")+avgClv+'%':"—")+'</div><div class="stat-sub">'+clvBets.length+' tracked</div></div>';
+  h+='<div class="stat-card"><div class="stat-label">Avg CLV</div><div class="stat-val '+(avgClv!=null&&avgClv<0?"red":"green")+'">'+(avgClv!=null?(avgClv>=0?"+":"")+avgClv+'%':"—")+'</div><div class="stat-sub">'+clvBets.length+' tracked</div></div>';
   h+='</div>';
 
   var totalPages=Math.ceil(all.length/betsPerPage);
