@@ -2796,30 +2796,49 @@ function exportCSV(rows,cols,filename){
   a.href=url;a.download=filename;a.click();
   URL.revokeObjectURL(url);
 }
+function _withPredMetrics(rows,cb){
+  sbGet("draw_predictions?select=fixture_id,league_name,avg_goals,btts_pct,home_draw_pct,away_draw_pct,league_draw_rate,ppg_diff,h2h_draw_rate,h2h_matches,our_prob&order=created_at.asc").then(function(preds){
+    var map={};(preds||[]).forEach(function(p){if(p.fixture_id)map[p.fixture_id]=p;});
+    rows.forEach(function(b){
+      var p=map[b.fixture_id]||{};
+      b._league=b.league||p.league_name||"";
+      b._avg_goals=p.avg_goals!=null?p.avg_goals:"";
+      b._btts=p.btts_pct!=null?p.btts_pct:"";
+      b._draw_stats=(p.home_draw_pct!=null||p.away_draw_pct!=null||p.league_draw_rate!=null)?"H:"+(p.home_draw_pct||0)+"% A:"+(p.away_draw_pct||0)+"% L:"+(p.league_draw_rate||0)+"%":"";
+      b._ppg_diff=p.ppg_diff!=null?p.ppg_diff:"";
+      b._h2h=p.h2h_draw_rate!=null?p.h2h_draw_rate+"% ("+(p.h2h_matches||0)+")":"";
+      b._xcap_prob=b.our_prob!=null?b.our_prob:(p.our_prob!=null?p.our_prob:"");
+    });
+    cb();
+  }).catch(function(){cb();});
+}
 function exportBets(){
   betsAll.forEach(function(b){
     b._mode=b.martingale_series_id?"Martingale":"Regular";
     b._clv=b.closing_odds&&b.odds?+((b.odds/b.closing_odds-1)*100).toFixed(1):null;
     b._final_score=b.notes&&b.notes.indexOf("auto:FT:")===0?b.notes.split("auto:FT:")[1]:"";
   });
+  _withPredMetrics(betsAll,function(){
   exportCSV(betsAll,[
     {key:"date",label:"Date"},{key:"match",label:"Match"},{key:"_final_score",label:"Final Score"},{key:"selection",label:"Selection"},
     {key:"bet_type",label:"Type"},{key:"odds",label:"Odds"},{key:"amount",label:"Amount"},
     {key:"payout",label:"Payout"},{key:"my_probability",label:"My%"},{key:"edge",label:"Edge"},
     {key:"bookmaker",label:"Bookmaker"},{key:"status",label:"Status"},{key:"_mode",label:"Mode"},
     {key:"closing_odds",label:"Closing Odds"},{key:"_clv",label:"CLV%"},{key:"calc_score",label:"Score"},
-    {key:"confidence",label:"Confidence"},{key:"category",label:"Category"}
+    {key:"confidence",label:"Confidence"},{key:"category",label:"Category"},
+    {key:"_league",label:"League"},{key:"_avg_goals",label:"Avg Goals"},{key:"_btts",label:"BTTS%"},{key:"_draw_stats",label:"Draw Stats"},{key:"_ppg_diff",label:"PPG Diff"},{key:"_h2h",label:"H2H"},{key:"_xcap_prob",label:"XCAP_Prob"}
   ],"bets_"+new Date().toISOString().slice(0,10)+".csv");
+  });
 }
 function exportPaperBets(){
   betsAll.forEach(function(b){
     b._clv=b.closing_odds&&b.odds?+((b.odds/b.closing_odds-1)*100).toFixed(1):null;
     b._pnl=b.status==="win"?+((b.stake||10)*(b.odds||0)-(b.stake||10)).toFixed(2):b.status==="loss"?-(b.stake||10):"";
   });
+  _withPredMetrics(betsAll,function(){
   exportCSV(betsAll,[
     {key:"kickoff",label:"Date"},
     {key:"match",label:"Match"},
-    {key:"league",label:"League"},
     {key:"odds",label:"Odds"},
     {key:"stake",label:"Stake"},
     {key:"market_edge",label:"Edge%"},
@@ -2829,8 +2848,10 @@ function exportPaperBets(){
     {key:"status",label:"Status"},
     {key:"closing_odds",label:"Closing Odds"},
     {key:"_clv",label:"CLV%"},
-    {key:"_pnl",label:"P&L"}
+    {key:"_pnl",label:"P&L"},
+    {key:"_league",label:"League"},{key:"_avg_goals",label:"Avg Goals"},{key:"_btts",label:"BTTS%"},{key:"_draw_stats",label:"Draw Stats"},{key:"_ppg_diff",label:"PPG Diff"},{key:"_h2h",label:"H2H"},{key:"_xcap_prob",label:"XCAP_Prob"}
   ],"paper_bets_"+new Date().toISOString().slice(0,10)+".csv");
+  });
 }
 function exportTx(){
   exportCSV(txAll,[
