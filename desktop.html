@@ -2520,12 +2520,31 @@ function addBetFromMatch(fixtureId,matchName,odds,ourProb,leagueName,calcScore,c
     calcBetFields();
   },100);
 }
+function _calcSnapshot(fixtureId){
+  if(!fixtureId||!window._lastCalcResults)return null;
+  var r=window._lastCalcResults.find(function(x){return x.match&&x.match.id==fixtureId;});
+  if(!r||!r.data)return null;
+  var d=r.data;
+  var ppgDiff=d.ppg_home&&d.ppg_away?+(Math.abs(d.ppg_home-d.ppg_away)/Math.max(d.ppg_home,d.ppg_away)*100).toFixed(1):null;
+  return JSON.stringify({
+    league:r.match.league_name||"",
+    avg_goals:d.avg_potential||0,
+    btts:d.btts_pct||0,
+    home_draw_pct:d.home_draw_pct||0,
+    away_draw_pct:d.away_draw_pct||0,
+    league_draw_rate:d.league_draw_rate||0,
+    ppg_diff:ppgDiff,
+    h2h_draw_rate:d.h2h_draw_rate||0,
+    h2h_matches:d.h2h_matches||0,
+    xcap_prob:(r.result&&r.result.ourProb)||0
+  });
+}
 function trackPaperBet(fixtureId,matchName,odds,ourProb,marketEdge,calcScore,confidence,leagueName,kickoff,category){
   if(window._trackedFixtures&&window._trackedFixtures.indexOf(fixtureId)!==-1){
     showToast("Already tracked!",true);
     return;
   }
-  sbPost("paper_bets",{
+  var _pbody={
     match:matchName,
     league:leagueName||"",
     fixture_id:fixtureId,
@@ -2538,6 +2557,12 @@ function trackPaperBet(fixtureId,matchName,odds,ourProb,marketEdge,calcScore,con
     category:category||"",
     stake:10,
     status:"pending"
+  };
+  var _snap=_calcSnapshot(fixtureId);
+  if(_snap)_pbody.calc_snapshot=_snap;
+  sbPost("paper_bets",_pbody).then(function(res){
+    if(res&&res.code&&_pbody.calc_snapshot){delete _pbody.calc_snapshot;return sbPost("paper_bets",_pbody);}
+    return res;
   }).then(function(){
     showToast("📋 Tracked!");
     window._trackedFixtures=window._trackedFixtures||[];
@@ -2801,6 +2826,7 @@ function _withPredMetrics(rows,cb){
     var map={};(preds||[]).forEach(function(p){if(p.fixture_id)map[p.fixture_id]=p;});
     rows.forEach(function(b){
       var p=map[b.fixture_id]||{};
+      if(b.calc_snapshot){try{var s=JSON.parse(b.calc_snapshot);p={league_name:s.league,avg_goals:s.avg_goals,btts_pct:s.btts,home_draw_pct:s.home_draw_pct,away_draw_pct:s.away_draw_pct,league_draw_rate:s.league_draw_rate,ppg_diff:s.ppg_diff,h2h_draw_rate:s.h2h_draw_rate,h2h_matches:s.h2h_matches,our_prob:s.xcap_prob};}catch(e){}}
       b._league=b.league||p.league_name||"";
       b._avg_goals=p.avg_goals!=null?p.avg_goals:"";
       b._btts=p.btts_pct!=null?p.btts_pct:"";
@@ -3417,6 +3443,7 @@ var confidenceVal=document.getElementById("bet-confidence").value||null;
 var categoryVal=document.getElementById("bet-category").value||null;
 var row={date:date,match:document.getElementById("bet-match").value,league:document.getElementById("bet-league").value,selection:document.getElementById("bet-sel").value,odds:odds,amount:amt,payout:payout,bookmaker:bk,status:status,bet_type:type,my_probability:myP,implied_probability:impl,edge:edge,martingale_series_id:martId,martingale_step:martStep,notes:notes,fixture_id:fixtureId,calc_score:calcScoreVal,kickoff:kickoffVal,confidence:confidenceVal,category:categoryVal};  var newEff=settledEffect(status,amt,payout);
   row.balance_applied=true;
+  if(!id){var _rsnap=_calcSnapshot(fixtureId);if(_rsnap)row.calc_snapshot=_rsnap;}
   var p;
   if(stakeId){row.notes="stake:"+stakeId;row.bookmaker="Stake";p=id?sbPatch("bets?id=eq."+id,row):sbPost("bets",row);}
   else if(id){
@@ -3433,7 +3460,10 @@ var row={date:date,match:document.getElementById("bet-match").value,league:docum
   }
   else{
     // NEW: apply only if settled at creation
-    p=sbPost("bets",row).then(function(){
+    p=sbPost("bets",row).then(function(res){
+      if(res&&res.code&&row.calc_snapshot){delete row.calc_snapshot;return sbPost("bets",row);}
+      return res;
+    }).then(function(){
       return adjustBalance(bk,row.balance_applied?newEff:0);
     });
   }
