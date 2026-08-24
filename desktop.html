@@ -1172,6 +1172,14 @@ loadBookmakers().then(function(){loadSettings().then(function(){
   loadMartSeries();
   loadUpcomingMatches();
 }
+function _apiErr(d){
+  if(!d)return "empty response";
+  if(d.data)return null;
+  var msg=d.message||d.error||d.error_message||(d.errors?JSON.stringify(d.errors):null);
+  if(msg)return String(msg).slice(0,140);
+  if(d.success===false)return "API returned success:false";
+  return "no data field";
+}
 function backfillClosingOdds(tbl){
   sbGet(tbl+"?select=id,fixture_id,closing_odds,notes&or=(closing_odds.is.null,notes.is.null)&fixture_id=not.is.null&status=in.(win,loss)").then(function(rows){
     rows.forEach(function(b){
@@ -1196,11 +1204,18 @@ function syncResults(){
   btn.textContent="Running...";btn.disabled=true;
   sbGet("bets?select=*&status=eq.pending&fixture_id=not.is.null").then(function(rows){
     if(!rows.length){showToast("No pending bets with fixture",true);btn.textContent="⟳ Sync Results";btn.disabled=false;return;}
-    var done=0;
+    var done=0,_updated=0,_notDone=0,_apiFail=0,_apiMsg="",_notDoneInfo=[];
+    var _rfinish=function(){
+      var msg=_apiFail?("API error ("+_apiFail+" matches): "+_apiMsg):("Synced! "+_updated+" updated"+(_notDone?", not finished: "+_notDoneInfo.join("; "):""));
+      showToast(msg,!!_apiFail);
+      btn.textContent="\u27f3 Sync Results";btn.disabled=false;loadBets();loadBookmakers();
+    };
     rows.forEach(function(b){
       fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+b.fixture_id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
       .then(function(r){return r.json();})
       .then(function(d){
+        var _e=_apiErr(d);
+        if(_e){_apiFail++;if(!_apiMsg)_apiMsg=_e;console.log("SYNC API error:",b.match,d);}
         var m=d.data;
         if(m&&m.status==="complete"){
           var isDraw=m.homeGoalCount===m.awayGoalCount;
@@ -1214,10 +1229,12 @@ sbPatch("bets?id=eq."+b.id,patch).then(function(){
   adjustBalance(b.bookmaker,newEff-oldEff);
   if(b.slip_id){updateComboStatuses(b.slip_id);}
 });
-        }
+        
+        _updated++;
+        }else if(!_e){_notDone++;_notDoneInfo.push((b.match||b.fixture_id)+" ["+(m?(m.status||"?"):"?")+"]");}
         done++;
-        if(done===rows.length){showToast("Synced!");btn.textContent="⟳ Sync Results";btn.disabled=false;loadBets();loadBookmakers();}
-      }).catch(function(){done++;if(done===rows.length){btn.textContent="⟳ Sync Results";btn.disabled=false;loadBets();}});
+        if(done===rows.length){_rfinish();}
+      }).catch(function(){done++;if(done===rows.length){_rfinish();}});
     });
   });
 }
@@ -1227,13 +1244,15 @@ function syncPaperResults(){
   btn.textContent="Running...";btn.disabled=true;
   sbGet("paper_bets?select=*&status=eq.pending").then(function(rows){
     if(!rows.length){showToast("No pending paper bets",true);btn.textContent="⟳ Sync";btn.disabled=false;return;}
-    var done=0,_updated=0,_notDone=0,_noFixture=0,_notDoneInfo=[];
-    var _finish=function(){showToast("Synced! "+_updated+" updated"+(_notDone?", not finished: "+_notDoneInfo.join("; "):"")+(_noFixture?", "+_noFixture+" without fixture":""));btn.textContent="⟳ Sync";btn.disabled=false;loadBets();loadBookmakers();};
+    var done=0,_updated=0,_notDone=0,_noFixture=0,_notDoneInfo=[],_apiFail=0,_apiMsg="";
+    var _finish=function(){showToast(_apiFail?("API error ("+_apiFail+" matches): "+_apiMsg):("Synced! "+_updated+" updated"+(_notDone?", not finished: "+_notDoneInfo.join("; "):"")+(_noFixture?", "+_noFixture+" without fixture":"")),!!_apiFail);btn.textContent="⟳ Sync";btn.disabled=false;loadBets();loadBookmakers();};
     rows.forEach(function(b){
       if(!b.fixture_id){_noFixture++;done++;if(done===rows.length){_finish();}return;}
       fetch("https://jczzctpbrbaavzetidov.supabase.co/functions/v1/hyper-function?endpoint=match&match_id="+b.fixture_id,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}})
       .then(function(r){return r.json();})
       .then(function(d){
+        var _e=_apiErr(d);
+        if(_e){_apiFail++;if(!_apiMsg)_apiMsg=_e;console.log("PAPER SYNC API error:",b.match,d);}
         var m=d.data;
         if(m&&m.status==="complete"){
           var status=m.homeGoalCount===m.awayGoalCount?"win":"loss";
@@ -1243,7 +1262,7 @@ function syncPaperResults(){
             if(st>=300){delete ppatch.notes;return sbPatch("paper_bets?id=eq."+b.id,ppatch).then(function(st2){if(st2>=300)showToast("DB write failed ("+st2+") — check paper_bets columns/permissions",true);else loadBets();});}
           });
           _updated++;
-        }else{_notDone++;console.log("SYNC not complete:",b.match,d);_notDoneInfo.push((b.match||b.fixture_id)+" [API: "+(m?(m.status||"?")+" "+(m.homeGoalCount!=null?m.homeGoalCount+"-"+m.awayGoalCount:""):"no data")+"]");}
+        }else if(!_e){_notDone++;console.log("SYNC not complete:",b.match,d);_notDoneInfo.push((b.match||b.fixture_id)+" [API: "+(m?(m.status||"?")+" "+(m.homeGoalCount!=null?m.homeGoalCount+"-"+m.awayGoalCount:""):"no data")+"]");}
         done++;
         if(done===rows.length){_finish();}
       }).catch(function(){done++;if(done===rows.length){_finish();}});
@@ -2232,7 +2251,11 @@ var requests=[
   }
   Promise.all(requests).then(function(pages){
     var allData=[];pages.forEach(function(p){allData=allData.concat(p.data||[]);});
-    var d={data:allData};if(!d.data||!d.data.length){el.innerHTML='<div class="empty">No matches found</div>';return;}
+    var _pe=null;pages.forEach(function(p){if(!_pe){var e=_apiErr(p);if(e)_pe=e;}});
+    var d={data:allData};if(!d.data||!d.data.length){
+      if(_pe){console.log("AUTO-FETCH API error:",pages);el.innerHTML='<div class="empty" style="color:var(--red)">FootyStats API error: '+_pe+'<br><span style="color:var(--text3);font-size:11px">Check the FOOTYSTATS key in the Supabase hyper-function secrets</span></div>';showToast("FootyStats API error: "+_pe,true);}
+      else el.innerHTML='<div class="empty">No matches found</div>';
+      return;}
     window._todaysMatches=d.data||[];
     var minOddsFilter=parseFloat(document.getElementById("calc-min-odds").value)||2.80;
     var matches=window._todaysMatches.filter(function(m){
