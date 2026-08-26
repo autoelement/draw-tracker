@@ -176,6 +176,39 @@ main{max-width:1180px;margin:0 auto;padding:26px 16px 80px}
 .bar i{display:block;height:100%;border-radius:3px;width:0;transition:width .7s cubic-bezier(.22,1,.36,1)}
 .row:hover .bar i{filter:brightness(1.15)}
 
+/* ─── ANNOTATIONS ────────────────────────────────────── */
+.warn{
+  display:inline-grid;place-items:center;width:14px;height:14px;margin-left:6px;
+  border-radius:50%;border:1px solid var(--line2);color:var(--txt3);
+  font-family:'Space Mono',monospace;font-size:9px;font-weight:700;cursor:help;vertical-align:1px;
+}
+.warn:hover{color:var(--amber);border-color:var(--amber)}
+.vm{
+  font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;
+  padding:1px 5px;border-radius:4px;border:1px solid var(--line);color:var(--txt3);white-space:nowrap;
+}
+.vm[data-vm="est"]{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 35%,transparent)}
+.vm[data-vm="nom"]{color:var(--txt3)}
+.vm[data-vm="mkt"]{color:var(--cyan);border-color:color-mix(in srgb,var(--cyan) 35%,transparent)}
+.rec{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line2)}
+.rec-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.rec-head .card-title{font-size:13px}
+.rec table{min-width:0}
+.rec th,.rec td{padding:6px 0;font-size:11.5px}
+.rec th{font-size:9px;padding-bottom:8px}
+.rec td:first-child{font-family:'Outfit',sans-serif;font-size:12px}
+.rec tfoot td{border-bottom:none;border-top:1px solid var(--line2);font-weight:700;padding-top:9px}
+.disclose{
+  margin-top:14px;padding:16px 18px;border-radius:14px;
+  background:var(--surface2);border:1px solid var(--line);
+}
+.disclose h4{font-size:12.5px;font-weight:600;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.disclose h4::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--amber);flex:0 0 6px}
+.disclose p{font-size:12px;line-height:1.7;color:var(--txt2)}
+.disclose p b{color:var(--txt);font-weight:600}
+.fxnote{font-size:11.5px;color:var(--amber);margin-top:10px;display:none}
+.fxnote.on{display:block}
+
 /* ─── TABLE ──────────────────────────────────────────── */
 .tbl-scroll{overflow-x:auto;margin:0 -20px;padding:0 20px}
 table{width:100%;border-collapse:collapse;min-width:440px}
@@ -320,6 +353,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
       <svg id="chart" role="img" aria-label="Capital growth over time"></svg>
       <div class="tip" id="tip"></div>
     </div>
+    <p class="fxnote" id="fxnote"></p>
     <div class="legend">
       <button id="lg-total"  aria-pressed="true" onclick="toggleSeries('total')">
         <span class="swatch" style="background:var(--accent)"></span><span data-i18n="sTotal">სრული კაპიტალი</span>
@@ -360,7 +394,30 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
         </div>
         <div class="rows" id="rows-pf"></div>
       </div>
+      <div class="rec">
+        <div class="rec-head">
+          <div>
+            <div class="card-title" data-i18n="recTitle">შედარება ბალანსთან</div>
+            <div class="card-sub" data-i18n="recSub">—</div>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th></th>
+            <th data-i18n="recPf">პორტფელი</th>
+            <th data-i18n="recCap">ბალანსი</th>
+            <th data-i18n="recDiff">სხვაობა</th>
+          </tr></thead>
+          <tbody id="rec-body"></tbody>
+          <tfoot id="rec-foot"></tfoot>
+        </table>
+      </div>
     </section>
+  </div>
+
+  <div class="disclose fade mb" style="animation-delay:.2s">
+    <h4 data-i18n="missing">რა აკლია ამ დაფას</h4>
+    <p id="missing-body"></p>
   </div>
 
   <!-- HISTORY -->
@@ -405,19 +462,19 @@ const R_GEL_PF = 2.68;     // Portfolio!B5 uses a slightly older rate
 const DATA = {
   asOf: '2026-08-23',
   assets: [
-    {id:'home',   usd:62*1800,      native:null,               color:'--cyan',   isHome:true,
+    {id:'home',   usd:62*1800,      native:null,               color:'--cyan',   isHome:true, vm:'est',
      ka:'სახლი · ლისი', en:'House · Lisi',  hintKa:'62 მ² × $1,800', hintEn:'62 m² × $1,800'},
-    {id:'bm333',  usd:200000/R_GEL, native:{cur:'GEL',v:200000}, color:'--blue',
+    {id:'bm333',  usd:200000/R_GEL, native:{cur:'GEL',v:200000}, color:'--blue',   vm:'est',
      ka:'BM 333', en:'BM 333'},
-    {id:'crypto', usd:15300,        native:null,               color:'--amber',
+    {id:'crypto', usd:15300,        native:null,               color:'--amber',  vm:'mkt',
      ka:'კრიპტო', en:'Crypto'},
-    {id:'stocks', usd:5010,         native:null,               color:'--violet',
+    {id:'stocks', usd:5010,         native:null,               color:'--violet', vm:'mkt',
      ka:'აქციები', en:'Stocks'},
-    {id:'gold',   usd:3000/R_GEL,   native:{cur:'GEL',v:3000},  color:'--gold',
+    {id:'gold',   usd:3000/R_GEL,   native:{cur:'GEL',v:3000},  color:'--gold',   vm:'mkt',
      ka:'ოქრო', en:'Gold'},
-    {id:'car',    usd:10000,        native:null,               color:'--pink',
+    {id:'car',    usd:10000,        native:null,               color:'--pink',   vm:'est',
      ka:'მანქანა', en:'Car'},
-    {id:'saving', usd:38500/R_GEL,  native:{cur:'GEL',v:38500}, color:'--accent',
+    {id:'saving', usd:38500/R_GEL,  native:{cur:'GEL',v:38500}, color:'--accent', vm:'nom',
      ka:'დანაზოგი', en:'Savings'}
   ],
   debts: [],
@@ -450,9 +507,9 @@ const DATA = {
     asOf:'2026-06-01',
     items:[
       {id:'re',      usd:0,               color:'--cyan',   ka:'უძრავი ქონება', en:'Real estate'},
-      {id:'stocks',  usd:3969,            color:'--violet', ka:'აქციები',       en:'Stocks'},
-      {id:'crypto',  usd:413+15890,       color:'--amber',  ka:'კრიპტო',        en:'Crypto'},
-      {id:'deposit', usd:26000/R_GEL_PF,  color:'--accent', ka:'დეპოზიტი',      en:'Deposit',
+      {id:'stocks',  usd:3969,            color:'--violet', ka:'აქციები',       en:'Stocks',  maps:'stocks'},
+      {id:'crypto',  usd:413+15890,       color:'--amber',  ka:'კრიპტო',        en:'Crypto',  maps:'crypto'},
+      {id:'deposit', usd:26000/R_GEL_PF,  color:'--accent', ka:'დეპოზიტი',      en:'Deposit', maps:'saving',
        native:{cur:'GEL',v:26000}}
     ]
   }
@@ -468,7 +525,7 @@ const T = {
   assets:       {ka:'აქტივები',                  en:'Assets'},
   k12m:         {ka:'12 თვე',                    en:'12 months'},
   k12ml:        {ka:'12 თვე · თავისუფალი',        en:'12 months · liquid'},
-  kcagr:        {ka:'საშუალო წლიური (CAGR)',      en:'Avg. annual (CAGR)'},
+  kcagr:        {ka:'კაპიტალის საშ. წლიური ზრდა',  en:'Avg. annual capital growth'},
   kshare:       {ka:'თავისუფალის წილი',           en:'Liquid share'},
   growthTitle:  {ka:'კაპიტალის ზრდა',            en:'Capital growth'},
   all:          {ka:'სულ',                       en:'All'},
@@ -495,6 +552,26 @@ const T = {
   showAll:      {ka:'ყველას ჩვენება',            en:'Show all'},
   showLess:     {ka:'ნაკლების ჩვენება',          en:'Show less'},
   pfSub:        {ka:'განაწილება',                en:'Allocation'},
+  cagrWarn:     {ka:'ეს არ არის შემოსავალი და არც ინვესტიციის უკუგება — ზრდაში შედის ახალი შენატანებიც და აქტივების გადაფასებაც.',
+                 en:'This is not income and not investment return — the growth includes new contributions as well as asset revaluation.'},
+  vmTitle:      {ka:'შეფასების მეთოდი',           en:'Valuation method'},
+  vm_mkt:       {ka:'საბაზრო ფასი',               en:'Market price'},
+  vm_est:       {ka:'შეფასებითი',                 en:'Estimate'},
+  vm_nom:       {ka:'ნომინალი',                   en:'Face value'},
+  fxWarn:       {ka:'ისტორიული მნიშვნელობები ლარში გადაყვანილია დღევანდელი კურსით (2.65), არა თითოეული თარიღის კურსით.',
+                 en:'Historical values are converted to GEL at today’s rate (2.65), not at each date’s own rate.'},
+  recTitle:     {ka:'შედარება ბალანსთან',          en:'Reconciliation with balance'},
+  recSub:       {ka:'Portfolio ფურცელი 2.5 თვით ძველია — სხვაობა ზუსტად ჯდება',
+                 en:'The Portfolio sheet is 2.5 months older — the gap reconciles exactly'},
+  recPf:        {ka:'პორტფელი',                   en:'Portfolio'},
+  recCap:       {ka:'ბალანსი',                    en:'Balance'},
+  recDiff:      {ka:'სხვაობა',                    en:'Gap'},
+  recTotal:     {ka:'ჯამი',                       en:'Total'},
+  stale:        {ka:'ძველი snapshot',             en:'stale snapshot'},
+  missing:      {ka:'რა აკლია ამ დაფას',           en:'What this dashboard cannot show'},
+  missingBody:  {
+    ka:'ცხრილში მხოლოდ <b>ბალანსის</b> მონაცემებია — მოცემულ თარიღებში რა გაქვს. იმისთვის, რომ დაფამ აჩვენოს <b>რატომ</b> შეიცვალა კაპიტალი, საჭიროა სამი რამ, რაც ცხრილში არ არსებობს: ფულადი ნაკადები (შემოსავალი/ხარჯი), ინვესტიციების შენატანების ისტორია (cost basis და თარიღები) და აქტივების გადაფასების ჩანაწერები. ამ სამის გარეშე ვერც ნამდვილ ინვესტიციურ უკუგებას (XIRR/TWR) დათვლი და ვერც net-worth bridge-ს ააგებ.',
+    en:'The workbook holds only <b>balance-sheet</b> data — what you own on given dates. To show <b>why</b> capital changed, three things are needed that the workbook does not contain: cash flows (income/spending), a contribution history for investments (cost basis and dates), and asset revaluation records. Without those, neither a true investment return (XIRR/TWR) nor a net-worth bridge can be computed.'},
   note:{
     ka:'წყარო: <b>Annual budget</b> — ფურცლები Capital, Capital Growth და Portfolio. ყველა თანხა შენახულია აშშ დოლარში; ლარის პოზიციები კონვერტირებულია კურსით <b>1 USD = 2.65 GEL</b>. პორტფელის დეპოზიტი თავად ცხრილში დათვლილია კურსით 2.68. 2023 წლის მაისი–ივლისი ცხრილში ცარიელია და გრაფიკზე გამოტოვებულია.',
     en:'Source: <b>Annual budget</b> — sheets Capital, Capital Growth and Portfolio. All figures are stored in USD; GEL positions are converted at <b>1 USD = 2.65 GEL</b>. The portfolio deposit is computed in the sheet itself at 2.68. May–July 2023 are blank in the sheet and are skipped on the chart.'
@@ -595,7 +672,8 @@ function renderKpis(){
   kpiPair('k-12m',  12, 'total',  'var(--accent)');
   kpiPair('k-12ml', 12, 'liquid', 'var(--violet)');
   el('k-cagr').textContent     = signed(CAGR, v=>pct(v,1));
-  el('k-cagr-sub').textContent = `${YEARS.toFixed(1)} ${t('years')} · ${fdate(FIRST.d,true)} →`;
+  el('k-cagr-sub').innerHTML   = `${YEARS.toFixed(1)} ${t('years')} · ${fdate(FIRST.d,true)} →`
+    + `<span class="warn" title="${t('cagrWarn')}">?</span>`;
   el('k-share').textContent    = pct(LIQUID/NET, 1);
   el('k-share-sub').textContent= `${money(LIQUID)} ${t('ofTotal')}`;
 }
@@ -800,6 +878,7 @@ function rows(hostId, items, total){
          <span class="dot" style="background:var(${i.color})"></span>
          <span class="row-name">${i[LANG]}</span>
          <span class="row-native">${native}</span>
+         ${i.vm ? `<span class="vm" data-vm="${i.vm}" title="${t('vmTitle')}: ${t('vm_'+i.vm)}">${t('vm_'+i.vm)}</span>` : ''}
          <span class="row-val">${money(i.usd)}</span>
          <span class="row-pct">${pct(frac,1)}</span>
        </div>
@@ -816,12 +895,37 @@ function renderAssets(){
   rows('rows-assets', DATA.assets, totalAssets);
   el('da-mid').textContent = compact(NET);
 }
+function renderRec(){
+  const body = el('rec-body'), foot = el('rec-foot');
+  body.innerHTML=''; foot.innerHTML='';
+  const linked = DATA.portfolio.items.filter(i=>i.maps);
+  let sp=0, sc=0;
+  linked.forEach(i=>{
+    const cap = DATA.assets.find(a=>a.id===i.maps);
+    if(!cap) return;
+    sp += i.usd; sc += cap.usd;
+    const d = cap.usd - i.usd;
+    const cls = d>0 ? 'up' : d<0 ? 'down' : 'flat';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><span class="dot" style="background:var(${i.color})"></span> ${cap[LANG]}</td>
+      <td>${money(i.usd)}</td><td>${money(cap.usd)}</td>
+      <td class="delta ${cls}">${signed(d,money)}</td>`;
+    body.appendChild(tr);
+  });
+  const d = sc - sp;
+  foot.innerHTML = `<tr><td>${t('recTotal')}</td><td>${money(sp)}</td><td>${money(sc)}</td>
+    <td class="delta ${d>0?'up':d<0?'down':'flat'}">${signed(d,money)}</td></tr>`;
+}
+
 function renderPortfolio(){
   donut('donut-pf', DATA.portfolio.items, PF_TOTAL);
   rows('rows-pf', DATA.portfolio.items, PF_TOTAL);
   el('dp-mid').textContent = compact(PF_TOTAL);
   const n = DATA.portfolio.items.filter(i=>i.usd>0).length;
-  el('pf-sub').textContent = `${fdate(DATA.portfolio.asOf,true)} · ${n} ${t('items')}`;
+  const stale = Math.round((parse(DATA.asOf)-parse(DATA.portfolio.asOf))/864e5);
+  el('pf-sub').innerHTML = `${fdate(DATA.portfolio.asOf,true)} · ${n} ${t('items')}`
+    + (stale>0 ? ` · <span style="color:var(--amber)">${stale}d ${t('stale')}</span>` : '');
+  renderRec();
 }
 
 /* ─── RENDER: HISTORY ──────────────────────────────────────── */
@@ -866,6 +970,9 @@ function renderAll(animate){
     b.setAttribute('aria-pressed', +b.dataset.range===RANGE));
   renderHero(animate); renderKpis(); renderChart(animate);
   renderAssets(); renderPortfolio(); renderHistory(); renderFooter();
+  el('missing-body').innerHTML = t('missingBody');
+  el('fxnote').textContent = t('fxWarn');
+  el('fxnote').classList.toggle('on', CUR==='GEL');
 }
 function setCur(c){ CUR=c; store.set('xcap.cur',c); unhover(); renderAll(false) }
 function setLang(l){ LANG=l; store.set('xcap.lang',l); unhover(); renderAll(false) }
