@@ -288,17 +288,14 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
         <div class="chips">
           <span class="chip up" id="h-alltime">—</span>
           <span class="chip mute" id="h-asof">—</span>
+          <span class="chip mute" id="h-nohouse">—</span>
         </div>
       </div>
     </div>
     <div class="hero-split">
       <div>
-        <div class="mini-lbl" data-i18n="liquid">თავისუფალი (სახლის გარეშე)</div>
-        <div class="mini-val" id="h-liquid" style="color:var(--violet)">—</div>
-      </div>
-      <div>
-        <div class="mini-lbl" data-i18n="realEstate">უძრავი ქონება</div>
-        <div class="mini-val" id="h-home">—</div>
+        <div class="mini-lbl" data-i18n="lastMove">ბოლო ცვლილება</div>
+        <div class="mini-val" id="h-last">—</div>
       </div>
       <div>
         <div class="mini-lbl" data-i18n="debt">ვალდებულებები</div>
@@ -319,19 +316,19 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
       <div class="kpi-foot" id="k-12m-sub">—</div>
     </div>
     <div class="card kpi">
-      <div class="mini-lbl"><span class="dot" style="background:var(--violet)"></span><span data-i18n="k12ml">12 თვე · თავისუფალი</span></div>
-      <div class="kpi-val" id="k-12ml" style="color:var(--violet)">—</div>
-      <div class="kpi-foot" id="k-12ml-sub">—</div>
+      <div class="mini-lbl"><span class="dot" style="background:var(--violet)"></span><span data-i18n="kmonthly">საშ. თვიური ზრდა</span></div>
+      <div class="kpi-val" id="k-mo" style="color:var(--violet)">—</div>
+      <div class="kpi-foot" id="k-mo-sub">—</div>
     </div>
     <div class="card kpi">
-      <div class="mini-lbl"><span class="dot" style="background:var(--blue)"></span><span data-i18n="kcagr">საშუალო წლიური (CAGR)</span></div>
-      <div class="kpi-val" id="k-cagr" style="color:var(--blue)">—</div>
-      <div class="kpi-foot" id="k-cagr-sub">—</div>
+      <div class="mini-lbl"><span class="dot" style="background:var(--blue)"></span><span data-i18n="ksince">დაწყებიდან</span></div>
+      <div class="kpi-val" id="k-since" style="color:var(--blue)">—</div>
+      <div class="kpi-foot" id="k-since-sub">—</div>
     </div>
     <div class="card kpi">
-      <div class="mini-lbl"><span class="dot" style="background:var(--amber)"></span><span data-i18n="kshare">თავისუფალის წილი</span></div>
-      <div class="kpi-val" id="k-share" style="color:var(--amber)">—</div>
-      <div class="kpi-foot" id="k-share-sub">—</div>
+      <div class="mini-lbl"><span class="dot" style="background:var(--amber)"></span><span data-i18n="kconc">კონცენტრაცია</span></div>
+      <div class="kpi-val" id="k-conc" style="color:var(--amber)">—</div>
+      <div class="kpi-foot" id="k-conc-sub">—</div>
     </div>
   </section>
 
@@ -354,14 +351,6 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
       <div class="tip" id="tip"></div>
     </div>
     <p class="fxnote" id="fxnote"></p>
-    <div class="legend">
-      <button id="lg-total"  aria-pressed="true" onclick="toggleSeries('total')">
-        <span class="swatch" style="background:var(--accent)"></span><span data-i18n="sTotal">სრული კაპიტალი</span>
-      </button>
-      <button id="lg-liquid" aria-pressed="true" onclick="toggleSeries('liquid')">
-        <span class="swatch" style="background:var(--violet)"></span><span data-i18n="sLiquid">სახლის გარეშე</span>
-      </button>
-    </div>
   </section>
 
   <!-- BREAKDOWNS -->
@@ -432,8 +421,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
       <table>
         <thead><tr>
           <th data-i18n="thDate">თარიღი</th>
-          <th data-i18n="thTotal">სრული</th>
-          <th data-i18n="thLiquid">სახლის გარეშე</th>
+          <th data-i18n="thTotal">კაპიტალი</th>
           <th data-i18n="thChange">ცვლილება</th>
         </tr></thead>
         <tbody id="hist-body"></tbody>
@@ -461,9 +449,10 @@ const R_GEL_PF = 2.68;     // Portfolio!B5 uses a slightly older rate
 
 const DATA = {
   asOf: '2026-08-23',
+  /* The Lisi house is deliberately excluded: it is lived in, not investable,
+     and its value is an estimate. Capital!G2 ("Without a Home") is the series
+     this dashboard tracks. */
   assets: [
-    {id:'home',   usd:62*1800,      native:null,               color:'--cyan',   isHome:true, vm:'est',
-     ka:'სახლი · ლისი', en:'House · Lisi',  hintKa:'62 მ² × $1,800', hintEn:'62 m² × $1,800'},
     {id:'bm333',  usd:200000/R_GEL, native:{cur:'GEL',v:200000}, color:'--blue',   vm:'est',
      ka:'BM 333', en:'BM 333'},
     {id:'crypto', usd:15300,        native:null,               color:'--amber',  vm:'mkt',
@@ -478,30 +467,31 @@ const DATA = {
      ka:'დანაზოგი', en:'Savings'}
   ],
   debts: [],
-  /* Capital Growth — [ISO date, capital incl. home, without home] */
+  /* Capital Growth — [ISO date, capital excl. house, capital incl. house]
+     Column 3 is Capital Growth!B, kept for reference but not rendered. */
   growth: [
-    ['2023-02-28', 76232,   2822],
-    ['2023-03-31', 76520,   2419],
-    ['2023-04-30', 77630,   2889],
-    ['2023-05-31', null,    null],
-    ['2023-06-30', null,    null],
-    ['2023-07-31', null,    null],
-    ['2023-08-31', 83294,   4960],
-    ['2023-09-30', 84521,   5341],
-    ['2023-10-31', 86207,   6207],
-    ['2023-11-30', 88646,   8646],
-    ['2023-12-31', 89072,   9072],
-    ['2024-01-31', 91365,  10765],
-    ['2024-02-29', 92322,  11722],
-    ['2024-03-31', 94710,  14110],
-    ['2024-07-07', 96842,  16242],
-    ['2025-07-06', 155000, 43000],
-    ['2025-08-18', 166000, 49000],
-    ['2025-11-04', 175783, 64183],
-    ['2026-02-02', 180688, 69048],
-    ['2026-03-01', 199292, 87692],
-    ['2026-05-13', 211438, 99838],
-    ['2026-08-23', 233042, 121442]
+    ['2023-02-28',   2822,  76232],
+    ['2023-03-31',   2419,  76520],
+    ['2023-04-30',   2889,  77630],
+    ['2023-05-31',   null,   null],
+    ['2023-06-30',   null,   null],
+    ['2023-07-31',   null,   null],
+    ['2023-08-31',   4960,  83294],
+    ['2023-09-30',   5341,  84521],
+    ['2023-10-31',   6207,  86207],
+    ['2023-11-30',   8646,  88646],
+    ['2023-12-31',   9072,  89072],
+    ['2024-01-31',  10765,  91365],
+    ['2024-02-29',  11722,  92322],
+    ['2024-03-31',  14110,  94710],
+    ['2024-07-07',  16242,  96842],
+    ['2025-07-06',  43000, 155000],
+    ['2025-08-18',  49000, 166000],
+    ['2025-11-04',  64183, 175783],
+    ['2026-02-02',  69048, 180688],
+    ['2026-03-01',  87692, 199292],
+    ['2026-05-13',  99838, 211438],
+    ['2026-08-23', 121442, 233042]
   ],
   portfolio: {
     asOf:'2026-06-01',
@@ -519,18 +509,20 @@ const DATA = {
 const T = {
   brand:        {ka:'კაპიტალი',                 en:'Capital'},
   totalCapital: {ka:'სრული კაპიტალი',            en:'Total capital'},
-  liquid:       {ka:'თავისუფალი (სახლის გარეშე)', en:'Liquid (without home)'},
-  realEstate:   {ka:'სახლი · ლისი',              en:'House · Lisi'},
+  lastMove:     {ka:'ბოლო ცვლილება',             en:'Last move'},
   debt:         {ka:'ვალდებულებები',             en:'Liabilities'},
   assets:       {ka:'აქტივები',                  en:'Assets'},
   k12m:         {ka:'12 თვე',                    en:'12 months'},
-  k12ml:        {ka:'12 თვე · თავისუფალი',        en:'12 months · liquid'},
-  kcagr:        {ka:'კაპიტალის საშ. წლიური ზრდა',  en:'Avg. annual capital growth'},
-  kshare:       {ka:'თავისუფალის წილი',           en:'Liquid share'},
+  kmonthly:     {ka:'საშ. თვიური ზრდა',           en:'Avg. monthly growth'},
+  ksince:       {ka:'დაწყებიდან',                en:'Since start'},
+  kconc:        {ka:'კონცენტრაცია',              en:'Concentration'},
+  perMonth:     {ka:'ბოლო 12 თვის მიხედვით',      en:'over the last 12 months'},
+  ofNet:        {ka:'კაპიტალის',                 en:'of capital'},
+  estShare:     {ka:'შეფასებითი აქტივები',        en:'estimated assets'},
+  noHouse:      {ka:'სახლი გამორიცხულია',         en:'house excluded'},
   growthTitle:  {ka:'კაპიტალის ზრდა',            en:'Capital growth'},
   all:          {ka:'სულ',                       en:'All'},
-  sTotal:       {ka:'სრული კაპიტალი',            en:'Total capital'},
-  sLiquid:      {ka:'სახლის გარეშე',             en:'Without home'},
+  sTotal:       {ka:'კაპიტალი',                  en:'Capital'},
   assetTitle:   {ka:'აქტივების სტრუქტურა',       en:'Asset breakdown'},
   assetSub:     {ka:'მიმდინარე ბალანსი',         en:'Current balance'},
   total:        {ka:'სულ',                       en:'Total'},
@@ -539,8 +531,7 @@ const T = {
   histTitle:    {ka:'ისტორია',                   en:'History'},
   histSub:      {ka:'ჩანაწერები თარიღების მიხედვით', en:'Snapshots by date'},
   thDate:       {ka:'თარიღი',                    en:'Date'},
-  thTotal:      {ka:'სრული',                     en:'Total'},
-  thLiquid:     {ka:'სახლის გარეშე',             en:'Without home'},
+  thTotal:      {ka:'კაპიტალი',                  en:'Capital'},
   thChange:     {ka:'ცვლილება',                  en:'Change'},
   asOf:         {ka:'მდგომარეობით',              en:'as of'},
   sinceStart:   {ka:'დაწყებიდან',                en:'since start'},
@@ -552,8 +543,10 @@ const T = {
   showAll:      {ka:'ყველას ჩვენება',            en:'Show all'},
   showLess:     {ka:'ნაკლების ჩვენება',          en:'Show less'},
   pfSub:        {ka:'განაწილება',                en:'Allocation'},
-  cagrWarn:     {ka:'ეს არ არის შემოსავალი და არც ინვესტიციის უკუგება — ზრდაში შედის ახალი შენატანებიც და აქტივების გადაფასებაც.',
+  growWarn:     {ka:'ეს არ არის შემოსავალი და არც ინვესტიციის უკუგება — ზრდაში შედის ახალი შენატანებიც და აქტივების გადაფასებაც.',
                  en:'This is not income and not investment return — the growth includes new contributions as well as asset revaluation.'},
+  concWarn:     {ka:'ერთ პოზიციაზე ამხელა წილი კონცენტრაციის რისკია.',
+                 en:'This much weight in a single position is concentration risk.'},
   vmTitle:      {ka:'შეფასების მეთოდი',           en:'Valuation method'},
   vm_mkt:       {ka:'საბაზრო ფასი',               en:'Market price'},
   vm_est:       {ka:'შეფასებითი',                 en:'Estimate'},
@@ -573,8 +566,8 @@ const T = {
     ka:'ცხრილში მხოლოდ <b>ბალანსის</b> მონაცემებია — მოცემულ თარიღებში რა გაქვს. იმისთვის, რომ დაფამ აჩვენოს <b>რატომ</b> შეიცვალა კაპიტალი, საჭიროა სამი რამ, რაც ცხრილში არ არსებობს: ფულადი ნაკადები (შემოსავალი/ხარჯი), ინვესტიციების შენატანების ისტორია (cost basis და თარიღები) და აქტივების გადაფასების ჩანაწერები. ამ სამის გარეშე ვერც ნამდვილ ინვესტიციურ უკუგებას (XIRR/TWR) დათვლი და ვერც net-worth bridge-ს ააგებ.',
     en:'The workbook holds only <b>balance-sheet</b> data — what you own on given dates. To show <b>why</b> capital changed, three things are needed that the workbook does not contain: cash flows (income/spending), a contribution history for investments (cost basis and dates), and asset revaluation records. Without those, neither a true investment return (XIRR/TWR) nor a net-worth bridge can be computed.'},
   note:{
-    ka:'წყარო: <b>Annual budget</b> — ფურცლები Capital, Capital Growth და Portfolio. ყველა თანხა შენახულია აშშ დოლარში; ლარის პოზიციები კონვერტირებულია კურსით <b>1 USD = 2.65 GEL</b>. პორტფელის დეპოზიტი თავად ცხრილში დათვლილია კურსით 2.68. 2023 წლის მაისი–ივლისი ცხრილში ცარიელია და გრაფიკზე გამოტოვებულია.',
-    en:'Source: <b>Annual budget</b> — sheets Capital, Capital Growth and Portfolio. All figures are stored in USD; GEL positions are converted at <b>1 USD = 2.65 GEL</b>. The portfolio deposit is computed in the sheet itself at 2.68. May–July 2023 are blank in the sheet and are skipped on the chart.'
+    ka:'წყარო: <b>Annual budget</b> — ფურცლები Capital, Capital Growth და Portfolio. <b>ლისის სახლი გამორიცხულია</b> — მასში ცხოვრობთ, გასაყიდი აქტივი არაა და მისი ღირებულება შეფასებითია; დაფა მიჰყვება ცხრილის „Without a Home“ სვეტს. ყველა თანხა შენახულია აშშ დოლარში; ლარის პოზიციები კონვერტირებულია კურსით <b>1 USD = 2.65 GEL</b>. პორტფელის დეპოზიტი თავად ცხრილში დათვლილია კურსით 2.68. 2023 წლის მაისი–ივლისი ცხრილში ცარიელია და გრაფიკზე გამოტოვებულია.',
+    en:'Source: <b>Annual budget</b> — sheets Capital, Capital Growth and Portfolio. <b>The Lisi house is excluded</b> — it is lived in, not investable, and its value is an estimate; the dashboard follows the workbook’s “Without a Home” column. All figures are stored in USD; GEL positions are converted at <b>1 USD = 2.65 GEL</b>. The portfolio deposit is computed in the sheet itself at 2.68. May–July 2023 are blank in the sheet and are skipped on the chart.'
   }
 };
 const MONTHS = {
@@ -590,7 +583,6 @@ const store = {
 let CUR   = store.get('xcap.cur','USD');
 let LANG  = store.get('xcap.lang','ka');
 let RANGE = 0;                         // months back; 0 = all
-let SHOW  = {total:true, liquid:true};
 let HIST_ALL = false;
 const REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches;
 
@@ -617,11 +609,11 @@ const el = id => document.getElementById(id);
 const totalAssets = DATA.assets.reduce((s,a)=>s+a.usd,0);
 const totalDebt   = DATA.debts.reduce((s,d)=>s+d.usd,0);
 const NET         = totalAssets - totalDebt;
-const HOME        = DATA.assets.filter(a=>a.isHome).reduce((s,a)=>s+a.usd,0);
-const LIQUID      = NET - HOME;
 const PF_TOTAL    = DATA.portfolio.items.reduce((s,i)=>s+i.usd,0);
-const SERIES      = DATA.growth.map(([d,a,b])=>({d, t:parse(d).getTime(), total:a, liquid:b}));
+const SERIES      = DATA.growth.map(([d,net,gross])=>({d, t:parse(d).getTime(), total:net, gross}));
 const VALID       = SERIES.filter(p=>p.total!=null);
+const BIGGEST     = DATA.assets.reduce((m,a)=>a.usd>m.usd?a:m, DATA.assets[0]);
+const ESTIMATED   = DATA.assets.filter(a=>a.vm==='est').reduce((s,a)=>s+a.usd,0);
 const FIRST = VALID[0], LAST = VALID[VALID.length-1];
 
 function baselineAt(monthsBack){
@@ -646,17 +638,20 @@ function countUp(node, target, fmt, animate){
 /* ─── RENDER: HERO + KPI ───────────────────────────────────── */
 function renderHero(animate){
   countUp(el('h-total'), NET, v=>money(v), animate);
-  el('h-liquid').textContent = money(LIQUID);
-  el('h-home').textContent   = money(HOME);
+  const prev = VALID[VALID.length-2];
+  const mv = LAST.total - prev.total;
+  el('h-last').textContent = signed(mv, money);
+  el('h-last').style.color = mv>=0 ? 'var(--accent)' : 'var(--red)';
   el('h-debt').textContent   = totalDebt ? money(totalDebt) : money(0);
   el('h-debt').style.color   = totalDebt ? 'var(--red)' : 'var(--txt2)';
   el('h-count').textContent  = DATA.assets.length;
 
-  const gain = LAST.total - FIRST.total, gp = gain/FIRST.total;
+  const gain = LAST.total - FIRST.total, mult = LAST.total/FIRST.total;
   const c = el('h-alltime');
   c.className = 'chip ' + (gain>=0?'up':'down');
-  c.textContent = `${signed(gain,money)} · ${signed(gp,v=>pct(v,0))} ${t('sinceStart')}`;
+  c.textContent = `${signed(gain,money)} · ${mult.toFixed(1)}× ${t('sinceStart')}`;
   el('h-asof').textContent = `${t('asOf')} ${fdate(DATA.asOf,true)}`;
+  el('h-nohouse').textContent = t('noHouse');
 }
 
 function kpiPair(sel, months, key, color){
@@ -669,13 +664,22 @@ function kpiPair(sel, months, key, color){
 }
 
 function renderKpis(){
-  kpiPair('k-12m',  12, 'total',  'var(--accent)');
-  kpiPair('k-12ml', 12, 'liquid', 'var(--violet)');
-  el('k-cagr').textContent     = signed(CAGR, v=>pct(v,1));
-  el('k-cagr-sub').innerHTML   = `${YEARS.toFixed(1)} ${t('years')} · ${fdate(FIRST.d,true)} →`
-    + `<span class="warn" title="${t('cagrWarn')}">?</span>`;
-  el('k-share').textContent    = pct(LIQUID/NET, 1);
-  el('k-share-sub').textContent= `${money(LIQUID)} ${t('ofTotal')}`;
+  kpiPair('k-12m', 12, 'total', 'var(--accent)');
+
+  const base = baselineAt(12);
+  const months = (LAST.t - base.t) / (365.2425/12*864e5);
+  const perMo = (LAST.total - base.total) / months;
+  el('k-mo').textContent     = signed(perMo, money);
+  el('k-mo-sub').innerHTML   = `${t('perMonth')}<span class="warn" title="${t('growWarn')}">?</span>`;
+
+  const gain = LAST.total - FIRST.total;
+  el('k-since').textContent  = signed(gain, money);
+  el('k-since-sub').textContent = `${(LAST.total/FIRST.total).toFixed(1)}× · ${fdate(FIRST.d,true)} →`;
+
+  const share = BIGGEST.usd/NET;
+  el('k-conc').textContent   = pct(share,1);
+  el('k-conc-sub').innerHTML = `${BIGGEST[LANG]} · ${t('estShare')} ${pct(ESTIMATED/NET,0)}`
+    + (share>0.5 ? `<span class="warn" title="${t('concWarn')}">!</span>` : '');
 }
 
 /* ─── RENDER: LINE CHART ───────────────────────────────────── */
@@ -714,9 +718,7 @@ function renderChart(animate){
   const iw = W-padL-padR, ih = H-padT-padB;
   const t0 = pts[0].t, t1 = pts[pts.length-1].t, span = (t1-t0)||1;
 
-  let peak = 0;
-  pts.forEach(p=>{ if(SHOW.total) peak=Math.max(peak,p.total);
-                   if(SHOW.liquid) peak=Math.max(peak,p.liquid); });
+  const peak = pts.reduce((m,p)=>Math.max(m,p.total),0);
   const yMax = (peak*1.10) || 1;
   const gStep = niceStep(conv(yMax)/4) / rate();   // round numbers in the displayed currency
   const X = p => padL + (p.t-t0)/span*iw;
@@ -725,7 +727,7 @@ function renderChart(animate){
 
   // ---- defs
   const defs = mk('defs');
-  [['gTotal','--accent'],['gLiquid','--violet']].forEach(([id,c])=>{
+  [['gTotal','--accent']].forEach(([id,c])=>{
     const g = mk('linearGradient',{id,x1:'0',y1:'0',x2:'0',y2:'1'});
     const s1 = mk('stop',{offset:'0%','stop-opacity':'.26'});  s1.style.stopColor=`var(${c})`;
     const s2 = mk('stop',{offset:'100%','stop-opacity':'0'});  s2.style.stopColor=`var(${c})`;
@@ -760,7 +762,6 @@ function renderChart(animate){
 
   // ---- series
   const draw = (key, color, grad) => {
-    if(!SHOW[key]) return;
     const d = pts.map((p,i)=>`${i?'L':'M'}${X(p).toFixed(1)} ${Y(p[key]).toFixed(1)}`).join(' ');
     const area = mk('path',{d:`${d} L${X(pts[pts.length-1]).toFixed(1)} ${Y(0)} L${X(pts[0]).toFixed(1)} ${Y(0)} Z`});
     area.style.fill = `url(#${grad})`; area.style.stroke='none';
@@ -786,18 +787,15 @@ function renderChart(animate){
     svg.appendChild(dot);
   };
   draw('total','--accent','gTotal');
-  draw('liquid','--violet','gLiquid');
 
   // ---- crosshair layer
   const cross = mk('g',{id:'cross', opacity:'0'});
   const cl = mk('line',{y1:padT-4, y2:padT+ih});
   cl.style.stroke='var(--line2)'; cl.style.strokeWidth='1'; cl.style.strokeDasharray='3 3';
   cross.appendChild(cl);
-  ['total','liquid'].forEach(k=>{
-    const c = mk('circle',{r:5,'data-k':k});
-    c.style.stroke='var(--surface)'; c.style.strokeWidth='2.5';
-    cross.appendChild(c);
-  });
+  const cc = mk('circle',{r:5,'data-k':'total'});
+  cc.style.stroke='var(--surface)'; cc.style.strokeWidth='2.5';
+  cross.appendChild(cc);
   svg.appendChild(cross);
 }
 
@@ -818,17 +816,14 @@ function hover(ev){
   cross.querySelector('line').setAttribute('x2',px);
   let topY = geom.padT + geom.ih;
   cross.querySelectorAll('circle').forEach(c=>{
-    const k = c.getAttribute('data-k');
-    if(!SHOW[k]){ c.setAttribute('r',0); return; }
-    const y = geom.Y(best[k]);
+    const y = geom.Y(best.total);
     c.setAttribute('cx',px); c.setAttribute('cy',y); c.setAttribute('r',5);
-    c.style.fill = k==='total' ? 'var(--accent)' : 'var(--violet)';
+    c.style.fill = 'var(--accent)';
     topY = Math.min(topY, y);
   });
 
   let html = `<div class="tip-date">${fdate(best.d,true)}</div>`;
-  if(SHOW.total)  html += `<div class="tip-row"><span class="dot" style="background:var(--accent)"></span>${t('sTotal')}<b>${money(best.total)}</b></div>`;
-  if(SHOW.liquid) html += `<div class="tip-row"><span class="dot" style="background:var(--violet)"></span>${t('sLiquid')}<b>${money(best.liquid)}</b></div>`;
+  html += `<div class="tip-row"><span class="dot" style="background:var(--accent)"></span>${t('sTotal')}<b>${money(best.total)}</b></div>`;
   tip.innerHTML = html;
   tip.classList.add('on');
   const wrapW = el('chart-wrap').clientWidth;
@@ -940,7 +935,6 @@ function renderHistory(){
     const txt = prev ? `${signed(abs,money)} <span style="opacity:.6">(${signed(abs/prev.total,v=>pct(v,1))})</span>` : '—';
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${fdate(p.d,true)}</td><td>${money(p.total)}</td>
-      <td style="color:var(--violet)">${money(p.liquid)}</td>
       <td class="delta ${cls}">${txt}</td>`;
     body.appendChild(tr);
   });
@@ -979,12 +973,6 @@ function setLang(l){ LANG=l; store.set('xcap.lang',l); unhover(); renderAll(fals
 function setRange(m){ RANGE=m; unhover();
   document.querySelectorAll('[data-range]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.range===m));
   renderChart(true);
-}
-function toggleSeries(k){
-  if(SHOW[k] && !SHOW[k==='total'?'liquid':'total']) return;   // keep at least one
-  SHOW[k]=!SHOW[k];
-  el('lg-'+k).setAttribute('aria-pressed', SHOW[k]);
-  unhover(); renderChart(false);
 }
 function toggleHist(){ HIST_ALL=!HIST_ALL; renderHistory() }
 function toggleTheme(){
