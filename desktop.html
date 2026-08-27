@@ -29,6 +29,24 @@ body{font-variant-numeric:tabular-nums}
 body{background:var(--bg);color:var(--text);font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;min-height:100vh}
 .mono{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif}
 nav{position:sticky;top:0;z-index:100;background:rgba(8,12,15,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px}
+
+/* APP SWITCHER */
+.appsw{position:relative}
+.appsw-btn{display:flex;align-items:center;gap:5px;padding:6px 8px;margin-left:-8px;border:none;border-radius:9px;background:none;cursor:pointer;font-family:inherit;font-weight:700;letter-spacing:.08em;color:var(--green);white-space:nowrap;transition:background .18s}
+.appsw-btn:hover{background:var(--bg3)}
+.appsw-btn>span{color:var(--text3)}
+.appsw-caret{width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.appsw-btn[aria-expanded="true"] .appsw-caret{transform:rotate(180deg)}
+.appsw-menu{position:absolute;top:calc(100% + 8px);left:0;z-index:300;min-width:212px;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.45);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .16s,transform .16s,visibility .16s}
+.appsw-menu.open{opacity:1;visibility:visible;transform:none}
+.appsw-item{display:block;padding:9px 11px;border-radius:10px;text-decoration:none;transition:background .15s}
+.appsw-item:hover{background:var(--bg3)}
+.appsw-item.is-current{background:var(--green-dim)}
+.appsw-l{display:block;font-size:13.5px;font-weight:700;letter-spacing:.08em;color:var(--green)}
+.appsw-l span{color:var(--text3)}
+.appsw-item.is-current .appsw-l::after{content:'\25CF';font-size:7px;vertical-align:middle;margin-left:7px}
+.appsw-d{display:block;font-size:11.5px;font-weight:400;letter-spacing:0;color:var(--text3);margin-top:2px}
+.appsw-btn{font-size:13px}
 .logo{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:13px;font-weight:700;color:var(--green);letter-spacing:.1em}
 .logo span{color:var(--text3)}
 .nav-tabs{display:flex;gap:2px}
@@ -170,7 +188,7 @@ tr:hover td{background:var(--bg3)}
 <!-- LOGIN PAGE -->
 <div class="login-page" id="login-page" style="display:none">
   <div class="login-box">
-    <div class="login-logo">X<span style="color:var(--text3)">/</span>CAP</div>
+    <div class="login-logo">X<span style="color:var(--text3)">·</span>CAP</div>
     <div class="login-sub">Sign in to continue</div>
     <div class="fg"><label class="fl">Email</label><input type="email" class="fi" id="login-email" placeholder="your@email.com"></div>
     <div class="fg"><label class="fl">Password</label><input type="password" class="fi" id="login-pass" placeholder="••••••••"></div>
@@ -578,7 +596,16 @@ tr:hover td{background:var(--bg3)}
 
 </div></div>
 <nav>
-  <div class="logo" onclick="showPage('dashboard',document.querySelector('.nav-tab'))" style="cursor:pointer">X<span>/</span>CAP</div>
+  <div class="appsw">
+  <button class="appsw-btn" type="button" onclick="toggleAppSw(event)" aria-haspopup="true" aria-expanded="false">
+    X<span>·</span>CAP
+    <svg class="appsw-caret" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>
+  </button>
+  <div class="appsw-menu" id="appsw-menu">
+    <a class="appsw-item is-current" href="index.html"><span class="appsw-l">X<span>·</span>CAP</span><span class="appsw-d">Bet tracker</span></a>
+    <a class="appsw-item" href="capital.html"><span class="appsw-l">R<span>·</span>CAP</span><span class="appsw-d">Capital</span></a>
+  </div>
+</div>
   <div class="nav-tabs">
     <button class="nav-tab" onclick="showPage('dashboard',this)">Dashboard</button>
     <button class="nav-tab" onclick="showPage('predictions',this)">Draw Selection</button>
@@ -3955,6 +3982,22 @@ document.addEventListener("mouseleave",function(ev){
 checkAuth();
 calcMartingale();
 loadCalcThresholds();
+
+/* ─── app switcher: X·CAP (bets) <-> R·CAP (capital) ─── */
+function toggleAppSw(e){
+  e.stopPropagation();
+  var m=document.getElementById("appsw-menu"); if(!m)return;
+  var open=!m.classList.contains("open");
+  m.classList.toggle("open",open);
+  e.currentTarget.setAttribute("aria-expanded",open?"true":"false");
+}
+function closeAppSw(){
+  var m=document.getElementById("appsw-menu"); if(!m)return;
+  m.classList.remove("open");
+  var b=document.querySelector(".appsw-btn"); if(b)b.setAttribute("aria-expanded","false");
+}
+document.addEventListener("click",closeAppSw);
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeAppSw();});
 </script>
 </body>
 </html>

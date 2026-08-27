@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="X CAP — capital & portfolio dashboard">
-<title>X CAP · Capital</title>
+<title>R CAP</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script>
 /* theme boot — runs before first paint to avoid a flash */
@@ -61,6 +61,24 @@ body::before{
 }
 .mono{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+
+/* ═══ APP SWITCHER ═══════════════════════════════════════ */
+.appsw{position:relative}
+.appsw-btn{display:flex;align-items:center;gap:5px;padding:6px 8px;margin-left:-8px;border:none;border-radius:9px;background:none;cursor:pointer;font-family:inherit;font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--accent);white-space:nowrap;transition:background .18s}
+.appsw-btn:hover{background:var(--surface2)}
+.appsw-btn>span{color:var(--txt3)}
+.appsw-caret{width:13px;height:13px;stroke:var(--txt3);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.appsw-btn[aria-expanded="true"] .appsw-caret{transform:rotate(180deg)}
+.appsw-menu{position:absolute;top:calc(100% + 8px);left:0;z-index:300;min-width:212px;background:var(--surface);border:1px solid var(--line2);border-radius:14px;padding:6px;box-shadow:var(--elev);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .16s,transform .16s,visibility .16s}
+.appsw-menu.open{opacity:1;visibility:visible;transform:none}
+.appsw-item{display:block;padding:9px 11px;border-radius:10px;text-decoration:none;transition:background .15s}
+.appsw-item:hover{background:var(--surface2)}
+.appsw-item.is-current{background:var(--accent-soft)}
+.appsw-l{display:block;font-size:13.5px;font-weight:700;letter-spacing:.08em;color:var(--accent)}
+.appsw-l span{color:var(--txt3)}
+.appsw-item.is-current .appsw-l::after{content:'\25CF';font-size:7px;vertical-align:middle;margin-left:7px}
+.appsw-d{display:block;font-size:11.5px;font-weight:400;letter-spacing:0;color:var(--txt3);margin-top:2px}
 
 /* ─── HEADER ─────────────────────────────────────────── */
 header{
@@ -257,7 +275,6 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
 @media(max-width:560px){
   /* the header now carries two segmented controls and two icon buttons —
      drop the page name and tighten everything so nothing spills */
-  .brand-page,.brand em:last-of-type{display:none}
   header{gap:7px;padding:0 12px}
   .seg button{padding:5px 9px;font-size:10px}
   .icon-btn{width:30px;height:30px;flex-basis:30px}
@@ -270,7 +287,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
   .row-pct{width:38px;flex-basis:38px}
 }
 @media(max-width:380px){
-  .brand{font-size:13px}
+  .appsw-btn{font-size:13px;letter-spacing:.06em}
   .seg button{padding:5px 7px;font-size:9.5px}
 }
 @media(prefers-reduced-motion:reduce){
@@ -367,7 +384,7 @@ select.fi{cursor:pointer;appearance:none;background-image:linear-gradient(45deg,
 <!-- ══ LOGIN GATE ══════════════════════════════════════════════ -->
 <div id="gate">
   <form class="gate-box" onsubmit="doLogin(event)">
-    <div class="gate-logo">X<em>·</em>CAP</div>
+    <div class="gate-logo">R<em>·</em>CAP</div>
     <div class="gate-sub" id="gate-sub">—</div>
     <div class="fg">
       <label class="fl" for="g-email" data-i18n="email">ელ. ფოსტა</label>
@@ -386,7 +403,16 @@ select.fi{cursor:pointer;appearance:none;background-image:linear-gradient(45deg,
 <div id="app" class="hidden">
 
 <header>
-  <div class="brand">X<em>·</em>CAP <em>/</em> <span class="brand-page" data-i18n="brand">კაპიტალი</span></div>
+  <div class="appsw">
+  <button class="appsw-btn" type="button" onclick="toggleAppSw(event)" aria-haspopup="true" aria-expanded="false">
+    R<span>·</span>CAP
+    <svg class="appsw-caret" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>
+  </button>
+  <div class="appsw-menu" id="appsw-menu">
+    <a class="appsw-item" href="index.html"><span class="appsw-l">X<span>·</span>CAP</span><span class="appsw-d" data-i18n="appBets">ფსონების ტრეკერი</span></a>
+    <a class="appsw-item is-current" href="capital.html"><span class="appsw-l">R<span>·</span>CAP</span><span class="appsw-d" data-i18n="appCapital">კაპიტალი</span></a>
+  </div>
+</div>
   <div class="spacer"></div>
   <div class="seg" role="group" aria-label="Currency">
     <button id="cur-usd" aria-pressed="true"  onclick="setCur('USD')">USD</button>
@@ -602,7 +628,8 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 /* ─── i18n ─────────────────────────────────────────────────── */
 const T = {
-  brand:        {ka:'კაპიტალი',                  en:'Capital'},
+  appBets:      {ka:'ფსონების ტრეკერი',        en:'Bet tracker'},
+  appCapital:   {ka:'კაპიტალი',                  en:'Capital'},
   signIn:       {ka:'შესვლა',                    en:'Sign in'},
   signingIn:    {ka:'შესვლა…',                   en:'Signing in…'},
   email:        {ka:'ელ. ფოსტა',                 en:'Email'},
@@ -1498,6 +1525,22 @@ let rt;
 addEventListener('resize', ()=>{ clearTimeout(rt); rt = setTimeout(()=>renderChart(false), 120) });
 
 boot();
+
+/* ─── app switcher: X·CAP (bets) <-> R·CAP (capital) ─── */
+function toggleAppSw(e){
+  e.stopPropagation();
+  var m=document.getElementById("appsw-menu"); if(!m)return;
+  var open=!m.classList.contains("open");
+  m.classList.toggle("open",open);
+  e.currentTarget.setAttribute("aria-expanded",open?"true":"false");
+}
+function closeAppSw(){
+  var m=document.getElementById("appsw-menu"); if(!m)return;
+  m.classList.remove("open");
+  var b=document.querySelector(".appsw-btn"); if(b)b.setAttribute("aria-expanded","false");
+}
+document.addEventListener("click",closeAppSw);
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeAppSw();});
 </script>
 </body>
 </html>
