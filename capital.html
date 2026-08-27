@@ -603,7 +603,8 @@ const T = {
   password:     {ka:'პაროლი',                    en:'Password'},
   gateSub:      {ka:'პირადი კაპიტალის დაფა',      en:'Personal capital dashboard'},
   badLogin:     {ka:'ელ. ფოსტა ან პაროლი არასწორია', en:'Wrong email or password'},
-  netErr:       {ka:'ქსელის შეცდომა — სცადეთ თავიდან', en:'Network error — try again'},
+  netErr:       {ka:'ქსელის შეცდომა',            en:'Network error'},
+  loadErr:      {ka:'შესვლა გამოვიდა, მონაცემები ვერ ჩაიტვირთა', en:'Signed in, but the data would not load'},
   totalCapital: {ka:'სრული კაპიტალი',            en:'Total capital'},
   vsSnapshot:   {ka:'ბოლო სნეპშოტიდან',          en:'Since last snapshot'},
   debt:         {ka:'ვალდებულებები',             en:'Liabilities'},
@@ -777,22 +778,38 @@ async function doLogin(ev){
   ev.preventDefault();
   const btn = el('g-btn'), err = el('g-err');
   const email = el('g-email').value.trim(), pass = el('g-pass').value;
+  const fail = m => { err.textContent = m; err.className = 'err on'; };
   btn.disabled = true; btn.textContent = t('signingIn'); err.className = 'err';
+
+  // 1. authenticate
+  let d;
   try{
     const r = await fetch(SB_URL+'/auth/v1/token?grant_type=password', {
       method:'POST', headers:{apikey:SB_KEY,'Content-Type':'application/json'},
       body: JSON.stringify({email, password:pass})
     });
-    const d = await r.json();
-    if(d.access_token){
-      setToken(d.access_token, d.refresh_token, email);
-      el('g-pass').value = '';
-      await enterApp();
-    } else {
-      err.textContent = t('badLogin'); err.className = 'err on';
+    d = await r.json().catch(()=>({}));
+    if(!d.access_token){
+      // surface what Supabase actually said — "wrong password" and
+      // "email not confirmed" need very different fixes
+      const why = d.error_description || d.msg || d.message || d.error || '';
+      fail(why ? `${t('badLogin')} — ${why}` : `${t('badLogin')} (HTTP ${r.status})`);
+      btn.disabled = false; btn.textContent = t('signIn');
+      return;
     }
   }catch(e){
-    err.textContent = t('netErr'); err.className = 'err on';
+    fail(`${t('netErr')} — ${e.message||e}`);
+    btn.disabled = false; btn.textContent = t('signIn');
+    return;
+  }
+
+  // 2. sign-in worked; loading the data is a separate failure mode
+  setToken(d.access_token, d.refresh_token, email);
+  el('g-pass').value = '';
+  try{
+    await enterApp();
+  }catch(e){
+    fail(`${t('loadErr')} — ${e.message||e}`);
   }finally{
     btn.disabled = false; btn.textContent = t('signIn');
   }
@@ -1434,8 +1451,13 @@ async function boot(){
   const tok = store.get('dt_token');
   if(tok){
     authH = {apikey:SB_KEY, Authorization:'Bearer '+tok, 'Content-Type':'application/json'};
-    try{ await sbGet('capital_assets?select=id&limit=1'); return enterApp(); }
-    catch(e){ if(await refreshToken()) return enterApp(); }
+    try{
+      await sbGet('capital_assets?select=id&limit=1');
+      return await enterApp();
+    }catch(e){
+      try{ if(await refreshToken()) return await enterApp(); }
+      catch(e2){ toast(String(e2.message||e2), true); }
+    }
   }
   el('g-email').value = store.get('dt_email','');
   el('gate').classList.remove('hidden');
