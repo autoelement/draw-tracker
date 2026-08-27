@@ -605,6 +605,7 @@ const T = {
   badLogin:     {ka:'ელ. ფოსტა ან პაროლი არასწორია', en:'Wrong email or password'},
   netErr:       {ka:'ქსელის შეცდომა',            en:'Network error'},
   loadErr:      {ka:'შესვლა გამოვიდა, მონაცემები ვერ ჩაიტვირთა', en:'Signed in, but the data would not load'},
+  connErr:      {ka:'ბაზასთან კავშირი ვერ დამყარდა', en:'Could not reach the database'},
   totalCapital: {ka:'სრული კაპიტალი',            en:'Total capital'},
   vsSnapshot:   {ka:'ბოლო სნეპშოტიდან',          en:'Since last snapshot'},
   debt:         {ka:'ვალდებულებები',             en:'Liabilities'},
@@ -837,8 +838,29 @@ function doLogout(){
 }
 
 /* ─── SUPABASE REST ────────────────────────────────────────── */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function sb(path, opts = {}, retry = true){
-  const r = await fetch(SB_URL+'/rest/v1/'+path, {...opts, headers:{...authH, ...(opts.headers||{})}});
+  const headers = {...authH, ...(opts.headers||{})};
+  // A GET or DELETE carries no body, and Content-Type on one only widens
+  // the CORS preflight for nothing — some middleboxes drop those.
+  if(!opts.body) delete headers['Content-Type'];
+
+  let r, lastErr;
+  for(let attempt = 0; attempt < 3; attempt++){
+    try{
+      r = await fetch(SB_URL+'/rest/v1/'+path, {...opts, headers});
+      lastErr = null;
+      break;
+    }catch(e){
+      // fetch only rejects on a transport failure — DNS, TLS, a dropped
+      // connection. Worth another go; an HTTP error never lands here.
+      lastErr = e;
+      if(attempt < 2) await sleep(400 * Math.pow(2, attempt));
+    }
+  }
+  if(lastErr) throw new Error(`${t('connErr')}: ${lastErr.message || lastErr}`);
+
   if(r.status === 401 && retry && await refreshToken()) return sb(path, opts, false);
   if(!r.ok) throw new Error((await r.text()) || ('HTTP '+r.status));
   return r.status === 204 ? null : r.json();
