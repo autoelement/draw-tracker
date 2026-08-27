@@ -12,7 +12,12 @@
 (function(){try{
   var s=localStorage.getItem('xcap.theme');
   document.documentElement.dataset.theme = s || (matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
-}catch(e){}})();
+}catch(e){}
+try{
+  var d=document.documentElement;
+  d.dataset.view = localStorage.getItem('dt_token') ? 'app' : 'gate';
+  d.dataset.loading = '1';
+}catch(e){ document.documentElement.dataset.view='gate'; }})();
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/firago@5/300.css">
@@ -62,6 +67,29 @@ body::before{
 .mono{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 
+
+
+/* ═══ SKELETON ═══════════════════════════════════════════
+   Same shimmer as X·CAP, drawn with this page's tokens. The
+   blocks sit inside the real .card / .kpis / .split shells so
+   they occupy exactly the space the data will.               */
+.sk{
+  display:block;border-radius:7px;
+  background:linear-gradient(90deg,var(--line) 25%,var(--line2) 50%,var(--line) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s linear infinite;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+#skel{display:none}
+
+/* One attribute on <html> drives which of the three views is up.
+   It is set in <head> from the stored token, so a returning user
+   never sees the sign-in form flash before the skeleton.        */
+#gate,#app{display:none}
+:root[data-view="gate"] #gate{display:grid}
+:root[data-view="app"] #app{display:block}
+:root[data-view="app"][data-loading] #skel{display:block}
+:root[data-view="app"][data-loading] main,
+:root[data-view="app"][data-loading] footer{display:none}
 
 /* ═══ APP SWITCHER ═══════════════════════════════════════ */
 .appsw{position:relative}
@@ -297,13 +325,11 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
 @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
 /* ═══ AUTH GATE ══════════════════════════════════════════ */
-#gate{position:fixed;inset:0;z-index:500;display:grid;place-items:center;padding:24px;background:var(--bg)}
-#gate.hidden{display:none}
+#gate{position:fixed;inset:0;z-index:500;place-items:center;padding:24px;background:var(--bg)}
 .gate-box{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:30px 26px;box-shadow:var(--elev)}
 .gate-logo{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:19px;font-weight:700;letter-spacing:.1em;color:var(--accent);text-align:center}
 .gate-logo em{font-style:normal;color:var(--txt3)}
 .gate-sub{font-size:12.5px;color:var(--txt3);text-align:center;margin:6px 0 22px}
-#app.hidden{display:none}
 
 /* ═══ FORMS ══════════════════════════════════════════════ */
 .fg{margin-bottom:13px}
@@ -400,7 +426,7 @@ select.fi{cursor:pointer;appearance:none;background-image:linear-gradient(45deg,
 </div>
 
 <!-- ══ APP ═════════════════════════════════════════════════════ -->
-<div id="app" class="hidden">
+<div id="app">
 
 <header>
   <div class="appsw">
@@ -430,6 +456,73 @@ select.fi{cursor:pointer;appearance:none;background-image:linear-gradient(45deg,
     <svg viewBox="0 0 24 24"><path d="M14 8V5.5A1.5 1.5 0 0 0 12.5 4h-6A1.5 1.5 0 0 0 5 5.5v13A1.5 1.5 0 0 0 6.5 20h6a1.5 1.5 0 0 0 1.5-1.5V16M10 12h10m0 0-3-3m3 3-3 3"/></svg>
   </button>
 </header>
+
+<div id="skel" aria-hidden="true">
+  <div class="card hero mb">
+    <div class="sk" style="height:10px;width:120px"></div>
+    <div class="sk" style="height:46px;width:min(340px,72%);margin:14px 0;border-radius:10px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div class="sk" style="height:24px;width:200px;border-radius:999px"></div>
+      <div class="sk" style="height:24px;width:160px;border-radius:999px"></div>
+    </div>
+    <div class="hero-split">
+      <div><div class="sk" style="height:10px;width:90px"></div><div class="sk" style="height:20px;width:110px;margin-top:8px"></div></div>
+      <div><div class="sk" style="height:10px;width:90px"></div><div class="sk" style="height:20px;width:110px;margin-top:8px"></div></div>
+      <div><div class="sk" style="height:10px;width:90px"></div><div class="sk" style="height:20px;width:110px;margin-top:8px"></div></div>
+    </div>
+  </div>
+
+  <div class="grid kpis mb">
+    <div class="card kpi"><div class="sk" style="height:10px;width:80px"></div><div class="sk" style="height:22px;width:120px;margin:10px 0 8px"></div><div class="sk" style="height:10px;width:140px"></div></div>
+    <div class="card kpi"><div class="sk" style="height:10px;width:80px"></div><div class="sk" style="height:22px;width:120px;margin:10px 0 8px"></div><div class="sk" style="height:10px;width:140px"></div></div>
+    <div class="card kpi"><div class="sk" style="height:10px;width:80px"></div><div class="sk" style="height:22px;width:120px;margin:10px 0 8px"></div><div class="sk" style="height:10px;width:140px"></div></div>
+    <div class="card kpi"><div class="sk" style="height:10px;width:80px"></div><div class="sk" style="height:22px;width:120px;margin:10px 0 8px"></div><div class="sk" style="height:10px;width:140px"></div></div>
+  </div>
+
+  <div class="card mb">
+    <div class="sk" style="height:13px;width:150px"></div><div class="sk" style="height:10px;width:210px;margin-top:8px"></div>
+    <div class="sk" style="height:250px;margin-top:20px;border-radius:12px"></div>
+  </div>
+
+  <div class="split mb">
+    <div class="card">
+      <div class="sk" style="height:13px;width:170px"></div><div class="sk" style="height:10px;width:120px;margin-top:8px"></div>
+      <div class="donut-row" style="margin-top:20px">
+        <div class="sk" style="width:158px;height:158px;border-radius:50%;flex:0 0 auto"></div>
+        <div class="rows" style="gap:14px">
+          <div><div class="sk" style="height:12px;width:70%"></div><div class="sk" style="height:6px;margin-top:7px;border-radius:3px"></div></div>
+          <div><div class="sk" style="height:12px;width:52%"></div><div class="sk" style="height:6px;margin-top:7px;border-radius:3px"></div></div>
+          <div><div class="sk" style="height:12px;width:60%"></div><div class="sk" style="height:6px;margin-top:7px;border-radius:3px"></div></div>
+          <div><div class="sk" style="height:12px;width:44%"></div><div class="sk" style="height:6px;margin-top:7px;border-radius:3px"></div></div>
+          <div><div class="sk" style="height:12px;width:38%"></div><div class="sk" style="height:6px;margin-top:7px;border-radius:3px"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sk" style="height:13px;width:170px"></div><div class="sk" style="height:10px;width:120px;margin-top:8px"></div>
+      <div class="donut-row" style="margin-top:20px">
+        <div class="sk" style="width:158px;height:158px;border-radius:50%;flex:0 0 auto"></div>
+        <div class="rows" style="gap:14px">
+          <div><div class="sk" style="height:12px;width:64%"></div><div class="sk" style="height:6px;margin-top:7px;border-radius:3px"></div></div>
+          <div><div class="sk" style="height:12px;width:50%"></div><div class="sk" style="height:6px;margin-top:7px;border-radius:3px"></div></div>
+          <div><div class="sk" style="height:12px;width:40%"></div><div class="sk" style="height:6px;margin-top:7px;border-radius:3px"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sk" style="height:13px;width:100px"></div><div class="sk" style="height:10px;width:170px;margin-top:8px"></div>
+    <div style="margin-top:22px">
+        <div class="sk" style="height:14px;margin-bottom:19px"></div>
+        <div class="sk" style="height:14px;margin-bottom:19px"></div>
+        <div class="sk" style="height:14px;margin-bottom:19px"></div>
+        <div class="sk" style="height:14px;margin-bottom:19px"></div>
+        <div class="sk" style="height:14px;margin-bottom:19px"></div>
+        <div class="sk" style="height:14px;margin-bottom:19px"></div>
+    </div>
+  </div>
+</div>
 
 <main>
 
@@ -801,6 +894,10 @@ function toast(msg, bad){
 }
 
 /* ─── AUTH ─────────────────────────────────────────────────── */
+const view    = v  => { document.documentElement.dataset.view = v; };
+const loading = on => { const d = document.documentElement;
+  if(on) d.setAttribute('data-loading','1'); else d.removeAttribute('data-loading'); };
+
 function setToken(access, refresh, email){
   authH = {apikey:SB_KEY, Authorization:'Bearer '+access, 'Content-Type':'application/json'};
   store.set('dt_token', access);
@@ -843,6 +940,7 @@ async function doLogin(ev){
   try{
     await enterApp();
   }catch(e){
+    view('gate');
     fail(`${t('loadErr')} — ${e.message||e}`);
   }finally{
     btn.disabled = false; btn.textContent = t('signIn');
@@ -866,8 +964,8 @@ async function refreshToken(){
 function doLogout(){
   store.del('dt_token'); store.del('dt_refresh');
   authH = null; S = {assets:[],debts:[],snaps:[],pf:[]};
-  el('app').classList.add('hidden');
-  el('gate').classList.remove('hidden');
+  loading(true);          // arm the skeleton for the next sign-in
+  view('gate');
 }
 
 /* ─── SUPABASE REST ────────────────────────────────────────── */
@@ -1491,11 +1589,14 @@ function applyI18n(){
 }
 
 async function enterApp(){
-  el('gate').classList.add('hidden');
-  el('app').classList.remove('hidden');
-  await loadStoredRates();
-  await loadAll();
-  renderAll(true);
+  view('app'); loading(true);
+  try{
+    await loadStoredRates();
+    await loadAll();
+    renderAll(true);
+  } finally {
+    loading(false);       // reveal the real page even if a load failed
+  }
   refreshRates().then(ok => { if(ok) renderAll(false); });
   setInterval(refreshToken, 50*60*1000);
   setInterval(async ()=>{ if(await refreshRates()) renderAll(false); }, 10*60*1000);
@@ -1515,7 +1616,7 @@ async function boot(){
     }
   }
   el('g-email').value = store.get('dt_email','');
-  el('gate').classList.remove('hidden');
+  view('gate');
 }
 
 el('chart-wrap').addEventListener('pointermove', hover);
