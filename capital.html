@@ -14,10 +14,16 @@
   document.documentElement.dataset.theme = s || (matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
 }catch(e){}})();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/firago@5/300.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/firago@5/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/firago@5/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/firago@5/600.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/firago@5/700.css">
 <style>
+/* FiraGO carries Georgian where Space Mono did not; tabular figures
+   keep the numeric columns aligned now that nothing is monospaced. */
+body{font-variant-numeric:tabular-nums}
 *{margin:0;padding:0;box-sizing:border-box}
 
 :root{
@@ -43,7 +49,7 @@
 html{-webkit-text-size-adjust:100%}
 body{
   background:var(--bg); color:var(--txt);
-  font-family:'Outfit',system-ui,sans-serif; font-weight:400;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif; font-weight:400;
   min-height:100vh; overflow-x:hidden; line-height:1.5;
   transition:background .25s,color .25s;
 }
@@ -53,7 +59,7 @@ body::before{
     radial-gradient(900px 500px at 12% -8%, var(--accent-soft), transparent 65%),
     radial-gradient(800px 450px at 92% 4%, var(--violet-soft), transparent 62%);
 }
-.mono{font-family:'Space Mono',ui-monospace,monospace}
+.mono{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 
 /* ─── HEADER ─────────────────────────────────────────── */
@@ -64,12 +70,12 @@ header{
   backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4);
   border-bottom:1px solid var(--line);
 }
-.brand{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--accent);white-space:nowrap}
+.brand{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--accent);white-space:nowrap}
 .brand em{font-style:normal;color:var(--txt3)}
 .spacer{flex:1}
 .seg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
 .seg button{
-  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.05em;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;
   padding:5px 11px;border:none;border-radius:999px;background:none;color:var(--txt3);cursor:pointer;
   transition:color .18s,background .18s;
 }
@@ -96,7 +102,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 16px 80px}
 .card-title{font-size:15px;font-weight:600;letter-spacing:-.01em}
 .card-sub{font-size:12px;color:var(--txt3);margin-top:2px}
 .eyebrow{
-  font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:var(--txt3);
 }
 .grid{display:grid;gap:14px}
@@ -109,14 +115,14 @@ main{max-width:1180px;margin:0 auto;padding:26px 16px 80px}
 }
 .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
 .hero-val{
-  font-family:'Space Mono',monospace;font-size:clamp(34px,8.5vw,54px);font-weight:700;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:clamp(34px,8.5vw,54px);font-weight:700;
   line-height:1;letter-spacing:-.03em;margin:10px 0 12px;
   font-variant-numeric:tabular-nums;
 }
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
-  font-family:'Space Mono',monospace;font-size:11.5px;font-weight:700;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:11.5px;font-weight:700;
   padding:5px 11px;border-radius:999px;border:1px solid transparent;white-space:nowrap;
 }
 .chip.up{color:var(--accent);background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 28%,transparent)}
@@ -127,14 +133,14 @@ main{max-width:1180px;margin:0 auto;padding:26px 16px 80px}
   margin-top:22px;padding-top:18px;border-top:1px dashed var(--line2);
 }
 .mini-lbl{font-size:11.5px;color:var(--txt3);font-weight:500;margin-bottom:5px}
-.mini-val{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.mini-val{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:19px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 
 /* ─── KPI ────────────────────────────────────────────── */
 .kpis{grid-template-columns:repeat(auto-fit,minmax(158px,1fr))}
 .kpi{padding:16px}
 .kpi .mini-lbl{display:flex;align-items:center;gap:6px}
 .dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
-.kpi-val{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;letter-spacing:-.02em;margin:2px 0 6px;font-variant-numeric:tabular-nums}
+.kpi-val{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:22px;font-weight:700;letter-spacing:-.02em;margin:2px 0 6px;font-variant-numeric:tabular-nums}
 .kpi-foot{font-size:11.5px;color:var(--txt3)}
 
 /* ─── CHART ──────────────────────────────────────────── */
@@ -153,10 +159,10 @@ main{max-width:1180px;margin:0 auto;padding:26px 16px 80px}
   box-shadow:var(--elev);transition:opacity .12s;white-space:nowrap;z-index:5;
 }
 .tip.on{opacity:1}
-.tip-date{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--txt3);margin-bottom:6px;text-transform:uppercase}
+.tip-date{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:10px;letter-spacing:.08em;color:var(--txt3);margin-bottom:6px;text-transform:uppercase}
 .tip-row{display:flex;align-items:center;gap:8px;font-size:12.5px;margin-top:3px}
-.tip-row b{font-family:'Space Mono',monospace;margin-left:auto;font-variant-numeric:tabular-nums}
-.ax{font-family:'Space Mono',monospace;font-size:10px;fill:var(--txt3)}
+.tip-row b{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;margin-left:auto;font-variant-numeric:tabular-nums}
+.ax{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:10px;fill:var(--txt3)}
 
 /* ─── BREAKDOWN ──────────────────────────────────────── */
 .split{display:grid;grid-template-columns:1fr;gap:14px}
@@ -164,15 +170,15 @@ main{max-width:1180px;margin:0 auto;padding:26px 16px 80px}
 .donut{position:relative;flex:0 0 auto;width:158px;height:158px}
 .donut svg{width:100%;height:100%;transform:rotate(-90deg)}
 .donut-mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
-.donut-mid .v{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;letter-spacing:-.02em}
+.donut-mid .v{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:17px;font-weight:700;letter-spacing:-.02em}
 .donut-mid .l{font-size:10px;color:var(--txt3);margin-top:2px}
 .rows{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:11px}
 .row{cursor:default}
 .row-top{display:flex;align-items:baseline;gap:8px;font-size:13px;min-width:0}
 .row-name{flex:0 1 auto;flex-shrink:1;min-width:0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row-native{flex:0 1 auto;flex-shrink:8;min-width:0;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--txt3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row-val{margin-left:auto;font-family:'Space Mono',monospace;font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.row-pct{font-family:'Space Mono',monospace;font-size:11px;color:var(--txt3);width:44px;text-align:right;flex:0 0 44px}
+.row-native{flex:0 1 auto;flex-shrink:8;min-width:0;font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:10.5px;color:var(--txt3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-val{margin-left:auto;font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.row-pct{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:11px;color:var(--txt3);width:44px;text-align:right;flex:0 0 44px}
 .bar{height:6px;border-radius:3px;background:var(--surface2);margin-top:6px;overflow:hidden}
 .bar i{display:block;height:100%;border-radius:3px;width:0;transition:width .7s cubic-bezier(.22,1,.36,1)}
 .row:hover .bar i{filter:brightness(1.15)}
@@ -181,11 +187,11 @@ main{max-width:1180px;margin:0 auto;padding:26px 16px 80px}
 .warn{
   display:inline-grid;place-items:center;width:14px;height:14px;margin-left:6px;
   border-radius:50%;border:1px solid var(--line2);color:var(--txt3);
-  font-family:'Space Mono',monospace;font-size:9px;font-weight:700;cursor:help;vertical-align:1px;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:9px;font-weight:700;cursor:help;vertical-align:1px;
 }
 .warn:hover{color:var(--amber);border-color:var(--amber)}
 .vm{
-  font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;
   padding:1px 5px;border-radius:4px;border:1px solid var(--line);color:var(--txt3);white-space:nowrap;
 }
 .vm[data-vm="est"]{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 35%,transparent)}
@@ -197,7 +203,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 16px 80px}
 .rec table{min-width:0}
 .rec th,.rec td{padding:6px 0;font-size:11.5px}
 .rec th{font-size:9px;padding-bottom:8px}
-.rec td:first-child{font-family:'Outfit',sans-serif;font-size:12px}
+.rec td:first-child{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:12px}
 .rec tfoot td{border-bottom:none;border-top:1px solid var(--line2);font-weight:700;padding-top:9px}
 .disclose{
   margin-top:14px;padding:16px 18px;border-radius:14px;
@@ -214,13 +220,13 @@ main{max-width:1180px;margin:0 auto;padding:26px 16px 80px}
 .tbl-scroll{overflow-x:auto;margin:0 -20px;padding:0 20px}
 table{width:100%;border-collapse:collapse;min-width:440px}
 th{
-  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--txt3);font-weight:700;text-align:right;padding:0 0 10px;border-bottom:1px solid var(--line);
 }
 th:first-child{text-align:left}
 td{
   padding:11px 0;border-bottom:1px solid var(--line);text-align:right;
-  font-family:'Space Mono',monospace;font-size:12.5px;font-variant-numeric:tabular-nums;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:12.5px;font-variant-numeric:tabular-nums;
 }
 td:first-child{text-align:left;color:var(--txt2);letter-spacing:.02em}
 tbody tr:last-child td{border-bottom:none}
@@ -230,7 +236,7 @@ tbody tr:hover td{background:var(--surface2)}
 .tbl-more{
   margin-top:14px;width:100%;padding:10px;border-radius:10px;cursor:pointer;
   background:var(--surface2);border:1px solid var(--line);color:var(--txt2);
-  font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:500;transition:color .18s,border-color .18s;
+  font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:12.5px;font-weight:500;transition:color .18s,border-color .18s;
 }
 .tbl-more:hover{color:var(--accent);border-color:var(--line2)}
 
@@ -277,7 +283,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
 #gate{position:fixed;inset:0;z-index:500;display:grid;place-items:center;padding:24px;background:var(--bg)}
 #gate.hidden{display:none}
 .gate-box{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:30px 26px;box-shadow:var(--elev)}
-.gate-logo{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;letter-spacing:.1em;color:var(--accent);text-align:center}
+.gate-logo{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:19px;font-weight:700;letter-spacing:.1em;color:var(--accent);text-align:center}
 .gate-logo em{font-style:normal;color:var(--txt3)}
 .gate-sub{font-size:12.5px;color:var(--txt3);text-align:center;margin:6px 0 22px}
 #app.hidden{display:none}
@@ -287,16 +293,16 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--txt3);font
 .fl{display:block;font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .fi{
   width:100%;padding:11px 13px;background:var(--surface2);border:1px solid var(--line);
-  border-radius:10px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:14px;outline:none;
+  border-radius:10px;color:var(--txt);font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:14px;outline:none;
   transition:border-color .18s;
 }
 .fi:focus{border-color:var(--accent)}
-.fi.mono{font-family:'Space Mono',monospace}
+.fi.mono{font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif}
 select.fi{cursor:pointer;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--txt3) 50%),linear-gradient(135deg,var(--txt3) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
 .frow{display:grid;grid-template-columns:1fr 110px;gap:10px}
 .btn{
   padding:11px 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);
-  color:var(--txt);font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;
+  color:var(--txt);font-family:FiraGO,Noto Sans Georgian,system-ui,sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;
   transition:filter .18s,border-color .18s,color .18s;
 }
 .btn:hover{border-color:var(--line2)}
